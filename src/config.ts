@@ -44,7 +44,7 @@ export interface Config {
 }
 
 const usage: Schema<Usage.Config> = Schema.object({
-  docs: Schema.string().role('link').default('https://docs.logthm.com/roll-bot-project').disabled()
+  docs: Schema.string().role('link').default('https://github.com/firedrakeovo/koishi-plugin-giveaway').disabled()
 });
 
 const basicConfig: Schema<BasicConfig.Config> = Schema.object({

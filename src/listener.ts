@@ -21,17 +21,17 @@ export const name = 'Listener'
 
 declare module 'koishi' {
   interface Events {
-    'roll-bot/roll-key-update'(...args: any[]): void
-    'roll-bot/roll-add'(...args: any[]): void
-    'roll-bot/roll-end'(...args: any[]): void
-    'roll-bot/roll-expired'(...args: any[]): void
-    'roll-bot/roll-join'(...args: any[]): void
-    'roll-bot/roll-quit'(...args: any[]): void
-    'roll-bot/reminder-add'(...args: any[]): void
-    'roll-bot/reminder-delete'(...args: any[]): void
-    'roll-bot/remind-add'(...args: any[]): void
-    'roll-bot/remind-delete'(...args: any[]): void
-    'roll-bot/remind-broadcast'(...args: any[]): void
+    'giveaway/roll-key-update'(...args: any[]): void
+    'giveaway/roll-add'(...args: any[]): void
+    'giveaway/roll-end'(...args: any[]): void
+    'giveaway/roll-expired'(...args: any[]): void
+    'giveaway/roll-join'(...args: any[]): void
+    'giveaway/roll-quit'(...args: any[]): void
+    'giveaway/reminder-add'(...args: any[]): void
+    'giveaway/reminder-delete'(...args: any[]): void
+    'giveaway/remind-add'(...args: any[]): void
+    'giveaway/remind-delete'(...args: any[]): void
+    'giveaway/remind-broadcast'(...args: any[]): void
   }
 }
 

@@ -26,7 +26,7 @@ import {disableRemind} from "./command/remind/disable"
 export const name = 'Command'
 
 export function apply(ctx: Context, config: Config) {
-  ctx.command('roll').alias('r')
+  ctx.command('giveaway').alias('抽奖')
   help(ctx, config)
   channel(ctx, config)
 
@@ -43,7 +43,7 @@ export function apply(ctx: Context, config: Config) {
   memberRoll(ctx, config)
   remindRoll(ctx, config)
 
-  ctx.command('remind').alias('rd')
+  ctx.command('giveaway.reminder')
   addReminder(ctx, config)
   deleteReminder(ctx, config)
   listReminder(ctx, config)

@@ -3,9 +3,9 @@ import {Config} from '../../config';
 import {hasPermission, isGuildAdmin, isPluginAdmin, isRollCreator} from "../../util/role";
 
 export function deleteRoll(ctx: Context, config: Config) {
-  ctx.command("roll.delete <rollCode>")
+  ctx.command("giveaway.delete <rollCode>")
     .alias('删除抽奖')
-    .alias('roll.rm')
+    .alias('giveaway.rm')
     .action(async ({session}, rollCode) => {
       // check arg
       if (!rollCode) return session.text('.empty')
@@ -29,7 +29,7 @@ export function deleteRoll(ctx: Context, config: Config) {
         )) return session.text('.noAuth')
       }
 
-      ctx.emit('roll-bot/roll-expired', rollRes[0].id)
+      ctx.emit('giveaway/roll-expired', rollRes[0].id)
       return session.text('.success', [rollCode])
     })
 }

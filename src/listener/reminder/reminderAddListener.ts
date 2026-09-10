@@ -2,7 +2,7 @@ import {Context, $} from 'koishi'
 import {Config} from '../../config'
 
 export function reminderAddListener(ctx: Context, config: Config) {
-  ctx.on('roll-bot/reminder-add', async (
+  ctx.on('giveaway/reminder-add', async (
     session,
     reminder
   ) => {

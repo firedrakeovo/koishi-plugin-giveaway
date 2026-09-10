@@ -3,8 +3,8 @@ import {Config} from '../../config';
 import {hasPermission, isGuildAdmin, isPluginAdmin, isRollCreator} from "../../util/role";
 
 export function endRoll(ctx: Context, config: Config) {
-  ctx.command("roll.end [rollCode]")
-    .alias('roll.draw')
+  ctx.command("giveaway.end [rollCode]")
+    .alias('giveaway.draw')
     .alias('开奖')
     .userFields(['id'])
     .channelFields(['id'])
@@ -55,6 +55,6 @@ export function endRoll(ctx: Context, config: Config) {
         )) return session.text('.noAuth')
       }
       // emit end event
-      ctx.emit('roll-bot/roll-end', rollId)
+      ctx.emit('giveaway/roll-end', rollId)
     })
 }

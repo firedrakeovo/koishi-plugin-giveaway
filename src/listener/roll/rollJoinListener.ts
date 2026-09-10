@@ -20,7 +20,7 @@ export function rollJoinListener(ctx: Context, config: Config) {
               attempts++
             }
             if (bind.length > 0) {
-              ctx.emit('roll-bot/roll-join', session, bind[0].aid, roll.id, roll.roll_code)
+              ctx.emit('giveaway/roll-join', session, bind[0].aid, roll.id, roll.roll_code)
             } else {
               session.sendQueued(session.text('events.join.error', {messageId: session.messageId}))
             }
@@ -30,7 +30,7 @@ export function rollJoinListener(ctx: Context, config: Config) {
     }
     //console.log(session.content, rollKeyCache.content)
   })
-  ctx.on('roll-bot/roll-join', async (
+  ctx.on('giveaway/roll-join', async (
     session,
     user_id,
     roll_id,

@@ -4,7 +4,7 @@ import {hasPermission, isGuildAdmin, isPluginAdmin} from '../../util/role'
 import {getTimeOffset, offsetToUTCOffset, validateTimeOffsetFormat} from '../../util/time'
 
 export function time(ctx: Context, config: Config) {
-  ctx.command("roll.time [offset]")
+  ctx.command("giveaway.time [offset]")
     .alias('时区')
     .option('channel', '-c')
     .option('default', '-d')

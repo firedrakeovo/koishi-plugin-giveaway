@@ -3,7 +3,7 @@ import {Config} from '../../config';
 import {hasPermission, isGuildAdmin, isPluginAdmin} from "../../util/role";
 
 export function locale(ctx: Context, config: Config) {
-  ctx.command("roll.locale [lang]")
+  ctx.command("giveaway.locale [lang]")
     .alias('语言')
     .option('channel', '-c')
     .option('default', '-d')

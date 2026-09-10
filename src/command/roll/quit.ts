@@ -2,8 +2,8 @@ import {Context} from 'koishi';
 import {Config} from '../../config';
 
 export function quitRoll(ctx: Context, config: Config) {
-  ctx.command("roll.quit <rollCode>")
-    .alias('roll.q')
+  ctx.command("giveaway.quit <rollCode>")
+    .alias('giveaway.q')
     .alias('退出抽奖')
     .action(async ({session}, rollCode) => {
       if (rollCode === undefined) return session.text('.empty')
@@ -16,7 +16,7 @@ export function quitRoll(ctx: Context, config: Config) {
       if (roll_channel.length === 0) {
         return session.text('.failed')
       } else {
-        ctx.emit('roll-bot/roll-quit',
+        ctx.emit('giveaway/roll-quit',
           session,
           bind[0].aid,
           rollId,

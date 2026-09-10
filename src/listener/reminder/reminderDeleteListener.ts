@@ -2,7 +2,7 @@ import {Context, $} from 'koishi'
 import {Config} from '../../config'
 
 export function reminderDeleteListener(ctx: Context, config: Config) {
-  ctx.on('roll-bot/reminder-delete', async (
+  ctx.on('giveaway/reminder-delete', async (
     userId,
     reminderId
   ) => {
@@ -13,7 +13,7 @@ export function reminderDeleteListener(ctx: Context, config: Config) {
     for (const remind of remindRes) {
       const rollCreatorRes = await ctx.database.get('roll_creator', {roll_id: remind.roll_id})
       if (rollCreatorRes[0].user_id === userId) {
-        ctx.emit('roll-bot/remind-delete', remind.id)
+        ctx.emit('giveaway/remind-delete', remind.id)
       }
     }
     // Check if the reminder is still in use, if not, remove it

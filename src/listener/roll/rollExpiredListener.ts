@@ -13,11 +13,11 @@ export function rollExpiredListener(ctx: Context, config: Config) {
       if (expireTime < DateTime.now()) expireTime = DateTime.now().plus({hours: 1})
       const expireJobTime = expireTime.toJSDate()
       expireManager.addJob(roll.id, expireJobTime, function () {
-        ctx.emit('roll-bot/roll-expired', roll.id)
+        ctx.emit('giveaway/roll-expired', roll.id)
       })
     })
   })
-  ctx.on('roll-bot/roll-expired', async (rollId) => {
+  ctx.on('giveaway/roll-expired', async (rollId) => {
     // Delete roll from database
     ctx.database.remove('roll', {id: rollId})
     ctx.database.remove('roll_creator', {roll_id: rollId})
@@ -34,9 +34,9 @@ export function rollExpiredListener(ctx: Context, config: Config) {
     // Delete remind
     const remindRes = await ctx.database.get('remind', {roll_id: rollId})
     for (const remind of remindRes) {
-      ctx.emit('roll-bot/remind-delete', remind.id)
+      ctx.emit('giveaway/remind-delete', remind.id)
     }
     // remove join key listener
-    ctx.emit('roll-bot/roll-key-update')
+    ctx.emit('giveaway/roll-key-update')
   })
 }

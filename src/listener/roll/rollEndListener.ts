@@ -6,7 +6,7 @@ import {rollEndMsgFromRollId} from "../../util/messageBuilder";
 import {bots, expireManager} from "../../index";
 
 export function rollEndListener(ctx: Context, config: Config) {
-  ctx.on('roll-bot/roll-end', async (rollId) => {
+  ctx.on('giveaway/roll-end', async (rollId) => {
     const res = await ctx.database.get('roll', {id: rollId, isEnd: 0})
     if (res.length === 0) return
     const roll = res[0]
@@ -39,16 +39,16 @@ export function rollEndListener(ctx: Context, config: Config) {
       }
     }
     // remove join key listener
-    ctx.emit('roll-bot/roll-key-update')
+    ctx.emit('giveaway/roll-key-update')
     // disable all reminds
     const remindRes = await ctx.database.get('remind', {roll_id: roll.id})
     for (const remind of remindRes) {
-      ctx.emit('roll-bot/remind-delete', remind.id)
+      ctx.emit('giveaway/remind-delete', remind.id)
     }
     // register expire listener
     const expireTime = DateTime.now().plus({hours: config.basic.cacheHours}).toUTC().toJSDate()
     expireManager.addJob(roll.id, expireTime, function () {
-      ctx.emit('roll-bot/roll-expired', roll.id)
+      ctx.emit('giveaway/roll-expired', roll.id)
     })
   })
 }

@@ -8,7 +8,7 @@ export function keyCacheListener(ctx: Context, config: Config) {
     rollKeyCache.content = await ctx.database.get('roll', {isEnd: 0})
   })
 
-  ctx.on('roll-bot/roll-key-update', async () => {
+  ctx.on('giveaway/roll-key-update', async () => {
     rollKeyCache.content = await ctx.database.get('roll', {isEnd: 0})
   })
 }

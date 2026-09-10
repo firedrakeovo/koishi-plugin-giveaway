@@ -3,9 +3,9 @@ import { Config } from '../../config';
 import {hasPermission, isPluginAdmin, isRollCreator} from "../../util/role";
 
 export function disableRemind(ctx: Context, config: Config) {
-  ctx.command("remind.disable <rollCode> <reminderCode> [...rest]")
+  ctx.command("giveaway.reminder.disable <rollCode> <reminderCode> [...rest]")
     .alias('禁用提醒器')
-    .alias('remind.off')
+    .alias('giveaway.reminder.off')
     .userFields(['offset'])
     .channelFields(['offset'])
     .action(async ({session}, rollCode, reminderCode, ...rest) => {
@@ -33,7 +33,7 @@ export function disableRemind(ctx: Context, config: Config) {
       for (const reminderCode of rest) {
         const reminderRes = await ctx.database.get('reminder', {reminder_code: reminderCode})
         const remindRes = await ctx.database.get('remind', {roll_id: rollId, reminder_id: reminderRes[0].id})
-        ctx.emit('roll-bot/remind-delete', remindRes[0].id)
+        ctx.emit('giveaway/remind-delete', remindRes[0].id)
       }
       return session.text('.success')
     })

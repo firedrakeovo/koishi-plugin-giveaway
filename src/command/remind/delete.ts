@@ -2,9 +2,9 @@ import { Context } from 'koishi';
 import { Config } from '../../config';
 
 export function deleteReminder(ctx: Context, config: Config) {
-  ctx.command("remind.delete <reminderCode> [...rest]")
+  ctx.command("giveaway.reminder.delete <reminderCode> [...rest]")
     .alias('删除提醒器')
-    .alias('remind.rm')
+    .alias('giveaway.reminder.rm')
     .userFields(['id'])
     .action(async ({session}, reminderCode, ...rest) => {
       // check arg
@@ -19,7 +19,7 @@ export function deleteReminder(ctx: Context, config: Config) {
         const userReminderRes = await ctx.database.get('user_reminder', {user_id: userId, reminder_id: reminderRes[0].id})
         if (userReminderRes.length === 0) return session.text(".notYourReminder")
         // delete
-        ctx.emit('roll-bot/reminder-delete', userId, reminderRes[0].id)
+        ctx.emit('giveaway/reminder-delete', userId, reminderRes[0].id)
       }
       return session.text(".success")
     })

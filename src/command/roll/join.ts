@@ -2,8 +2,8 @@ import { Context } from 'koishi';
 import { Config } from '../../config';
 
 export function joinRoll(ctx: Context, config: Config) {
-  ctx.command("roll.join <rollCode>")
-    .alias('roll.j')
+  ctx.command("giveaway.join <rollCode>")
+    .alias('giveaway.j')
     .alias('加入抽奖')
     .action(async ({session}, rollCode) => {
       if (rollCode === undefined) return session.text('.empty')
@@ -16,7 +16,7 @@ export function joinRoll(ctx: Context, config: Config) {
       if (roll_channel.length === 0) {
         return session.text('.failed')
       } else {
-        ctx.emit('roll-bot/roll-join',
+        ctx.emit('giveaway/roll-join',
           session,
           bind[0].aid,
           rollId,

@@ -2,7 +2,7 @@ import {Context} from 'koishi';
 import {Config} from '../../config';
 
 export function rollQuitListener(ctx: Context, config: Config) {
-  ctx.on('roll-bot/roll-quit', async (
+  ctx.on('giveaway/roll-quit', async (
     session,
     user_id,
     roll_id,

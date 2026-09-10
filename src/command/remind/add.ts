@@ -5,7 +5,7 @@ import {getCurrentUTCOffset} from "../../util/time";
 import {checkDateInput, dateInputToDateTime, dateInputToDuration, generateUniqueCode} from "../../util/general";
 
 export function addReminder(ctx: Context, config: Config) {
-  ctx.command("remind.add")
+  ctx.command("giveaway.reminder.add")
     .alias('创建提醒器')
     .userFields(['id', 'offset'])
     .channelFields(['id', 'offset'])
@@ -192,7 +192,7 @@ export function addReminder(ctx: Context, config: Config) {
         return session.text('.success', [checkDuplicate[0].reminder_code])
       }
 
-      ctx.emit('roll-bot/reminder-add', session, reminder)
+      ctx.emit('giveaway/reminder-add', session, reminder)
       return session.text('.success', [reminderCode])
     })
 }

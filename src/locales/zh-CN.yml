@@ -3,13 +3,13 @@ _config:
     $description: |-
       使用说明
     docs: |-
-      <p><b>点击右侧打开 <a href="https://docs.logthm.com/roll-bot-project">帮助文档</a></b></p>
-      <p><b>你也可以通过 roll help 指令获取 Roll Bot 的帮助文档。</b></p>
+      <p><b>点击右侧打开 <a href="https://github.com/firedrakeovo/koishi-plugin-giveaway">帮助文档</a></b></p>
+      <p><b>你也可以通过 giveaway help 指令获取 Giveaway 的帮助文档。</b></p>
   basic:
     $description: |-
       基本设置
     adminUsers: |-
-      **Roll Bot 管理员** 的用户id (使用 inspect 指令获取)
+      **Giveaway 管理员** 的用户id (使用 inspect 指令获取)
     cacheHours: |-
       抽奖开奖后，记录保留的时间（小时）
     defaultTimeOffset: |-
@@ -44,23 +44,23 @@ _config:
 commands:
   timeout: |-
     输入超时
-  roll:
+  giveaway:
     description: |-
-      Roll Bot 抽奖功能
-  roll.help:
+      Giveaway 抽奖功能
+  giveaway.help:
     description: |-
-      显示 Roll Bot 帮助信息
+      显示 Giveaway 帮助信息
     messages:
       help: |-
         <p>帮助文档：</p>
-        <a>https://docs.logthm.com/roll-bot-project</a>
-  roll.channel:
+        <a>https://github.com/firedrakeovo/koishi-plugin-giveaway</a>
+  giveaway.channel:
     description: |-
       获取当前频道的频道id
     messages:
       result: |-
         当前频道id为：{0}
-  roll.add:
+  giveaway.add:
     description: |-
      交互式地创建一个抽奖
     messages:
@@ -115,7 +115,7 @@ commands:
         <p>- 回复 q 取消本次创建</p>
       quit: |-
         已取消本次创建。
-  roll.delete:
+  giveaway.delete:
     description: |-
       手动删除一个抽奖
     messages:
@@ -127,7 +127,7 @@ commands:
         你没有权限删除该抽奖！
       success: |-
         删除了抽奖 {0}
-  roll.end:
+  giveaway.end:
     description: |-
       手动进行开奖
     messages:
@@ -145,10 +145,10 @@ commands:
         该抽奖已开奖！
       notFound: |-
         没有找到该抽奖！
-  roll.list:
+  giveaway.list:
     description: |-
       查询指定频道内的抽奖
-  roll.detail:
+  giveaway.detail:
     description: |-
       查询指定抽奖的详细描述
     messages:
@@ -156,7 +156,7 @@ commands:
         请输入抽奖编号！
       notFound: |-
         没有找到该抽奖！
-  roll.member:
+  giveaway.member:
     description: |-
       查询指定抽奖的参与成员
     messages:
@@ -164,7 +164,7 @@ commands:
         请输入抽奖编号！
       notFound: |-
         没有找到该抽奖！
-  roll.join:
+  giveaway.join:
     description: |-
       加入指定的抽奖
     messages:
@@ -172,7 +172,7 @@ commands:
         找不到此抽奖！
       empty: |-
         请输入抽奖编号！
-  roll.quit:
+  giveaway.quit:
     description: |-
       退出指定的抽奖
     messages:
@@ -180,7 +180,7 @@ commands:
         找不到此抽奖！
       empty: |-
         请输入抽奖编号！
-  roll.time:
+  giveaway.time:
     description: |-
       修改时区
     messages:
@@ -206,7 +206,7 @@ commands:
           已清除频道时区设置
         defaultUser: |-
           已清除你的时区设置
-  roll.locale:
+  giveaway.locale:
     description: |-
       修改语言偏好
     messages:
@@ -232,17 +232,17 @@ commands:
           已清除频道语言偏好设置
         defaultUser: |-
           已清除你的语言偏好设置
-  roll.remind:
+  giveaway.remind:
     description: |-
       查询抽奖启用的提醒
     messages:
       notFound: |-
         没有找到该抽奖！
 
-  remind:
+  giveaway.reminder:
     description: |-
-      Roll Bot 提醒功能
-  remind.add:
+      Giveaway 提醒功能
+  giveaway.reminder.add:
     description: |-
       创建一个提醒器
     messages:
@@ -292,7 +292,7 @@ commands:
           <p>你希望每小时的什么时候提醒？</p>
           <p>格式：分</p>
           <p>当前时区：{0}</p>
-  remind.delete:
+  giveaway.reminder.delete:
     description: |-
       删除一个提醒器
     messages:
@@ -302,10 +302,10 @@ commands:
         未找到提醒器编号，请重新输入！
       notYourReminder: |-
         你没有权限删除该提醒器！
-  remind.list:
+  giveaway.reminder.list:
     description: |-
       查询提醒器列表
-  remind.enable:
+  giveaway.reminder.enable:
     description: |-
       启用一个提醒器
     messages:
@@ -319,7 +319,7 @@ commands:
         你没有权限启用提醒器！
       success: |-
         启用提醒器成功！
-  remind.disable:
+  giveaway.reminder.disable:
     description: |-
       禁用一个提醒
     messages:

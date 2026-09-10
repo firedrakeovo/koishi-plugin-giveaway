@@ -4,7 +4,7 @@ import {autoEndManager, remindManager} from "../../index";
 import {getRemindValueFromDefaultReminder} from "../../util/general";
 
 export function rollAddListener(ctx: Context, config: Config) {
-  ctx.on('roll-bot/roll-add', async (
+  ctx.on('giveaway/roll-add', async (
     session,
     roll,
     prizes,
@@ -30,19 +30,19 @@ export function rollAddListener(ctx: Context, config: Config) {
       channel_platform: session.event.platform
     })
 
-    ctx.emit('roll-bot/roll-key-update')
+    ctx.emit('giveaway/roll-key-update')
     // Apply default reminds
     for (const defaultRemind of config.remind.defaultReminders) {
       if (rollRes.endTime || defaultRemind.type != '1') {
         remindManager.addJob(rollRes.id, getRemindValueFromDefaultReminder(rollRes.endTime, defaultRemind, config), function () {
-          ctx.emit('roll-bot/remind-broadcast', rollRes.id)
+          ctx.emit('giveaway/remind-broadcast', rollRes.id)
         })
       }
     }
     // Create auto end job
     if (rollRes.endTime) {
       autoEndManager.addJob(rollRes.id, rollRes.endTime, function () {
-        ctx.emit('roll-bot/roll-end', rollRes.id)
+        ctx.emit('giveaway/roll-end', rollRes.id)
       })
     }
   })

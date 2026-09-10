@@ -3,9 +3,9 @@ import { Config } from '../../config';
 import {hasPermission, isPluginAdmin, isRollCreator} from "../../util/role";
 
 export function enableRemind(ctx: Context, config: Config) {
-  ctx.command("remind.enable <rollCode> <reminderCode> [...rest]")
+  ctx.command("giveaway.reminder.enable <rollCode> <reminderCode> [...rest]")
     .alias('启用提醒器')
-    .alias('remind.on')
+    .alias('giveaway.reminder.on')
     .userFields(['offset'])
     .channelFields(['offset'])
     .action(async ({session}, rollCode, reminderCode, ...rest) => {
@@ -31,7 +31,7 @@ export function enableRemind(ctx: Context, config: Config) {
       )) return session.text('.noAuth')
       // enable
       for (const reminderCode of rest) {
-        ctx.emit('roll-bot/remind-add', rollCode, reminderCode)
+        ctx.emit('giveaway/remind-add', rollCode, reminderCode)
       }
       return session.text('.success')
     })

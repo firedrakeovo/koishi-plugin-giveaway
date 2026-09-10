@@ -11,13 +11,13 @@ import zhCN from './locales/zh-CN.yml'
 import enUS from './locales/en-US.yml'
 import deDE from './locales/de-DE.yml'
 
-export const name = 'roll-bot'
+export const name = 'giveaway'
 
 export const inject = ['database', 'assets']
 
 export * from './config'
 
-export const logger = new Logger('Roll Bot')
+export const logger = new Logger('giveaway')
 export const remindManager = new RemindManager()
 export const autoEndManager = new AutoEndManager()
 export const expireManager = new ExpireManager()

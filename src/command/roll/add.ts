@@ -6,7 +6,7 @@ import {hasPermission, isGuildAdmin, isPluginAdmin} from "../../util/role";
 import {getCurrentUTCOffset} from "../../util/time";
 
 export function addRoll(ctx: Context, config: Config) {
-  ctx.command("roll.add")
+  ctx.command("giveaway.add")
     .alias('创建抽奖')
     .option('n', '-n')
     .userFields(['offset'])
@@ -161,7 +161,7 @@ export function addRoll(ctx: Context, config: Config) {
         }
       }
 
-      ctx.emit('roll-bot/roll-add',
+      ctx.emit('giveaway/roll-add',
         a.session,
         a.roll,
         a.prizeList,

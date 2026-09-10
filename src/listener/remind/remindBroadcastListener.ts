@@ -4,7 +4,7 @@ import {bots} from "../../index";
 import { DateTime, Duration } from 'luxon'
 
 export function remindBroadcastListener(ctx: Context, config: Config) {
-  ctx.on('roll-bot/remind-broadcast', async (
+  ctx.on('giveaway/remind-broadcast', async (
     rollId,
     remindId?
   ) => {

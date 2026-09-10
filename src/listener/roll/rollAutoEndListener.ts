@@ -12,11 +12,11 @@ export function rollAutoEndListener(ctx: Context, config: Config) {
         if (DateTime.fromJSDate(roll.endTime) < DateTime.now()) {
           // if endTime is already passed, end the roll immediately
           autoEndManager.addJob(roll.id, DateTime.now().plus({seconds: 3}).toJSDate(), function () {
-            ctx.emit('roll-bot/roll-end', roll.id)
+            ctx.emit('giveaway/roll-end', roll.id)
           })
         } else {
           autoEndManager.addJob(roll.id, roll.endTime, function () {
-            ctx.emit('roll-bot/roll-end', roll.id)
+            ctx.emit('giveaway/roll-end', roll.id)
           })
         }
       }

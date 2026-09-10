@@ -14,7 +14,7 @@ export function remindAddListener(ctx: Context, config: Config) {
       const reminderRes = await ctx.database.get('reminder', {id: r.remind.reminder_id})
       if (rollRes.length != 0) {
         remindManager.addJob(r.remind.id, getRemindValueFromReminder(rollRes[0].endTime, reminderRes[0]), function () {
-          ctx.emit('roll-bot/remind-broadcast', r.remind.roll_id, r.remind.id)
+          ctx.emit('giveaway/remind-broadcast', r.remind.roll_id, r.remind.id)
         })
       }
     }
@@ -24,14 +24,14 @@ export function remindAddListener(ctx: Context, config: Config) {
       for (const roll of rollRes) {
         if (roll.endTime || defaultRemind.type != '1') {
           remindManager.addJob(globalState.remindInitialId, getRemindValueFromDefaultReminder(roll.endTime, defaultRemind, config), function () {
-            ctx.emit('roll-bot/remind-broadcast', roll.id)
+            ctx.emit('giveaway/remind-broadcast', roll.id)
           })
           globalState.remindInitialId++
         }
       }
     }
   })
-  ctx.on('roll-bot/remind-add', async (
+  ctx.on('giveaway/remind-add', async (
     rollCode,
     reminderCode,
   ) => {
@@ -47,7 +47,7 @@ export function remindAddListener(ctx: Context, config: Config) {
         channel_platform: rollChannelRes[0].channel_platform
       })
       remindManager.addJob(r.id, getRemindValueFromReminder(rollRes[0].endTime, reminderRes[0]), function() {
-        ctx.emit('roll-bot/remind-broadcast', r.roll_id, r.id)
+        ctx.emit('giveaway/remind-broadcast', r.roll_id, r.id)
       })
     }
   })

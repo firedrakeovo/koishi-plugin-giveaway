@@ -5,9 +5,8 @@ import {getCurrentUTCOffset} from "../../util/time";
 import {getCurrentLocales} from "../../util/locale";
 
 export function detailRoll(ctx: Context, config: Config) {
-  ctx.command("roll.detail <rollCode>")
+  ctx.command("giveaway.detail <rollCode>")
     .alias('抽奖详情')
-    .alias('d')
     .action(async ({session}, rollCode) => {
       if (rollCode === undefined) return session.text('.empty')
       // find roll
