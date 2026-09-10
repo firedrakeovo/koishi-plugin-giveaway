@@ -93,19 +93,22 @@ npm i koishi-plugin-giveaway
 
 参与条件在**抽奖口令加入**与 `giveaway.join` 指令两条路径上都会检查；两项都满足才计入参与名单，拒绝时会回带「你当前多少级 / 需要多少级」这类具体原因。
 
-| 条件 | 数据来源（OneBot v11 标准接口） | 字段 | 备注 |
+| 条件 | 数据来源 | 字段 | 备注 |
 | --- | --- | --- | --- |
-| 群聊等级 | `get_group_member_info` | `level` | NapCat 取 QQ NT 的 `memberRealLevel`，即群聊等级（1~100） |
-| 最近发言 | `get_group_member_info` | `last_sent_time` | 不依赖 QQ 网页接口，比互动标识稳定，建议作为兜底 |
-| 群聊之火（连续 7 天） | `get_group_honor_info` | `performer_list` | 与「群聊炽焰」互斥：持有炽焰的人不再出现在火列表，插件已自动把炽焰视为满足 7 天 |
-| 群聊炽焰（连续 30 天） | `get_group_honor_info` | `legend_list` | |
-| 龙王（昨日最活跃） | `get_group_honor_info` | `talkative_list` | 榜单为昨日群聊活跃榜 |
+| 群聊等级 | OneBot `get_group_member_info` | `level` | NapCat 取 QQ NT 的 `memberRealLevel`，即群聊等级（1~100） |
+| 最近发言 | OneBot `get_group_member_info` | `last_sent_time` | 不依赖 QQ 网页接口，比互动标识稳定，建议作为兜底 |
+| 群聊之火（连续发言） | QQ 网页接口 `/cgi-bin/qunapp/honor_continuous` | `continuous_type=2` | 返回带 `day_count`（连续天数） |
+| 群聊炽焰（连续 30 天） | 同上 | `continuous_type=3` | 持有炽焰者不再出现在火列表，插件自动把炽焰视为满足 7 天 |
+| 龙王（昨日最活跃） | QQ 网页接口 `/cgi-bin/qunapp/honor_talkative` | `talkative_list` | 昨日群聊活跃榜 |
+
+**为什么荣誉不走 OneBot 标准接口**：NapCat 的 `get_group_honor_info` 依赖 `qun.qq.com/interactive/honorlist` 页面里的 `window.__INITIAL_STATE__`，而该页已改版为 Vite SPA（变量不复存在），于是它**静默返回空列表**（截至 v4.18.19 仍未修复）。因此本插件改为：先用 OneBot 接口（未来修复即可自动生效），取不到数据时自动改用 QQ 新版网页接口兜底——后者通过 OneBot 的 `get_cookies` 取 `qun.qq.com` 的登录态，并归一化成同一套结构。
 
 注意事项：
 
-- 群荣誉接口走的是 **qun.qq.com 网页接口**（依赖登录 Cookie），比成员信息慢、也更容易失败，因此按「群 + 类型」缓存（`cacheMinutes`），并且只请求配置里真正用到的类型；
-- 接口取不到数据时按 `onFetchError` 处理；荣誉列表返回全空也会被当作「取不到数据」（真实群聊榜上至少会有人），避免误判成「你没有标识」；
-- 非 OneBot 平台（如 Discord）拿不到这些接口，会跳过参与条件检查。
+- 网页荣誉接口依赖登录 Cookie，比成员信息慢、也更容易失败，因此按「群 + 类型」缓存（`cacheMinutes`），且只请求配置里真正用到的类型；
+- 两条路径都取不到数据时按 `onFetchError` 处理；荣誉列表返回全空也会被当作「取不到数据」（真实群聊榜上至少会有人），避免误判成「你没有标识」；
+- 非 OneBot 平台（如 Discord）拿不到这些接口，会跳过参与条件检查；
+- 排查用管理员指令：`giveaway.debug.honor`（诊断荣誉接口）、`giveaway.debug.member [用户]`（诊断群成员等级/发言），两者都会把原始 JSON 写进插件日志。
 
 ### 权限模型
 
