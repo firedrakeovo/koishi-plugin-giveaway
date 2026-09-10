@@ -24,6 +24,45 @@ _config:
     allowGuildAdminEnd: |-
       <p><b>Gruppeneigentümer und -administratoren</b> dürfen Verlosungen ihrer Gruppe manuell ziehen.</p>
       <p>Wenn deaktiviert, dürfen nur der Ersteller und Nutzer ab dem Verwaltungsrang ziehen.</p>
+  join:
+    $description: |-
+      Teilnahmebedingungen
+    minGroupLevel: |-
+      <p>Mindest-<b>Gruppenlevel</b> (QQ-Gruppenchat-Level, 1-100), um an einer Verlosung teilzunehmen.</p>
+      <p><code>0</code> bedeutet keine Einschränkung; z. B. lässt <code>40</code> nur Mitglieder ab Level 40 teilnehmen.</p>
+      <p>Daten stammen aus OneBot <code>get_group_member_info</code> (Feld <code>level</code>).</p>
+    minActiveDays: |-
+      <p>Das Mitglied muss innerhalb der letzten N Tage in dieser Gruppe geschrieben haben. <code>0</code> bedeutet keine Einschränkung.</p>
+      <p>Daten stammen aus <code>last_sent_time</code> von <code>get_group_member_info</code>. Sie hängen nicht von der QQ-Web-API ab, sind also zuverlässiger als die Ehrungen unten, und eignen sich als Fallback.</p>
+    requiredHonors:
+      $description: |-
+        <p>Das Mitglied muss die gewählten QQ-Gruppen-<b>Interaktionsabzeichen</b> besitzen. Mehrfachauswahl möglich; leer bedeutet keine Einschränkung.</p>
+        <p>Daten stammen aus OneBot <code>get_group_honor_info</code>:</p>
+        <ul>
+          <li><b>Gruppenfeuer:</b> 7 Tage in Folge geschrieben (<code>performer_list</code>)</li>
+          <li><b>Gruppenflamme:</b> 30 Tage in Folge geschrieben (<code>legend_list</code>)</li>
+          <li><b>Drachenkönig:</b> gestern am aktivsten (<code>talkative_list</code>)</li>
+        </ul>
+        <p>Wer die Flamme besitzt, erscheint nicht mehr in der Feuer-Liste; das Plugin wertet die Flamme als Erfüllung der 7-Tage-Bedingung. Diese API läuft über qun.qq.com, ist langsamer und kann fehlschlagen; Ergebnisse werden für die eingestellte Dauer zwischengespeichert.</p>
+      $inner:
+        - Gruppenfeuer (7 Tage in Folge)
+        - Gruppenflamme (30 Tage in Folge)
+        - Drachenkönig (gestern am aktivsten)
+    honorMode:
+      $description: |-
+        Ob bei mehreren gewählten Abzeichen eines genügt oder alle erfüllt sein müssen.
+      $inner:
+        - Eines genügt
+        - Alle erforderlich
+    onFetchError:
+      $description: |-
+        <p>Verhalten, wenn Mitglieds-/Ehrungsdaten nicht abgerufen werden können (QQ-API-Timeout, abgelaufene Cookies, ...).</p>
+        <p><b>Zulassen:</b> nicht abrufbare Bedingungen überspringen und beitreten lassen (empfohlen); <b>Ablehnen:</b> das Mitglied bitten, es später erneut zu versuchen.</p>
+      $inner:
+        - Zulassen
+        - Ablehnen
+    cacheMinutes: |-
+      Wie lange (in Minuten) Ehrungsdaten zwischengespeichert werden. <code>0</code> bedeutet jedes Mal neu abrufen.
   remind:
     $description: |-
       Erinnerungen
@@ -318,6 +357,28 @@ commands:
       success: |-
         禁用提醒器成功！
 events:
+  join.rejected: |-
+    <quote id={messageId}/> Du erfüllst die Bedingungen dieser Verlosung nicht: {reason}
+  join.never-spoke: |-
+    noch nie in dieser Gruppe geschrieben
+  join.days-ago: |-
+    vor {0} Tagen
+  join.honor:
+    fire7: |-
+      Gruppenfeuer (7 Tage in Folge)
+    fire30: |-
+      Gruppenflamme (30 Tage in Folge)
+    dragon: |-
+      Drachenkönig (gestern am aktivsten)
+  join.reason:
+    level: |-
+      Gruppenlevel zu niedrig (du bist Level {current}, diese Verlosung verlangt Level {required} oder höher)
+    active: |-
+      keine Nachricht in den letzten {required} Tagen (deine letzte Nachricht: {last})
+    honor: |-
+      erforderliche Interaktionsabzeichen fehlen (erforderlich: {required})
+    unavailable: |-
+      deine Gruppenmitgliedsdaten sind derzeit nicht verfügbar, bitte versuche es später erneut oder wende dich an einen Admin
   roll.add:
     success: |-
       <quote id={messageId}/> 成功加入编号为 {rollCode} 的抽奖。

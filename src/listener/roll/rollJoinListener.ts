@@ -1,6 +1,7 @@
 import {Context} from 'koishi';
 import {Config} from '../../config';
-import {rollKeyCache} from "../../index";
+import {logger, rollKeyCache} from "../../index";
+import {checkJoinPolicy} from "../../util/joinPolicy";
 
 export function rollJoinListener(ctx: Context, config: Config) {
   ctx.on('message', async (session) => {
@@ -38,6 +39,14 @@ export function rollJoinListener(ctx: Context, config: Config) {
   ) => {
     const res = await ctx.database.get('roll_member', {roll_id: roll_id, user_id: user_id})
     if (res.length === 0) {
+      // 参与条件（群聊等级 / 活跃度 / 互动标识）
+      const verdict = await checkJoinPolicy(ctx, session, config)
+      if (!verdict.ok) {
+        logger.debug(`用户 ${session.userId} 不满足参与条件：${JSON.stringify(verdict.detail ?? {})}`)
+        const key = verdict.reason?.key ?? 'unavailable'
+        const reason = session.text(`events.join.reason.${key}`, verdict.reason?.params ?? {})
+        return session.sendQueued(session.text('events.join.rejected', {messageId: session.messageId, reason}))
+      }
       await ctx.database.create('roll_member', {roll_id: roll_id, user_id: user_id})
       session.sendQueued(session.text('events.roll.add.success', {messageId: session.messageId, rollCode: roll_code}))
     }

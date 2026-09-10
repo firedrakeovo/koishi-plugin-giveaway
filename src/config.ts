@@ -19,7 +19,21 @@ namespace PermissionConfig {
   }
 }
 
-namespace RemindConfig {
+namespace JoinConfig {
+  export interface Config {
+    minGroupLevel: number
+    minActiveDays: number
+    requiredHonors: HonorRequirement[]
+    honorMode: 'any' | 'all'
+    onFetchError: 'allow' | 'deny'
+    cacheMinutes: number
+  }
+}
+
+/** 可选的互动标识（QQ 群荣誉）条件 */
+export type HonorRequirement = 'fire7' | 'fire30' | 'dragon'
+
+export namespace RemindConfig {
   export interface Config {
     defaultReminders?: Array<{
       type: "0" | "1"
@@ -31,6 +45,7 @@ namespace RemindConfig {
 export interface Config {
   basic: BasicConfig.Config
   permission: PermissionConfig.Config
+  join: JoinConfig.Config
   remind: RemindConfig.Config
 }
 
@@ -66,6 +81,25 @@ const permissionConfig: Schema<PermissionConfig.Config> = Schema.object({
   allowGuildAdminEnd: Schema.boolean().default(true),
 })
 
+const joinConfig: Schema<JoinConfig.Config> = Schema.object({
+  minGroupLevel: Schema.natural().max(100).default(0),
+  minActiveDays: Schema.natural().max(365).default(0),
+  requiredHonors: Schema.array(Schema.union([
+    Schema.const('fire7').description('群聊之火（连续发言 7 天）'),
+    Schema.const('fire30').description('群聊炽焰（连续发言 30 天）'),
+    Schema.const('dragon').description('龙王（昨日群聊最活跃）'),
+  ])).default([]),
+  honorMode: Schema.union([
+    Schema.const('any'),
+    Schema.const('all'),
+  ]).default('any'),
+  onFetchError: Schema.union([
+    Schema.const('allow'),
+    Schema.const('deny'),
+  ]).default('allow'),
+  cacheMinutes: Schema.natural().max(60).default(5),
+})
+
 const remindConfig: Schema<RemindConfig.Config> = Schema.object({
   defaultReminders: Schema.array(
     Schema.object({
@@ -81,6 +115,7 @@ const remindConfig: Schema<RemindConfig.Config> = Schema.object({
 export const Config: Schema<Config> = Schema.object({
   basic: basicConfig,
   permission: permissionConfig,
+  join: joinConfig,
   remind: remindConfig,
 }).i18n({
   "de-DE": deDE._config,

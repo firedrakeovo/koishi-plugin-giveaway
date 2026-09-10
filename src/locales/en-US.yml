@@ -24,6 +24,45 @@ _config:
     allowGuildAdminEnd: |-
       <p>Allow <b>group owners and group admins</b> to draw giveaways in their group manually.</p>
       <p>When disabled, only the creator and users at or above the management level can draw.</p>
+  join:
+    $description: |-
+      Join Requirements
+    minGroupLevel: |-
+      <p>Minimum <b>group level</b> (QQ group chat level, 1-100) required to join a giveaway.</p>
+      <p><code>0</code> means no restriction; e.g. <code>40</code> only lets members at level 40 or above join.</p>
+      <p>Data comes from OneBot <code>get_group_member_info</code> (the <code>level</code> field).</p>
+    minActiveDays: |-
+      <p>Require the member to have spoken in this group within the last N days. <code>0</code> means no restriction.</p>
+      <p>Data comes from <code>last_sent_time</code> of <code>get_group_member_info</code>. It does not depend on QQ's web API, so it is more reliable than the honors below and makes a good fallback.</p>
+    requiredHonors:
+      $description: |-
+        <p>Require the member to hold the selected QQ group <b>interaction honors</b>. Multiple choices allowed; empty means no restriction.</p>
+        <p>Data comes from OneBot <code>get_group_honor_info</code>:</p>
+        <ul>
+          <li><b>Group fire:</b> spoke for 7 consecutive days (<code>performer_list</code>)</li>
+          <li><b>Group blaze:</b> spoke for 30 consecutive days (<code>legend_list</code>)</li>
+          <li><b>Dragon King:</b> most active in the group yesterday (<code>talkative_list</code>)</li>
+        </ul>
+        <p>Members holding the blaze honor no longer appear in the fire list; the plugin treats blaze as satisfying the 7-day condition. This API goes through qun.qq.com, so it is slower and may fail; results are cached for the configured duration.</p>
+      $inner:
+        - Group fire (7 consecutive days)
+        - Group blaze (30 consecutive days)
+        - Dragon King (most active yesterday)
+    honorMode:
+      $description: |-
+        When several honors are selected, whether any one of them is enough or all of them are required.
+      $inner:
+        - Any of them
+        - All of them
+    onFetchError:
+      $description: |-
+        <p>What to do when member / honor data cannot be fetched (QQ API timeout, expired cookies, ...).</p>
+        <p><b>Allow:</b> skip the conditions that could not be fetched and let the member join (recommended, avoids blocking legitimate users); <b>Deny:</b> ask the member to try again later.</p>
+      $inner:
+        - Allow
+        - Deny
+    cacheMinutes: |-
+      How long (in minutes) honor data is cached. <code>0</code> means fetch every time.
   remind:
     $description: |-
       Reminders
@@ -318,6 +357,28 @@ commands:
       success: |-
         禁用提醒器成功！
 events:
+  join.rejected: |-
+    <quote id={messageId}/> You do not meet the requirements of this giveaway: {reason}
+  join.never-spoke: |-
+    never spoke in this group
+  join.days-ago: |-
+    {0} days ago
+  join.honor:
+    fire7: |-
+      group fire (7 consecutive days)
+    fire30: |-
+      group blaze (30 consecutive days)
+    dragon: |-
+      Dragon King (most active yesterday)
+  join.reason:
+    level: |-
+      group level too low (you are level {current}, this giveaway requires level {required} or above)
+    active: |-
+      no messages within the last {required} days (your last message: {last})
+    honor: |-
+      missing required interaction honors (required: {required})
+    unavailable: |-
+      your group member information is temporarily unavailable, please try again later or contact an admin
   roll.add:
     success: |-
       <quote id={messageId}/> 成功加入编号为 {rollCode} 的抽奖。

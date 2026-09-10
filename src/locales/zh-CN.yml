@@ -24,6 +24,45 @@ _config:
     allowGuildAdminEnd: |-
       <p>允许<b>群主与群管理员</b>对本群的抽奖手动开奖。</p>
       <p>关闭后，只有创建者与达到管理等级的用户可以开奖。</p>
+  join:
+    $description: |-
+      参与条件
+    minGroupLevel: |-
+      <p>参与抽奖所需的最低<b>群聊等级</b>（QQ 群内等级，1~100）。</p>
+      <p>填 <code>0</code> 表示不限制；例如填 <code>40</code>，则只有 40 级及以上的人能参加。</p>
+      <p>数据来自 OneBot 的 <code>get_group_member_info</code>（<code>level</code> 字段，即 QQ 的群聊等级）。</p>
+    minActiveDays: |-
+      <p>要求参与者最近 N 天内在本群发过言，填 <code>0</code> 表示不限制。</p>
+      <p>数据来自 <code>get_group_member_info</code> 的 <code>last_sent_time</code>。它不依赖 QQ 网页接口，比下方的互动标识稳定，建议作为兜底条件。</p>
+    requiredHonors:
+      $description: |-
+        <p>要求参与者持有指定的 QQ 群<b>互动标识</b>（群荣誉），可多选，留空表示不限制。</p>
+        <p>数据来自 OneBot 的 <code>get_group_honor_info</code>：</p>
+        <ul>
+          <li><b>群聊之火：</b>连续发言 7 天（<code>performer_list</code>）</li>
+          <li><b>群聊炽焰：</b>连续发言 30 天（<code>legend_list</code>）</li>
+          <li><b>龙王：</b>昨日群聊最活跃（<code>talkative_list</code>）</li>
+        </ul>
+        <p>持有炽焰的人不会再出现在火列表里，插件已自动兼容（炽焰视为满足「连续 7 天」）。该接口走 qun.qq.com 网页接口，较慢且可能失败，结果按「缓存时长」缓存。</p>
+      $inner:
+        - 群聊之火（连续发言 7 天）
+        - 群聊炽焰（连续发言 30 天）
+        - 龙王（昨日群聊最活跃）
+    honorMode:
+      $description: |-
+        勾选多个互动标识时，是满足任意一个即可，还是必须全部满足。
+      $inner:
+        - 满足任意一个
+        - 必须全部满足
+    onFetchError:
+      $description: |-
+        <p>取不到群成员 / 群荣誉数据时的策略（QQ 接口超时、Cookie 失效等）。</p>
+        <p><b>放行：</b>跳过取不到的条件，允许参加（推荐，避免误伤正常用户）；<b>拒绝：</b>提示用户稍后再试。</p>
+      $inner:
+        - 放行
+        - 拒绝
+    cacheMinutes: |-
+      群荣誉数据的缓存时长（分钟），填 <code>0</code> 表示每次都重新获取。
   remind:
     $description: |-
       提醒设置
@@ -335,6 +374,28 @@ commands:
       success: |-
         禁用提醒器成功！
 events:
+  join.rejected: |-
+    <quote id={messageId}/> 你不符合本次抽奖的参与条件：{reason}
+  join.never-spoke: |-
+    从未在群内发言
+  join.days-ago: |-
+    {0} 天前
+  join.honor:
+    fire7: |-
+      群聊之火（连续发言 7 天）
+    fire30: |-
+      群聊炽焰（连续发言 30 天）
+    dragon: |-
+      龙王（昨日群聊最活跃）
+  join.reason:
+    level: |-
+      群聊等级不足（你当前 {current} 级，本抽奖要求 {required} 级以上）
+    active: |-
+      最近 {required} 天内没有发言记录（你上次发言：{last}）
+    honor: |-
+      缺少所需的互动标识（需要：{required}）
+    unavailable: |-
+      暂时无法获取你的群成员信息，请稍后再试或联系管理员
   join.error: |-
     <quote id={messageId}/> 加入遇到错误，请再次发送口令。
   roll.add:

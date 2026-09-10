@@ -71,7 +71,7 @@ npm i koishi-plugin-giveaway
 
 ## 配置
 
-在 Koishi 控制台的插件配置页可视化编辑，分为三组：
+在 Koishi 控制台的插件配置页可视化编辑，分为四组：
 
 | 分组 | 字段 | 说明 |
 | --- | --- | --- |
@@ -81,7 +81,31 @@ npm i koishi-plugin-giveaway
 | | `authorityManage` | 管理**他人**抽奖（删除 / 手动开奖 / 提醒器）所需的最低权限等级，默认 `3` |
 | | `allowGuildAdminDelete` | 允许群主与群管理员删除本群抽奖，默认开启 |
 | | `allowGuildAdminEnd` | 允许群主与群管理员对本群抽奖手动开奖，默认开启 |
+| `join` | `minGroupLevel` | 参与抽奖所需的最低**群聊等级**（1~100），默认 `0`（不限制） |
+| | `minActiveDays` | 要求最近 N 天内在本群发过言，默认 `0`（不限制） |
+| | `requiredHonors` | 要求持有的 QQ 群**互动标识**（群聊之火 / 群聊炽焰 / 龙王），默认不限制 |
+| | `honorMode` | 勾选多个标识时是「满足任意一个」还是「必须全部满足」，默认任意一个 |
+| | `onFetchError` | 取不到成员/荣誉数据时放行还是拒绝，默认放行 |
+| | `cacheMinutes` | 群荣誉数据的缓存时长（分钟），默认 `5` |
 | `remind` | `defaultReminders` | 新建抽奖时默认启用的提醒器（定时提醒器 / 结束前提醒器） |
+
+### 参与条件
+
+参与条件在**抽奖口令加入**与 `giveaway.join` 指令两条路径上都会检查；两项都满足才计入参与名单，拒绝时会回带「你当前多少级 / 需要多少级」这类具体原因。
+
+| 条件 | 数据来源（OneBot v11 标准接口） | 字段 | 备注 |
+| --- | --- | --- | --- |
+| 群聊等级 | `get_group_member_info` | `level` | NapCat 取 QQ NT 的 `memberRealLevel`，即群聊等级（1~100） |
+| 最近发言 | `get_group_member_info` | `last_sent_time` | 不依赖 QQ 网页接口，比互动标识稳定，建议作为兜底 |
+| 群聊之火（连续 7 天） | `get_group_honor_info` | `performer_list` | 与「群聊炽焰」互斥：持有炽焰的人不再出现在火列表，插件已自动把炽焰视为满足 7 天 |
+| 群聊炽焰（连续 30 天） | `get_group_honor_info` | `legend_list` | |
+| 龙王（昨日最活跃） | `get_group_honor_info` | `talkative_list` | 榜单为昨日群聊活跃榜 |
+
+注意事项：
+
+- 群荣誉接口走的是 **qun.qq.com 网页接口**（依赖登录 Cookie），比成员信息慢、也更容易失败，因此按「群 + 类型」缓存（`cacheMinutes`），并且只请求配置里真正用到的类型；
+- 接口取不到数据时按 `onFetchError` 处理；荣誉列表返回全空也会被当作「取不到数据」（真实群聊榜上至少会有人），避免误判成「你没有标识」；
+- 非 OneBot 平台（如 Discord）拿不到这些接口，会跳过参与条件检查。
 
 ### 权限模型
 
@@ -107,7 +131,16 @@ npm i koishi-plugin-giveaway
 
 ## 开发
 
-现阶段构建沿用上游的 Koishi 工作区工具链（`yakumo build` / `esbuild` + YAML 加载器），独立构建脚本整理中。
+```bash
+npm install
+npm run build         # tsc 生成 lib/*.d.ts + esbuild 打包 lib/index.js
+npm run build:watch   # 监听源码重新打包
+npm run clean
+```
+
+构建脚本 `scripts/build.mjs` 只依赖本地 devDependencies（esbuild + js-yaml），语言包 `.yml` 由 js-yaml 解析后交给 esbuild 的 json loader；`koishi` 等运行时依赖保持 external。
+
+本地接入 Koishi 应用时（例如 `file:../roll-bot` 依赖），改完代码需要重新 `yarn install` 刷新副本并重启应用才生效；纯配置值（等级阈值、开关等）可以在控制台热改，只有字段结构变更才需要重启。
 
 ## 许可证
 
