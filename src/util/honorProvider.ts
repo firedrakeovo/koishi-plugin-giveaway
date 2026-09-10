@@ -26,6 +26,104 @@ const QUN_HOST = 'https://qun.qq.com'
 const HONOR_PAGE = `${QUN_HOST}/interactive/honorlist`
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
+/** 解析 Cookie 字符串 */
+export function parseCookies(cookie: string): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const part of String(cookie ?? '').split(';')) {
+    const index = part.indexOf('=')
+    if (index <= 0) continue
+    out[part.slice(0, index).trim()] = part.slice(index + 1).trim()
+  }
+  return out
+}
+
+/**
+ * QQ 的 CSRF 令牌（`bkn` / `g_tk`）：对 skey 做 djb2 变体哈希再取低 31 位。
+ * 与 NapCat 的 `getBknFromSKey` 实现完全一致（`napcat.mjs`）。
+ */
+export function calcBkn(skey: string): string {
+  if (!skey) return ''
+  let hash = 5381
+  for (let i = 0; i < skey.length; i++) {
+    hash = hash + (hash << 5) + skey.charCodeAt(i)
+  }
+  return String(hash & 2147483647)
+}
+
+/**
+ * 鉴权变体：新版 `/cgi-bin/qunapp/*` 接口只带 Cookie 会返回
+ * `retcode 100021 csrf error`，需要补上从 skey 算出来的 `bkn`。
+ * 这里按顺序试，命中即记住，避免每次请求都试一遍。
+ */
+interface AuthVariant {
+  name: string
+  params?: (cookie: Record<string, string>) => Record<string, string>
+  headers?: Record<string, string>
+}
+
+export const AUTH_VARIANTS: AuthVariant[] = [
+  { name: 'cookie-only', params: () => ({}) },
+  { name: 'bkn(skey)', params: (c) => ({ bkn: calcBkn(c.skey) }) },
+  { name: 'bkn(p_skey)', params: (c) => ({ bkn: calcBkn(c.p_skey) }) },
+  { name: 'bkn+g_tk(skey)', params: (c) => ({ bkn: calcBkn(c.skey), g_tk: calcBkn(c.skey) }) },
+  {
+    name: 'bkn(skey)+origin',
+    params: (c) => ({ bkn: calcBkn(c.skey) }),
+    headers: { Origin: QUN_HOST, 'X-Requested-With': 'XMLHttpRequest' },
+  },
+]
+
+let cachedVariant: string | null = null
+/** 测试用：清掉已选中的鉴权变体 */
+export function resetAuthVariant() {
+  cachedVariant = null
+}
+
+async function requestOnce(ctx: Context, url: string, cookie: string, variant: AuthVariant): Promise<any> {
+  const parsed = parseCookies(cookie)
+  const extra = variant.params?.(parsed) ?? {}
+  const target = new URL(url)
+  for (const [key, value] of Object.entries(extra)) {
+    if (value) target.searchParams.set(key, value)
+  }
+  const headers: Record<string, string> = { 'User-Agent': UA, Referer: HONOR_PAGE, ...(variant.headers ?? {}) }
+  if (cookie) headers.Cookie = cookie
+  const http = (ctx as any).http
+  if (http && typeof http.get === 'function') {
+    return await http.get(target.toString(), { headers })
+  }
+  const res = await fetch(target.toString(), { headers })
+  const text = await res.text()
+  try {
+    return JSON.parse(text)
+  } catch {
+    return { retcode: -1, msg: `非 JSON 响应（HTTP ${res.status}）：${text.slice(0, 120)}` }
+  }
+}
+
+/** 按鉴权变体依次尝试，返回第一个 retcode=0 的结果（都失败则返回最后一次结果） */
+async function requestWithAuth(ctx: Context, url: string, cookie: string): Promise<{ body: any; variant: string }> {
+  const order = cachedVariant
+    ? [...AUTH_VARIANTS].sort((a, b) => (a.name === cachedVariant ? -1 : b.name === cachedVariant ? 1 : 0))
+    : AUTH_VARIANTS
+  let last: { body: any; variant: string } = { body: undefined, variant: order[0].name }
+  for (const variant of order) {
+    const body = await requestOnce(ctx, url, cookie, variant)
+    last = { body, variant: variant.name }
+    if (body?.retcode === 0) {
+      if (cachedVariant !== variant.name) {
+        cachedVariant = variant.name
+        logger.info(`荣誉接口鉴权方式已确定为：${variant.name}`)
+      }
+      return last
+    }
+    if (variant !== order[order.length - 1]) {
+      logger.info(`荣誉接口鉴权变体 ${variant.name} 失败（retcode=${body?.retcode} ${body?.msg ?? ''}），继续尝试下一种`)
+    }
+  }
+  return last
+}
+
 /** OneBot 荣誉类型 → 新版接口参数 */
 const ENDPOINTS: Record<string, { path: string; params: Record<string, string | number>; list: string }> = {
   talkative: { path: '/cgi-bin/qunapp/honor_talkative', params: { num: 3000 }, list: 'talkative_list' },
@@ -43,22 +141,6 @@ export interface HonorProbe {
   info?: OneBotHonorInfo
   /** 每个接口的原始响应（诊断用，已裁剪） */
   raw?: Record<string, any>
-}
-
-async function httpGetJson(ctx: Context, url: string, cookie: string): Promise<any> {
-  const headers: Record<string, string> = { 'User-Agent': UA, Referer: HONOR_PAGE }
-  if (cookie) headers.Cookie = cookie
-  const http = (ctx as any).http
-  if (http && typeof http.get === 'function') {
-    return await http.get(url, { headers })
-  }
-  const res = await fetch(url, { headers })
-  const text = await res.text()
-  try {
-    return JSON.parse(text)
-  } catch {
-    return { retcode: -1, msg: `非 JSON 响应（HTTP ${res.status}）：${text.slice(0, 120)}` }
-  }
 }
 
 function toMember(item: any): OneBotHonorMember {
@@ -112,10 +194,10 @@ export async function fetchHonorViaWeb(ctx: Context, session: any, groupId: numb
     const query = new URLSearchParams({ gc: String(groupId), ...Object.fromEntries(Object.entries(endpoint.params).map(([k, v]) => [k, String(v)])) })
     const url = `${QUN_HOST}${endpoint.path}?${query.toString()}`
     try {
-      const body = await httpGetJson(ctx, url, cookie)
+      const { body, variant } = await requestWithAuth(ctx, url, cookie)
       const retcode = body?.retcode
       const list = pickList(body?.data)
-      raw[type] = { url: endpoint.path, retcode, msg: body?.msg, count: list.length, sample: list.slice(0, 3) }
+      raw[type] = { url: endpoint.path, variant, retcode, msg: body?.msg, count: list.length, sample: list.slice(0, 3) }
       if (retcode !== 0) {
         errors.push(`${type}: retcode=${retcode} ${body?.msg ?? ''}`)
         continue
