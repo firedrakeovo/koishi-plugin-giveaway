@@ -1,46 +1,47 @@
 _config:
-  usage:
-    $description: |-
-      使用说明
-    docs: |-
-      <p><b>点击右侧打开 <a href="https://github.com/firedrakeovo/koishi-plugin-giveaway">帮助文档</a></b></p>
-      <p><b>你也可以通过 giveaway help 指令获取 Giveaway 的帮助文档。</b></p>
   basic:
     $description: |-
-      基本设置
-    adminUsers: |-
-      **Giveaway 管理员** 的用户id (使用 inspect 指令获取)
+      基础设置
     cacheHours: |-
-      抽奖开奖后，记录保留的时间（小时）
+      <p>抽奖开奖后，抽奖记录的保留时长（小时）。</p>
+      <p>超过该时长的记录会被自动清理，默认 72 小时。</p>
     defaultTimeOffset: |-
-      <p>未设置时区的用户默认所在的时区（偏移量）</p>
-      <p>填写本地时间与 UTC 时间之间的差异，例如 `+5` `-9:30` `−00:25:21`</p>
+      <p>未设置时区的用户默认使用的时区偏移量。</p>
+      <p>填写本地时间与 UTC 时间之间的差值，例如 <code>+8</code>、<code>-9:30</code>、<code>-00:25:21</code>。</p>
   permission:
     $description: |-
       权限设置
+    authorityCreate: |-
+      <p>创建抽奖所需的最低权限等级，默认为 1（普通用户）。</p>
+      <p>Koishi 权限等级：<code>0</code> 封禁、<code>1</code> 普通用户、<code>3</code> 管理员、<code>4</code> 超级管理员，可用 <code>admin user.authorize &lt;等级&gt;</code> 指令或控制台的用户页面调整。</p>
+      <p>群主与群管理员始终可以创建抽奖。</p>
+    authorityManage: |-
+      <p>管理<b>他人</b>抽奖（删除抽奖、手动开奖、管理提醒器）所需的最低权限等级，默认为 3（管理员）。</p>
+      <p>抽奖的创建者始终可以管理自己的抽奖。</p>
     allowGuildAdminDelete: |-
-      允许 **频道管理员** 对频道内抽奖进行删除
+      <p>允许<b>群主与群管理员</b>删除本群的抽奖。</p>
+      <p>关闭后，只有创建者与达到管理等级的用户可以删除。</p>
     allowGuildAdminEnd: |-
-      允许 **频道管理员** 对频道内抽奖进行手动开奖
-    allowNormalUserAdd: |-
-      允许 **普通成员** 创建抽奖
+      <p>允许<b>群主与群管理员</b>对本群的抽奖手动开奖。</p>
+      <p>关闭后，只有创建者与达到管理等级的用户可以开奖。</p>
   remind:
     $description: |-
       提醒设置
     defaultReminders:
       $description: |-
-        <p>设置默认的提醒器</p>
-        <p><b>type:</b> 提醒器类型，包括如下二种：</p>
+        <p>新建抽奖时默认启用的提醒器。</p>
+        <p><b>type：</b>提醒器类型</p>
         <ul>
-          <li><b>定时提醒器：</b>在指定时间提醒一次</li>
+          <li><b>定时提醒器：</b>在指定时刻提醒一次</li>
           <li><b>结束前提醒器：</b>抽奖结束前一定时间提醒一次</li>
         </ul>
-        <p><b>value:</b> 时间或间隔，格式为 <b>年-月-日-时-分</b></p>
+        <p><b>value：</b>时间或间隔，格式为 <b>年-月-日-时-分</b>（未用到的位填 0）</p>
+      value: |-
+        格式：年-月-日-时-分
       type:
         $inner:
           - 定时提醒器
           - 结束前提醒器
-
 commands:
   timeout: |-
     输入超时

@@ -1,46 +1,47 @@
 _config:
-  usage:
-    $description: |-
-      使用说明
-    docs: |-
-      <p><b>点击右侧打开 <a href="https://github.com/firedrakeovo/koishi-plugin-giveaway">帮助文档</a></b></p>
-      <p><b>你也可以通过 giveaway help 指令获取 Giveaway 的帮助文档。</b></p>
   basic:
     $description: |-
-      基本设置
-    adminUsers: |-
-      **Giveaway 管理员** 的用户id (使用 inspect 指令获取)
+      Grundeinstellungen
     cacheHours: |-
-      抽奖开奖后，记录保留的时间（小时）
+      <p>Wie lange (in Stunden) ein Verlosungseintrag nach der Ziehung aufbewahrt wird.</p>
+      <p>Ältere Einträge werden automatisch gelöscht. Standard: 72 Stunden.</p>
     defaultTimeOffset: |-
-      <p>未设置时区的用户默认所在的时区（偏移量）</p>
-      <p>填写本地时间与 UTC 时间之间的差异，例如 `+5` `-9:30` `−00:25:21`</p>
+      <p>Standard-Zeitzonenversatz für Nutzer, die keinen eigenen eingestellt haben.</p>
+      <p>Differenz zwischen lokaler Zeit und UTC, z. B. <code>+8</code>, <code>-9:30</code>, <code>-00:25:21</code>.</p>
   permission:
     $description: |-
-      权限设置
+      Berechtigungen
+    authorityCreate: |-
+      <p>Mindestrang zum Erstellen einer Verlosung. Standard: 1 (normale Nutzer).</p>
+      <p>Koishi-Ränge: <code>0</code> gesperrt, <code>1</code> Nutzer, <code>3</code> Administrator, <code>4</code> Superadministrator. Änderbar mit <code>admin user.authorize &lt;Rang&gt;</code> oder über die Nutzerseite der Konsole.</p>
+      <p>Gruppeneigentümer und Gruppenadministratoren dürfen immer erstellen.</p>
+    authorityManage: |-
+      <p>Mindestrang, um <b>fremde</b> Verlosungen zu verwalten (löschen, manuell ziehen, Erinnerungen verwalten). Standard: 3 (Administrator).</p>
+      <p>Der Ersteller darf seine eigene Verlosung immer verwalten.</p>
     allowGuildAdminDelete: |-
-      允许 **频道管理员** 对频道内抽奖进行删除
+      <p><b>Gruppeneigentümer und -administratoren</b> dürfen Verlosungen ihrer Gruppe löschen.</p>
+      <p>Wenn deaktiviert, dürfen nur der Ersteller und Nutzer ab dem Verwaltungsrang löschen.</p>
     allowGuildAdminEnd: |-
-      允许 **频道管理员** 对频道内抽奖进行手动开奖
-    allowNormalUserAdd: |-
-      允许 **普通成员** 创建抽奖
+      <p><b>Gruppeneigentümer und -administratoren</b> dürfen Verlosungen ihrer Gruppe manuell ziehen.</p>
+      <p>Wenn deaktiviert, dürfen nur der Ersteller und Nutzer ab dem Verwaltungsrang ziehen.</p>
   remind:
     $description: |-
-      提醒设置
+      Erinnerungen
     defaultReminders:
       $description: |-
-        <p>设置默认的提醒器</p>
-        <p><b>type:</b> 提醒器类型，包括如下二种：</p>
+        <p>Erinnerungen, die beim Erstellen einer Verlosung standardmäßig aktiv sind.</p>
+        <p><b>type</b> — Art der Erinnerung:</p>
         <ul>
-          <li><b>定时提醒器：</b>在指定时间提醒一次</li>
-          <li><b>结束前提醒器：</b>抽奖结束前一定时间提醒一次</li>
+          <li><b>Geplant</b>: einmal zu einem bestimmten Zeitpunkt erinnern</li>
+          <li><b>Vor Ende</b>: eine bestimmte Zeit vor Ende der Verlosung erinnern</li>
         </ul>
-        <p><b>value:</b> 时间或间隔，格式为 <b>年-月-日-时-分</b></p>
+        <p><b>value</b> — Zeit oder Intervall im Format <b>Jahr-Monat-Tag-Stunde-Minute</b> (nicht genutzte Teile mit 0 füllen)</p>
+      value: |-
+        Format: Jahr-Monat-Tag-Stunde-Minute
       type:
         $inner:
-          - 定时提醒器
-          - 结束前提醒器
-
+          - Geplant
+          - Vor Ende
 commands:
   timeout: |-
     输入超时

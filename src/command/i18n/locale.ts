@@ -1,6 +1,6 @@
 import {Context} from 'koishi';
 import {Config} from '../../config';
-import {hasPermission, isGuildAdmin, isPluginAdmin} from "../../util/role";
+import {hasPermission, isGuildAdmin, hasAuthority} from "../../util/role";
 
 export function locale(ctx: Context, config: Config) {
   ctx.command("giveaway.locale [lang]")
@@ -12,7 +12,7 @@ export function locale(ctx: Context, config: Config) {
     .action(({session, options}, lang) => {
       if (options.default) {
         if (options.channel) {
-          if (!hasPermission(isPluginAdmin(session, config), isGuildAdmin(session))) return session.text('.noAuth')
+          if (!hasPermission(hasAuthority(session, config.permission.authorityManage), isGuildAdmin(session))) return session.text('.noAuth')
           session.channel.locales = []
           return session.text('.success.defaultChannel')
         } else {
@@ -47,7 +47,7 @@ export function locale(ctx: Context, config: Config) {
       }
 
       if (options.channel) {
-        if (!hasPermission(isPluginAdmin(session, config), isGuildAdmin(session))) return session.text('.noAuth')
+        if (!hasPermission(hasAuthority(session, config.permission.authorityManage), isGuildAdmin(session))) return session.text('.noAuth')
         session.channel.locales.unshift(lang)
         return session.text('.success.channel', [lang])
       } else {

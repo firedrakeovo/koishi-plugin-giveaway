@@ -1,6 +1,6 @@
 import {Context} from 'koishi';
 import {Config} from '../../config';
-import {hasPermission, isGuildAdmin, isPluginAdmin} from '../../util/role'
+import {hasPermission, isGuildAdmin, hasAuthority} from '../../util/role'
 import {getTimeOffset, offsetToUTCOffset, validateTimeOffsetFormat} from '../../util/time'
 
 export function time(ctx: Context, config: Config) {
@@ -13,7 +13,7 @@ export function time(ctx: Context, config: Config) {
     .action(async ({session, options}, offset) => {
       if (options.default) {
         if (options.channel) {
-          if (!hasPermission(isPluginAdmin(session, config), isGuildAdmin(session))) return session.text('.noAuth')
+          if (!hasPermission(hasAuthority(session, config.permission.authorityManage), isGuildAdmin(session))) return session.text('.noAuth')
           session.channel.offset = ''
           return session.text('.success.defaultChannel')
         } else {
@@ -61,7 +61,7 @@ export function time(ctx: Context, config: Config) {
       if (!validateTimeOffsetFormat(offset)) return session.text('.inValidFormat')
 
       if (options.channel) {
-        if (!hasPermission(isPluginAdmin(session, config), isGuildAdmin(session))) return session.text('.noAuth')
+        if (!hasPermission(hasAuthority(session, config.permission.authorityManage), isGuildAdmin(session))) return session.text('.noAuth')
         session.channel.offset = offset
         return session.text('.success.channel', [offset])
       } else {

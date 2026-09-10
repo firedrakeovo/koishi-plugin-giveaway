@@ -1,6 +1,6 @@
 import { Context } from 'koishi';
 import { Config } from '../../config';
-import {hasPermission, isPluginAdmin, isRollCreator} from "../../util/role";
+import {hasPermission, hasAuthority, isRollCreator} from "../../util/role";
 
 export function disableRemind(ctx: Context, config: Config) {
   ctx.command("giveaway.reminder.disable <rollCode> <reminderCode> [...rest]")
@@ -26,7 +26,7 @@ export function disableRemind(ctx: Context, config: Config) {
       const creatorRes = await ctx.database.get('roll_creator', {roll_id: rollId})
       const rollCreatorId = creatorRes[0].user_id
       if (!hasPermission(
-        isPluginAdmin(session, config),
+        hasAuthority(session, config.permission.authorityManage),
         await isRollCreator(session, rollCreatorId)
       )) return session.text('.noAuth')
       // disable

@@ -2,7 +2,7 @@ import {Context} from 'koishi';
 import {Config} from '../../config';
 import {DateTime} from 'luxon';
 import {stringToPrize, generateUniqueCode, dateInputToDateTime, checkDateInput} from "../../util/general";
-import {hasPermission, isGuildAdmin, isPluginAdmin} from "../../util/role";
+import {hasPermission, isGuildAdmin, hasAuthority} from "../../util/role";
 import {getCurrentUTCOffset} from "../../util/time";
 
 export function addRoll(ctx: Context, config: Config) {
@@ -12,10 +12,9 @@ export function addRoll(ctx: Context, config: Config) {
     .userFields(['offset'])
     .channelFields(['offset'])
     .action(async ({session, options}) => {
-      // auth
+      // auth：达到创建等级，或群主/群管理员
       if (!hasPermission(
-        config.permission.allowNormalUserAdd,
-        isPluginAdmin(session, config),
+        hasAuthority(session, config.permission.authorityCreate),
         isGuildAdmin(session)
       )) return session.text('.noAuth')
 

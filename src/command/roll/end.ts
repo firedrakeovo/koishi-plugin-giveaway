@@ -1,6 +1,6 @@
 import {Context} from 'koishi';
 import {Config} from '../../config';
-import {hasPermission, isGuildAdmin, isPluginAdmin, isRollCreator} from "../../util/role";
+import {hasPermission, isGuildAdmin, hasAuthority, isRollCreator} from "../../util/role";
 
 export function endRoll(ctx: Context, config: Config) {
   ctx.command("giveaway.end [rollCode]")
@@ -44,13 +44,13 @@ export function endRoll(ctx: Context, config: Config) {
       // auth
       if (config.permission.allowGuildAdminEnd) {
         if (!hasPermission(
-          isPluginAdmin(session, config),
+          hasAuthority(session, config.permission.authorityManage),
           isGuildAdmin(session),
           await isRollCreator(session, rollCreatorId)
         )) return session.text('.noAuth')
       } else {
         if (!hasPermission(
-          isPluginAdmin(session, config),
+          hasAuthority(session, config.permission.authorityManage),
           await isRollCreator(session, rollCreatorId)
         )) return session.text('.noAuth')
       }

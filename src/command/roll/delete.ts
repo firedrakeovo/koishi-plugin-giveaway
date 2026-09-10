@@ -1,6 +1,6 @@
 import {Context} from 'koishi';
 import {Config} from '../../config';
-import {hasPermission, isGuildAdmin, isPluginAdmin, isRollCreator} from "../../util/role";
+import {hasPermission, isGuildAdmin, hasAuthority, isRollCreator} from "../../util/role";
 
 export function deleteRoll(ctx: Context, config: Config) {
   ctx.command("giveaway.delete <rollCode>")
@@ -18,13 +18,13 @@ export function deleteRoll(ctx: Context, config: Config) {
       const rollCreatorRes = await ctx.database.get('roll_creator', {roll_id: rollRes[0].id})
       if (config.permission.allowGuildAdminDelete) {
         if (!hasPermission(
-          isPluginAdmin(session, config),
+          hasAuthority(session, config.permission.authorityManage),
           await isRollCreator(session, rollCreatorRes[0].user_id),
           isGuildAdmin(session)
         )) return session.text('.noAuth')
       } else {
         if (!hasPermission(
-          isPluginAdmin(session, config),
+          hasAuthority(session, config.permission.authorityManage),
           await isRollCreator(session, rollCreatorRes[0].user_id),
         )) return session.text('.noAuth')
       }
