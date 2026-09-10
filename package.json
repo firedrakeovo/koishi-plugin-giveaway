@@ -20,6 +20,16 @@
     "lib",
     "dist"
   ],
+  "scripts": {
+    "build": "npm run build:types && node scripts/build.mjs",
+    "build:types": "tsc -p tsconfig.json",
+    "build:watch": "node scripts/build.mjs --watch",
+    "clean": "node -e \"require('node:fs').rmSync('lib', { recursive: true, force: true })\"",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "license": "MIT",
   "keywords": [
     "chatbot",
@@ -41,7 +51,14 @@
   "devDependencies": {
     "@koishijs/plugin-database-memory": "^3.6.0",
     "@types/luxon": "^3",
-    "@types/node-schedule": "^2"
+    "@types/node": "^22.7.5",
+    "@types/node-schedule": "^2",
+    "esbuild": "^0.23.1",
+    "js-yaml": "^4.1.0",
+    "koishi": "^4.18.7",
+    "koishi-plugin-assets-local": "^3.3.2",
+    "typescript": "^5.6.2",
+    "yml-register": "^1.2.5"
   },
   "koishi": {
     "description": {
