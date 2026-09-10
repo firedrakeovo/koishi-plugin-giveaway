@@ -3,6 +3,7 @@ import { Config } from "./config";
 
 import {help} from './command/basic/help'
 import {channel} from './command/basic/channel'
+import {debugProbe} from './command/basic/debug'
 
 import {addRoll} from './command/roll/add'
 import {deleteRoll} from './command/roll/delete'
@@ -29,6 +30,7 @@ export function apply(ctx: Context, config: Config) {
   ctx.command('giveaway').alias('抽奖')
   help(ctx, config)
   channel(ctx, config)
+  debugProbe(ctx, config)
 
   locale(ctx, config)
   time(ctx, config)

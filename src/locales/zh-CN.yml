@@ -373,6 +373,22 @@ commands:
         你没有权限禁用提醒器！
       success: |-
         禁用提醒器成功！
+  giveaway.debug.honor:
+    description: |-
+      诊断当前群的荣誉接口（管理员）
+    messages:
+      noAuth: |-
+        你没有权限使用该指令！
+      groupOnly: |-
+        请在群聊中使用该指令。
+  giveaway.debug.member:
+    description: |-
+      诊断群成员信息接口（管理员）
+    messages:
+      noAuth: |-
+        你没有权限使用该指令！
+      groupOnly: |-
+        请在群聊中使用该指令。
 events:
   join.rejected: |-
     <quote id={messageId}/> 你不符合本次抽奖的参与条件：{reason}

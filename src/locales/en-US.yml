@@ -356,6 +356,22 @@ commands:
         你没有权限禁用提醒器！
       success: |-
         禁用提醒器成功！
+  giveaway.debug.honor:
+    description: |-
+      Diagnose the group honor APIs (admin only)
+    messages:
+      noAuth: |-
+        You are not allowed to use this command.
+      groupOnly: |-
+        Please use this command in a group.
+  giveaway.debug.member:
+    description: |-
+      Diagnose the group member API (admin only)
+    messages:
+      noAuth: |-
+        You are not allowed to use this command.
+      groupOnly: |-
+        Please use this command in a group.
 events:
   join.rejected: |-
     <quote id={messageId}/> You do not meet the requirements of this giveaway: {reason}

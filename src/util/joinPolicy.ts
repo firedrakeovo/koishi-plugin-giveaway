@@ -1,6 +1,7 @@
 import { Context } from 'koishi'
 import { Config, HonorRequirement } from '../config'
 import { logger } from '../index'
+import { fetchHonorViaWeb } from './honorProvider'
 
 /**
  * 抽奖参与条件（join policy）
@@ -39,6 +40,8 @@ export interface OneBotHonorMember {
   nickname?: string
   avatar?: string
   description?: string
+  /** 连续天数（新版网页接口会返回；NapCat 的旧路径没有） */
+  day_count?: number
 }
 
 /** OneBot `get_group_honor_info` 返回值（按 NapCat 的实现） */
@@ -74,10 +77,20 @@ export function toMillis(value?: number): number | null {
   return value > 1e12 ? value : value * 1000
 }
 
+/**
+ * 归一化 `requiredHonors`：控制台里把多选清空时可能留下 `null` 占位，
+ * 这类无效值不能让条件继续生效（否则会变成"永远需要标识"）。
+ */
+export function normalizeHonors(honors: any): HonorRequirement[] {
+  if (!Array.isArray(honors)) return []
+  return honors.filter((honor): honor is HonorRequirement =>
+    honor === 'fire7' || honor === 'fire30' || honor === 'dragon')
+}
+
 /** 配置里是否设置了任何参与条件 */
 export function hasJoinConditions(config: Config): boolean {
   const join = config.join
-  return join.minGroupLevel > 0 || join.minActiveDays > 0 || join.requiredHonors.length > 0
+  return join.minGroupLevel > 0 || join.minActiveDays > 0 || normalizeHonors(join.requiredHonors).length > 0
 }
 
 async function fetchMember(onebot: any, groupId: number, userId: number): Promise<OneBotMemberInfo | null> {
@@ -137,8 +150,9 @@ export async function checkJoinPolicy(ctx: Context, session: any, config: Config
 
   const groupId = Number(session.guildId)
   const userId = Number(session.userId)
+  const honors = normalizeHonors(join.requiredHonors)
   const needMember = join.minGroupLevel > 0 || join.minActiveDays > 0
-  const needHonor = join.requiredHonors.length > 0
+  const needHonor = honors.length > 0
   const denyOnError = join.onFetchError === 'deny'
 
   // 1. 群聊等级 / 最近发言
@@ -146,7 +160,10 @@ export async function checkJoinPolicy(ctx: Context, session: any, config: Config
   if (needMember) {
     member = await fetchMember(onebot, groupId, userId)
     if (!member) {
-      if (denyOnError) return { ok: false, reason: { key: 'unavailable' } }
+      if (denyOnError) {
+        logger.warn(`无法获取群 ${groupId} 成员 ${userId} 的信息，按 onFetchError=deny 拒绝`)
+        return { ok: false, reason: { key: 'unavailable' } }
+      }
       logger.warn(`无法获取成员信息，按参与条件配置放行：群 ${groupId} 用户 ${userId}`)
     }
   }
@@ -182,24 +199,43 @@ export async function checkJoinPolicy(ctx: Context, session: any, config: Config
 
   // 2. 互动标识（QQ 群荣誉）
   if (needHonor) {
-    const types = requiredHonorTypes(join.requiredHonors)
+    const types = requiredHonorTypes(honors)
     const ttl = join.cacheMinutes * 60 * 1000
     const lists: Record<string, OneBotHonorMember[]> = {}
-    let failed = false
-    for (const type of types) {
-      const info = await fetchHonor(onebot, groupId, type, ttl)
-      if (!info) { failed = true; continue }
+    const merge = (info: OneBotHonorInfo) => {
       for (const [key, value] of Object.entries(info)) {
         if (Array.isArray(value)) lists[key] = (lists[key] ?? []).concat(value)
       }
     }
+    let failed = false
+    for (const type of types) {
+      const info = await fetchHonor(onebot, groupId, type, ttl)
+      if (!info) { failed = true; continue }
+      merge(info)
+    }
     // 群荣誉接口失败时会返回全空列表，而真实群里至少会有人上榜：
     // 全部为空视为「取不到数据」，按 onFetchError 处理，避免误判成「你没有标识」
-    const honorUnavailable = failed || (types.length > 0
-      && !lists.talkative_list?.length && !lists.performer_list?.length
-      && !lists.legend_list?.length && !lists.emotion_list?.length)
+    const empty = (batch: Record<string, OneBotHonorMember[]>) => !batch.talkative_list?.length
+      && !batch.performer_list?.length && !batch.legend_list?.length && !batch.emotion_list?.length
+    let honorUnavailable = failed || empty(lists)
+    // NapCat 的荣誉接口已失效（QQ 荣誉页改成 SPA，见 honorProvider 注释）：
+    // 这里自动改用 QQ 新版网页接口兜底，成功则继续判定，不再走 onFetchError
     if (honorUnavailable) {
-      if (denyOnError) return { ok: false, reason: { key: 'unavailable' } }
+      const probe = await fetchHonorViaWeb(ctx, session, groupId, types)
+      if (probe.info && !empty(probe.info as Record<string, OneBotHonorMember[]>)) {
+        for (const key of Object.keys(lists)) delete lists[key]
+        merge(probe.info)
+        honorUnavailable = false
+        logger.info(`群 ${groupId} 已改用 QQ 网页接口获取荣誉数据（NapCat 接口不可用）`)
+      } else {
+        logger.warn(`群 ${groupId} 两种途径都没能取到荣誉数据${probe.error ? `（网页接口：${probe.error}）` : ''}`)
+      }
+    }
+    if (honorUnavailable) {
+      if (denyOnError) {
+        logger.warn(`无法获取群 ${groupId} 的荣誉数据，按 onFetchError=deny 拒绝用户 ${userId}`)
+        return { ok: false, reason: { key: 'unavailable' } }
+      }
       logger.warn(`无法获取群 ${groupId} 的荣誉数据，按参与条件配置跳过该项检查`)
       return { ok: true, detail: { member, skipped: 'honor-unavailable' } }
     }
@@ -211,15 +247,15 @@ export async function checkJoinPolicy(ctx: Context, session: any, config: Config
       fire30: inList('legend_list'),
       dragon: inList('talkative_list'),
     }
-    const missing = join.requiredHonors.filter((honor) => !owned[honor])
-    const matched = join.requiredHonors.length - missing.length
+    const missing = honors.filter((honor) => !owned[honor])
+    const matched = honors.length - missing.length
     const passed = join.honorMode === 'all' ? missing.length === 0 : matched > 0
     if (!passed) {
       return {
         ok: false,
         reason: {
           key: 'honor',
-          params: { required: join.requiredHonors.map((h) => session.text(`events.join.honor.${h}`)).join(session.text('general.comma')) },
+          params: { required: honors.map((h) => session.text(`events.join.honor.${h}`)).join(session.text('general.comma')) },
         },
         detail: { owned, missing, mode: join.honorMode },
       }
