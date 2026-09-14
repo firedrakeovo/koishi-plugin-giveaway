@@ -2,12 +2,14 @@ import {Context} from 'koishi'
 import {Config} from '../../config'
 import {autoEndManager, remindManager} from "../../index";
 import {getRemindValueFromDefaultReminder} from "../../util/general";
+import {policyToRow} from "../../util/rollPolicy";
 
 export function rollAddListener(ctx: Context, config: Config) {
   ctx.on('giveaway/roll-add', async (
     session,
     roll,
     prizes,
+    extra = {} as { policy?: any },
   ) => {
     // Write to database
     const rollRes = await ctx.database.create('roll', roll)
@@ -29,6 +31,11 @@ export function rollAddListener(ctx: Context, config: Config) {
       channel_id: session.channelId,
       channel_platform: session.event.platform
     })
+
+    // 参与条件与全局不同时，落一行 per-roll 覆盖（相同则不落，继续跟随控制台配置）
+    if (extra?.policy) {
+      await ctx.database.create('roll_policy', policyToRow(rollRes.id, extra.policy))
+    }
 
     ctx.emit('giveaway/roll-key-update')
     // Apply default reminds

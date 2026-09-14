@@ -11,6 +11,7 @@ import {
 } from "../../util/general";
 import {hasPermission, isGuildAdmin, hasAuthority} from "../../util/role";
 import {getCurrentUTCOffset} from "../../util/time";
+import {inheritPolicy, parsePolicy, pickLang, policyEquals, policyFromConfig, renderPolicy} from "../../util/rollPolicy";
 
 /**
  * 创建抽奖。
@@ -55,8 +56,11 @@ export function addRoll(ctx: Context, config: Config) {
       let keyInput = keyArg
       let titleInput = ''
       let descriptionInput = ''
+      // 模板里的「参与条件」一行直接带上控制台当前配置；用户可沿默认、删空或改写
+      const globalPolicy = policyFromConfig(config)
+      let policyOverride = null
       if (prizeInput === undefined) {
-        await session.send(session.text('.createForm'))
+        await session.send(session.text('.createForm', [renderPolicy(globalPolicy, pickLang(session))]))
         const answer = await session.prompt()
         // 超时/没回 / 明确取消 / 回复别的内容 → 一律取消本次创建
         if (!answer) return session.text('.cancelled')
@@ -67,6 +71,14 @@ export function addRoll(ctx: Context, config: Config) {
           await session.send(session.text(form.error === 'time' ? '.timeError' : '.noPrize'))
           return session.text('.cancelled')
         }
+        const policy = parsePolicy(form.policyInput)
+        if (!policy.ok) {
+          await session.send(session.text('.policyError', [policy.unknown ?? '']))
+          return session.text('.cancelled')
+        }
+        // 文本没表达的字段（龙王口径等）沿用全局，再判断是否真的与全局不同
+        const effective = inheritPolicy(policy.policy, globalPolicy)
+        if (!policyEquals(effective, globalPolicy)) policyOverride = effective
         prizeInput = form.prizeInput
         timeInput = form.timeInput
         keyInput = form.keyInput
@@ -124,7 +136,7 @@ export function addRoll(ctx: Context, config: Config) {
         session,
         roll,
         prizeList,
-        {}
+        policyOverride ? { policy: policyOverride } : {}
       )
 
       return roll.joinKey

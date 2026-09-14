@@ -135,6 +135,8 @@ commands:
         Giveaway created, code {0}
       successWithKey: |-
         Giveaway created, code {0}; join key: {1}
+      policyError: |-
+        Unrecognised conditions: {0} (please follow the template format)
       createForm: |-
         Copy the template below, fill in each item and send it back (leave an item empty to skip it):
         Prizes:
@@ -142,7 +144,9 @@ commands:
         Join key:
         Title:
         Description:
-        Notes: prizes use "name*amount", separate several with a comma or space; end time uses year-month-day-hour-minute, leave it empty for no auto-draw.
+        Conditions: {0}
+        Note 1: prizes use "name*amount", separate several with a comma or space; end time uses year-month-day-hour-minute, leave it empty for no auto-draw.
+        Note 2: the "Conditions" line may be kept as is (use the console config), emptied (no restrictions for this giveaway), or rewritten as "Level≥40 Active≥1 Streak≥7 Honors=blaze,dragon Mode=any" (delete whatever you do not need).
       noPrize: |-
         No "Prizes:" line found, the giveaway cannot be created.
       prizeEmpty: |-

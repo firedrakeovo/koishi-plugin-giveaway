@@ -135,6 +135,8 @@ commands:
         Verlosung erstellt, Nummer {0}
       successWithKey: |-
         Verlosung erstellt, Nummer {0}; Beitrittswort: {1}
+      policyError: |-
+        Bedingungen nicht erkennbar: {0} (bitte die Vorlage beachten)
       createForm: |-
         Bitte die Vorlage unten kopieren, ausfüllen und zurücksenden (leere Felder werden übersprungen):
         Preise:
@@ -142,7 +144,9 @@ commands:
         Beitrittswort:
         Titel:
         Beschreibung:
-        Hinweis: Preise im Format „Name*Anzahl“, mehrere mit Komma oder Leerzeichen trennen; Endzeit im Format Jahr-Monat-Tag-Stunde-Minute, leer = keine automatische Ziehung.
+        Bedingungen: {0}
+        Hinweis 1: Preise im Format „Name*Anzahl“, mehrere mit Komma oder Leerzeichen trennen; Endzeit im Format Jahr-Monat-Tag-Stunde-Minute, leer = keine automatische Ziehung.
+        Hinweis 2: Die Zeile „Bedingungen“ kann unverändert bleiben (Konsole-Einstellungen verwenden), geleert werden (keine Einschränkung für diese Verlosung) oder umgeschrieben werden, z. B. „Stufe≥40 Aktiv≥1 Serie≥7 Abzeichen=Flamme,Drachenkoenig Modus=beliebig“ (nicht Benötigtes löschen).
       noPrize: |-
         Keine Zeile „Preise:“ gefunden, die Verlosung kann nicht erstellt werden.
       prizeEmpty: |-

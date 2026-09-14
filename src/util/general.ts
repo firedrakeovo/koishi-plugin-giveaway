@@ -143,12 +143,14 @@ export function parseTimeAndKey(input: string) {
 
 
 /** 创建模板里的字段（三种语言都认） */
-const CREATE_LABELS: Record<string, 'prize' | 'time' | 'key' | 'title' | 'description'> = {
+const CREATE_LABELS: Record<string, 'prize' | 'time' | 'key' | 'title' | 'description' | 'policy'> = {
   '奖品': 'prize', 'prizes': 'prize', 'prize': 'prize', 'preise': 'prize',
   '开奖时间': 'time', 'end time': 'time', 'endtime': 'time', 'endzeit': 'time',
   '加入口令': 'key', 'join key': 'key', 'joinkey': 'key', 'beitrittswort': 'key',
   '标题': 'title', 'title': 'title', 'titel': 'title',
   '描述': 'description', 'description': 'description', 'beschreibung': 'description',
+  '参与条件': 'policy', 'conditions': 'policy', 'condition': 'policy',
+  'bedingungen': 'policy', 'bedingung': 'policy',
 }
 
 /**
@@ -180,6 +182,7 @@ export function parseCreateForm(input: string) {
     keyInput: fields.key ?? '',
     titleInput: fields.title ?? '',
     descriptionInput: fields.description ?? '',
+    policyInput: fields.policy ?? '',
   }
   if (!result.prizeInput) return { ok: false as const, error: 'no-prize' as const, ...result }
   if (result.timeInput !== '' && result.timeInput !== 'n' && !checkDateInput(result.timeInput, 5)) {

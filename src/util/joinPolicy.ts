@@ -2,6 +2,7 @@ import { Context } from 'koishi'
 import { Config, HonorRequirement } from '../config'
 import { logger } from '../index'
 import { fetchHonorViaWeb } from './honorProvider'
+import { mergePolicy, rowToPolicy } from './rollPolicy'
 
 /**
  * 抽奖参与条件（join policy）
@@ -89,11 +90,15 @@ export function normalizeHonors(honors: any): HonorRequirement[] {
     honor === 'fire7' || honor === 'fire30' || honor === 'dragon')
 }
 
-/** 配置里是否设置了任何参与条件 */
-export function hasJoinConditions(config: Config): boolean {
-  const join = config.join
+/** 某份 join 配置里是否设置了任何参与条件 */
+export function joinHasConditions(join: Config['join']): boolean {
   return join.minGroupLevel > 0 || join.minActiveDays > 0 || join.minContinuousDays > 0
     || normalizeHonors(join.requiredHonors).length > 0
+}
+
+/** 配置里是否设置了任何参与条件 */
+export function hasJoinConditions(config: Config): boolean {
+  return joinHasConditions(config.join)
 }
 
 /** 取该成员在荣誉数据里的最长连续发言天数（`day_count_max` 优先，回退 `day_count`）；没有记录返回 null */
@@ -157,9 +162,18 @@ export function requiredHonorTypes(honors: HonorRequirement[], needContinuous = 
  *
  * 未配置任何条件时零开销直接通过；非 OneBot 平台（拿不到这些接口）同样直接通过。
  */
-export async function checkJoinPolicy(ctx: Context, session: any, config: Config): Promise<JoinVerdict> {
-  const join = config.join
-  if (!hasJoinConditions(config)) return { ok: true }
+export async function checkJoinPolicy(ctx: Context, session: any, config: Config, rollId?: number): Promise<JoinVerdict> {
+  // per-roll 参与条件优先：有 roll_policy 行就用它覆盖全局（没有行 = 沿用控制台配置）
+  let join = config.join
+  if (rollId !== undefined) {
+    try {
+      const rows = await ctx.database.get('roll_policy', { roll_id: rollId })
+      if (rows.length > 0) join = mergePolicy(config, rowToPolicy(rows[0]))
+    } catch (error: any) {
+      logger.warn(`读取抽奖 ${rollId} 的参与条件失败，改用全局配置：${error?.message ?? error}`)
+    }
+  }
+  if (!joinHasConditions(join)) return { ok: true }
 
   const onebot = session.onebot
   if (!onebot || !session.guildId) {

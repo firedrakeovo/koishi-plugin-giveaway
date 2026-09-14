@@ -41,7 +41,7 @@ export function rollJoinListener(ctx: Context, config: Config) {
     const res = await ctx.database.get('roll_member', {roll_id: roll_id, user_id: user_id})
     if (res.length === 0) {
       // 参与条件（群聊等级 / 活跃度 / 互动标识）
-      const verdict = await checkJoinPolicy(ctx, session, config)
+      const verdict = await checkJoinPolicy(ctx, session, config, roll_id)
       if (!verdict.ok) {
         logger.debug(`用户 ${session.userId} 不满足参与条件：${JSON.stringify(verdict.detail ?? {})}`)
         const key = verdict.reason?.key ?? 'unavailable'

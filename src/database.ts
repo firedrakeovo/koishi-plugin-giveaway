@@ -13,6 +13,7 @@ declare module 'koishi' {
     remind_channel: RemindChennel
     user_prize: UserPrize
     user_reminder: UserReminder
+    roll_policy: RollPolicy
   }
   interface User {
     offset: string
@@ -33,6 +34,17 @@ export interface Roll {
   isEnd: number
   title: string
   description: string
+}
+
+export interface RollPolicy {
+  id: number
+  roll_id: number
+  minGroupLevel: number
+  minActiveDays: number
+  minContinuousDays: number
+  requiredHonors: string
+  honorMode: string
+  dragonScope: string
 }
 
 export interface Prize {
@@ -152,6 +164,20 @@ export function apply(ctx: Context) {
     last_call: 'timestamp',
     duration: 'json',
     recurrence_rule: 'json'
+  }, {
+    autoInc: true,
+  })
+
+  // 单个抽奖的参与条件（per-roll 覆盖；没有行 = 沿用控制台全局配置）
+  ctx.model.extend('roll_policy', {
+    id: 'unsigned',
+    roll_id: 'unsigned',
+    minGroupLevel: 'unsigned',
+    minActiveDays: 'unsigned',
+    minContinuousDays: 'unsigned',
+    requiredHonors: 'string',
+    honorMode: 'string',
+    dragonScope: 'string',
   }, {
     autoInc: true,
   })
