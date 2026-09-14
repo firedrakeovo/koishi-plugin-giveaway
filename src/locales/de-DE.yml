@@ -116,7 +116,7 @@ commands:
         当前频道id为：{0}
   giveaway.add:
     description: |-
-      Verlosung interaktiv erstellen (maximal zwei Schritte: Preise → Endzeit & Beitrittswort)
+      Verlosung erstellen: mit einer einzigen Zeile antworten (Preise + Endzeit + optionales Beitrittswort)
     options:
       title: |-
         Eigener Titel (Standard: „Verlosung von {0}“)
@@ -124,8 +124,6 @@ commands:
         Eigene Beschreibung (Standard: der Titel)
       repeat: |-
         Derselbe Gewinner darf mehrfach gezogen werden (standardmäßig aus)
-      fast: |-
-        Schnellerstellung: nur nach Preisen fragen, keine automatische Ziehung, kein Beitrittswort
     messages:
       noAuth: |-
         Du darfst keine Verlosungen erstellen.
@@ -135,34 +133,21 @@ commands:
         Verlosung von {0}
       success: |-
         Verlosung erstellt, Nummer {0}
-      prize: |-
-        <p>Bitte die Preise senden:</p>
-        <p>Format: Preisname*Anzahl (Anzahl standardmäßig 1), ein Preis pro Zeile.</p>
-        <p>- q zum Abbrechen</p>
+      createHint: |-
+        <p>Bitte mit <b>einer Nachricht</b> im folgenden Format antworten (jede andere Antwort bricht ab):</p>
+        <p><b>Preise</b>: Name*Anzahl, mehrere mit | trennen, z. B. <code>Tastatur*1|Maus*2</code></p>
+        <p><b>Endzeit</b>: Jahr-Monat-Tag-Stunde-Minute, oder <code>n</code> für keine automatische Ziehung</p>
+        <p><b>Beitrittswort</b>: optional; <code>n</code> bedeutet kein Beitrittswort</p>
+        <p>Beispiel: <code>Tastatur*1 09-15-20-00 mitmachen</code></p>
+        <p>Beispiel: <code>Tastatur*1|Maus*2 n mitmachen</code> (keine automatische Ziehung)</p>
+      invalidFormat: |-
+        Ungültiges Format: mindestens „Preise + Endzeit“ sind nötig (n = keine automatische Ziehung).
       prizeEmpty: |-
-        Die Preise dürfen nicht leer sein, bitte erneut senden.
-      timeAndKey: |-
-        <p>Bitte <b>Endzeit</b> und <b>Beitrittswort</b> senden (durch Leerzeichen getrennt):</p>
-        <p>Format der Endzeit: Jahr-Monat-Tag-Stunde-Minute; n = keine automatische Ziehung</p>
-        <p>Beitrittswort: Mitglieder senden dieses Wort zum Beitreten; n = kein Beitrittswort</p>
-        <p>Aktuelle Zeitzone: {0}</p>
-        <p>Beispiele: <code>09-15-20-00 mitmachen</code> / <code>n mitmachen</code> / <code>09-15-20-00 n</code></p>
-        <p>- undo = einen Schritt zurück</p>
-        <p>- q = abbrechen</p>
-      autoEnd: |-
-        <p>Bitte die Zeit der automatischen Ziehung senden:</p>
-        <p>Format: Jahr-Monat-Tag-Stunde-Minute</p>
-        <p>Aktuelle Zeitzone: {0}</p>
-        <p>- n = keine automatische Ziehung</p>
-        <p>- undo = einen Schritt zurück</p>
-        <p>- q = abbrechen</p>
-      joinKey: |-
-        <p>Bitte das Beitrittswort senden; Mitglieder treten durch dieses Wort bei:</p>
-        <p>- n = kein Beitrittswort</p>
-        <p>- undo = einen Schritt zurück</p>
-        <p>- q = abbrechen</p>
+        Die Preise dürfen nicht leer sein.
       timeError: |-
-        Ungültiges Zeitformat, bitte erneut senden (Jahr-Monat-Tag-Stunde-Minute).
+        Ungültige Endzeit: Jahr-Monat-Tag-Stunde-Minute, oder n für keine automatische Ziehung.
+      cancelled: |-
+        Erstellung abgebrochen; bei Bedarf einfach erneut „创建抽奖“ senden.
       quit: |-
         Erstellung abgebrochen.
   giveaway.delete:

@@ -133,3 +133,21 @@ export function parseTimeAndKey(input: string) {
   const keyInput = parts.join(' ')
   return { timeInput, keyInput }
 }
+
+/**
+ * 解析「一行式」创建输入：`奖品 开奖时间 [加入口令]`
+ *
+ * - 至少要有两段（奖品 + 开奖时间），避免把群里的随口一句话当成奖品
+ * - 时间必须是合法格式或 `n`（不自动开奖）
+ * - 口令可以省略（缺省表示不用口令），且允许包含空格（取剩余全部文本）
+ * - 多个奖品用 `|` 分隔，例如 `显卡*1|鼠标*2`
+ */
+export function parseCreateInput(input: string) {
+  const tokens = String(input ?? '').trim().split(/\s+/).filter(Boolean)
+  const fail = (error: 'format' | 'time') => ({ ok: false as const, error, prizeInput: '', timeInput: '', keyInput: '' })
+  if (tokens.length < 2) return fail('format')
+  const [prizeInput, timeInput] = tokens
+  const keyInput = tokens.slice(2).join(' ')
+  if (timeInput !== 'n' && !checkDateInput(timeInput, 5)) return fail('time')
+  return { ok: true as const, error: null, prizeInput, timeInput, keyInput }
+}

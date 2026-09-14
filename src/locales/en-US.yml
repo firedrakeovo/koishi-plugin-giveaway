@@ -116,7 +116,7 @@ commands:
         当前频道id为：{0}
   giveaway.add:
     description: |-
-      Create a giveaway interactively (at most two steps: prizes → end time & join key)
+      Create a giveaway by replying with a single line (prizes + end time + optional join key)
     options:
       title: |-
         Custom giveaway title (defaults to "{0}'s giveaway")
@@ -124,8 +124,6 @@ commands:
         Custom giveaway description (defaults to the title)
       repeat: |-
         Allow the same member to win more than once (disabled by default)
-      fast: |-
-        Quick create: only ask for prizes, no auto-draw and no join key
     messages:
       noAuth: |-
         You are not allowed to create giveaways.
@@ -135,34 +133,21 @@ commands:
         {0}'s giveaway
       success: |-
         Giveaway created, code {0}
-      prize: |-
-        <p>Please send the prizes:</p>
-        <p>Format: prize name*amount (amount defaults to 1), one prize per line.</p>
-        <p>- Send q to cancel</p>
+      createHint: |-
+        <p>Reply with <b>one message</b> in the format below to create a giveaway (any other reply cancels it):</p>
+        <p><b>Prizes</b>: name*amount, separate several with |, e.g. <code>keyboard*1|mouse*2</code></p>
+        <p><b>End time</b>: year-month-day-hour-minute, or <code>n</code> for no auto-draw</p>
+        <p><b>Join key</b>: optional; <code>n</code> means no join key</p>
+        <p>Example: <code>keyboard*1 09-15-20-00 join</code></p>
+        <p>Example: <code>keyboard*1|mouse*2 n join</code> (no auto-draw)</p>
+      invalidFormat: |-
+        Invalid format: at least "prizes + end time" is required (use n for no auto-draw).
       prizeEmpty: |-
-        Prizes cannot be empty, please try again.
-      timeAndKey: |-
-        <p>Please send the <b>end time</b> and the <b>join key</b> (separated by a space):</p>
-        <p>End time format: year-month-day-hour-minute; send n for no auto-draw</p>
-        <p>Join key: members send this word to join; send n for no join key</p>
-        <p>Current timezone: {0}</p>
-        <p>Examples: <code>09-15-20-00 join</code> / <code>n join</code> / <code>09-15-20-00 n</code></p>
-        <p>- Send undo to go back</p>
-        <p>- Send q to cancel</p>
-      autoEnd: |-
-        <p>Please send the auto-draw time:</p>
-        <p>Format: year-month-day-hour-minute</p>
-        <p>Current timezone: {0}</p>
-        <p>- Send n for no auto-draw</p>
-        <p>- Send undo to go back</p>
-        <p>- Send q to cancel</p>
-      joinKey: |-
-        <p>Please send the join key; members join by sending this word:</p>
-        <p>- Send n for no join key</p>
-        <p>- Send undo to go back</p>
-        <p>- Send q to cancel</p>
+        Prizes cannot be empty.
       timeError: |-
-        Invalid time format, please try again (year-month-day-hour-minute).
+        Invalid end time: use year-month-day-hour-minute, or n for no auto-draw.
+      cancelled: |-
+        Creation cancelled; just send "创建抽奖" again when needed.
       quit: |-
         Creation cancelled.
   giveaway.delete:
