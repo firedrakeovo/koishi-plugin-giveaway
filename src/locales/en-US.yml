@@ -116,7 +116,7 @@ commands:
         当前频道id为：{0}
   giveaway.add:
     description: |-
-      Create a giveaway by replying with a single line (prizes + end time + optional join key)
+      Create a giveaway: the bot sends a template, copy it, fill it in and send it back
     options:
       title: |-
         Custom giveaway title (defaults to "{0}'s giveaway")
@@ -133,19 +133,20 @@ commands:
         {0}'s giveaway
       success: |-
         Giveaway created, code {0}
-      createHint: |-
-        <p>Reply with <b>one message</b> in the format below to create a giveaway (any other reply cancels it):</p>
-        <p><b>Prizes</b>: name*amount, separate several with |, e.g. <code>keyboard*1|mouse*2</code></p>
-        <p><b>End time</b>: year-month-day-hour-minute, or <code>n</code> for no auto-draw</p>
-        <p><b>Join key</b>: optional; <code>n</code> means no join key</p>
-        <p>Example: <code>keyboard*1 09-15-20-00 join</code></p>
-        <p>Example: <code>keyboard*1|mouse*2 n join</code> (no auto-draw)</p>
-      invalidFormat: |-
-        Invalid format: at least "prizes + end time" is required (use n for no auto-draw).
+      createForm: |-
+        <p>Please copy the template below, fill in each item and send it back (leave an item empty to skip it):</p>
+        Prizes:
+        End time:
+        Join key:
+        Title:
+        Description:
+        <p>Notes: prizes use "name*amount", separate several with |; end time uses "year-month-day-hour-minute", leave it empty for no auto-draw.</p>
+      noPrize: |-
+        No "Prizes:" line found, the giveaway cannot be created.
       prizeEmpty: |-
         Prizes cannot be empty.
       timeError: |-
-        Invalid end time: use year-month-day-hour-minute, or n for no auto-draw.
+        Invalid end time: use year-month-day-hour-minute, or leave it empty for no auto-draw.
       cancelled: |-
         Creation cancelled; just send "创建抽奖" again when needed.
       quit: |-

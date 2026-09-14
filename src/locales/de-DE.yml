@@ -116,7 +116,7 @@ commands:
         当前频道id为：{0}
   giveaway.add:
     description: |-
-      Verlosung erstellen: mit einer einzigen Zeile antworten (Preise + Endzeit + optionales Beitrittswort)
+      Verlosung erstellen: der Bot sendet eine Vorlage, diese ausfüllen und zurücksenden
     options:
       title: |-
         Eigener Titel (Standard: „Verlosung von {0}“)
@@ -133,19 +133,20 @@ commands:
         Verlosung von {0}
       success: |-
         Verlosung erstellt, Nummer {0}
-      createHint: |-
-        <p>Bitte mit <b>einer Nachricht</b> im folgenden Format antworten (jede andere Antwort bricht ab):</p>
-        <p><b>Preise</b>: Name*Anzahl, mehrere mit | trennen, z. B. <code>Tastatur*1|Maus*2</code></p>
-        <p><b>Endzeit</b>: Jahr-Monat-Tag-Stunde-Minute, oder <code>n</code> für keine automatische Ziehung</p>
-        <p><b>Beitrittswort</b>: optional; <code>n</code> bedeutet kein Beitrittswort</p>
-        <p>Beispiel: <code>Tastatur*1 09-15-20-00 mitmachen</code></p>
-        <p>Beispiel: <code>Tastatur*1|Maus*2 n mitmachen</code> (keine automatische Ziehung)</p>
-      invalidFormat: |-
-        Ungültiges Format: mindestens „Preise + Endzeit“ sind nötig (n = keine automatische Ziehung).
+      createForm: |-
+        <p>Bitte die Vorlage unten kopieren, ausfüllen und zurücksenden (leere Felder werden übersprungen):</p>
+        Preise:
+        Endzeit:
+        Beitrittswort:
+        Titel:
+        Beschreibung:
+        <p>Hinweis: Preise im Format „Name*Anzahl“, mehrere mit | trennen; Endzeit im Format „Jahr-Monat-Tag-Stunde-Minute“, leer = keine automatische Ziehung.</p>
+      noPrize: |-
+        Keine Zeile „Preise:“ gefunden, die Verlosung kann nicht erstellt werden.
       prizeEmpty: |-
         Die Preise dürfen nicht leer sein.
       timeError: |-
-        Ungültige Endzeit: Jahr-Monat-Tag-Stunde-Minute, oder n für keine automatische Ziehung.
+        Ungültige Endzeit: Jahr-Monat-Tag-Stunde-Minute, oder leer lassen für keine automatische Ziehung.
       cancelled: |-
         Erstellung abgebrochen; bei Bedarf einfach erneut „创建抽奖“ senden.
       quit: |-

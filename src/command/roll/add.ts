@@ -7,7 +7,7 @@ import {
   dateInputToDateTime,
   checkDateInput,
   parsePrizeInput,
-  parseCreateInput,
+  parseCreateForm,
 } from "../../util/general";
 import {hasPermission, isGuildAdmin, hasAuthority} from "../../util/role";
 import {getCurrentUTCOffset} from "../../util/time";
@@ -15,17 +15,21 @@ import {getCurrentUTCOffset} from "../../util/time";
 /**
  * 创建抽奖。
  *
- * 交互只有「一问一答」：
- *   1. `创建抽奖` → bot 输出创建格式与参考用例
- *   2. 用户**下一条消息**即为创建内容：`奖品 开奖时间 [加入口令]`
- *      - 奖品：`名称*数量`，多个用 `|` 分隔
- *      - 开奖时间：`年-月-日-时-分`，或 `n`（不自动开奖）
- *      - 加入口令：可省略；`n` 表示不用口令
- *   3. 不符合规则、或回复的是别的内容 → **直接取消本次创建**（不再追问）
+ * 交互只有「一问一答」：bot 给出**文字表格模板**，用户复制后逐项填写发回。
  *
- * 熟手也可以完全跳过交互，直接带参数（此时不再输出格式提示）：
+ * ```
+ * 奖品：显卡*1|鼠标*2        ← 必填，名称*数量，多个用 | 分隔
+ * 开奖时间：09-15-20-00      ← 留空表示不自动开奖
+ * 加入口令：参加             ← 留空表示不用口令
+ * 标题：                     ← 留空用默认「{昵称} 的抽奖」
+ * 描述：                     ← 留空用默认（同标题）
+ * ```
+ *
+ * 解析按**标签**取值，所以群里随口一句（没有「奖品：」这类标签）不会被误当成奖品；
+ * 缺奖品、时间格式不对、或明确回复取消 → 直接取消本次创建，不逐步追问。
+ *
+ * 熟手也可以完全跳过模板，直接带参数创建：
  *   `抽奖 add 显卡*1 09-15-20-00 参加`
- *   `抽奖 add 显卡*1|鼠标*2 n n`
  *   `抽奖 add -t <标题> -d <描述> -r 显卡*1 n 参加`
  */
 export function addRoll(ctx: Context, config: Config) {
@@ -45,25 +49,29 @@ export function addRoll(ctx: Context, config: Config) {
 
       const offset = await getCurrentUTCOffset(ctx, session, config)
 
-      // 交互式：先给出格式与参考用例，用户的下一条消息即创建内容
+      // 交互式：给出文字表格模板，用户复制填写后发回，下一条消息即创建内容
       let prizeInput = prizeArg
       let timeInput = endTimeArg
       let keyInput = keyArg
+      let titleInput = ''
+      let descriptionInput = ''
       if (prizeInput === undefined) {
-        await session.send(session.text('.createHint'))
+        await session.send(session.text('.createForm'))
         const answer = await session.prompt()
         // 超时/没回 / 明确取消 / 回复别的内容 → 一律取消本次创建
         if (!answer) return session.text('.cancelled')
         const trimmed = answer.trim()
         if (trimmed === 'q' || trimmed === '取消') return session.text('.quit')
-        const parsed = parseCreateInput(trimmed)
-        if (!parsed.ok) {
-          await session.send(session.text(parsed.error === 'time' ? '.timeError' : '.invalidFormat'))
+        const form = parseCreateForm(trimmed)
+        if (!form.ok) {
+          await session.send(session.text(form.error === 'time' ? '.timeError' : '.noPrize'))
           return session.text('.cancelled')
         }
-        prizeInput = parsed.prizeInput
-        timeInput = parsed.timeInput
-        keyInput = parsed.keyInput
+        prizeInput = form.prizeInput
+        timeInput = form.timeInput
+        keyInput = form.keyInput
+        titleInput = form.titleInput
+        descriptionInput = form.descriptionInput
       }
 
       // 开奖时间：合法时间 或 n（不自动开奖）
@@ -99,12 +107,17 @@ export function addRoll(ctx: Context, config: Config) {
         rollType: options.repeat ? '0' : '1',
         endTime: endTime,
         isEnd: false,
-        title: options.title
-          ? await ctx.assets.transform(options.title)
-          : session.text('.defaultTitle', [session.author.name]),
-        description: options.description
-          ? await ctx.assets.transform(options.description)
-          : session.text('.defaultDescription', [session.author.name]),
+        // 优先级：模板里填的 > 命令行选项 > 默认值
+        title: titleInput
+          ? await ctx.assets.transform(titleInput)
+          : options.title
+            ? await ctx.assets.transform(options.title)
+            : session.text('.defaultTitle', [session.author.name]),
+        description: descriptionInput
+          ? await ctx.assets.transform(descriptionInput)
+          : options.description
+            ? await ctx.assets.transform(options.description)
+            : session.text('.defaultDescription', [session.author.name]),
       } as any
 
       ctx.emit('giveaway/roll-add',

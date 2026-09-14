@@ -134,20 +134,49 @@ export function parseTimeAndKey(input: string) {
   return { timeInput, keyInput }
 }
 
+
+/** 创建模板里的字段（三种语言都认） */
+const CREATE_LABELS: Record<string, 'prize' | 'time' | 'key' | 'title' | 'description'> = {
+  '奖品': 'prize', 'prizes': 'prize', 'prize': 'prize', 'preise': 'prize',
+  '开奖时间': 'time', 'end time': 'time', 'endtime': 'time', 'endzeit': 'time',
+  '加入口令': 'key', 'join key': 'key', 'joinkey': 'key', 'beitrittswort': 'key',
+  '标题': 'title', 'title': 'title', 'titel': 'title',
+  '描述': 'description', 'description': 'description', 'beschreibung': 'description',
+}
+
 /**
- * 解析「一行式」创建输入：`奖品 开奖时间 [加入口令]`
+ * 解析「文字表格」形式的创建输入，例如：
  *
- * - 至少要有两段（奖品 + 开奖时间），避免把群里的随口一句话当成奖品
- * - 时间必须是合法格式或 `n`（不自动开奖）
- * - 口令可以省略（缺省表示不用口令），且允许包含空格（取剩余全部文本）
- * - 多个奖品用 `|` 分隔，例如 `显卡*1|鼠标*2`
+ * ```
+ * 奖品：显卡*1|鼠标*2
+ * 开奖时间：09-15-20-00
+ * 加入口令：参加
+ * 标题：
+ * 描述：
+ * ```
+ *
+ * 按**标签**取值（不认位置），因此群里的随口一句不会被当成奖品；
+ * 未填写的项留空，由调用方按默认处理。
  */
-export function parseCreateInput(input: string) {
-  const tokens = String(input ?? '').trim().split(/\s+/).filter(Boolean)
-  const fail = (error: 'format' | 'time') => ({ ok: false as const, error, prizeInput: '', timeInput: '', keyInput: '' })
-  if (tokens.length < 2) return fail('format')
-  const [prizeInput, timeInput] = tokens
-  const keyInput = tokens.slice(2).join(' ')
-  if (timeInput !== 'n' && !checkDateInput(timeInput, 5)) return fail('time')
-  return { ok: true as const, error: null, prizeInput, timeInput, keyInput }
+export function parseCreateForm(input: string) {
+  const fields: Record<string, string> = {}
+  for (const line of String(input ?? '').split(/\r\n|\r|\n/)) {
+    // 标签取「冒号前的整段」（英文标签含空格，如 `End time:`）
+    const matched = /^\s*([^:：\n]{1,24}?)\s*[:：]\s*(.*)$/.exec(line)
+    if (!matched) continue
+    const field = CREATE_LABELS[matched[1].trim().toLowerCase()] ?? CREATE_LABELS[matched[1].trim()]
+    if (field) fields[field] = matched[2].trim()
+  }
+  const result = {
+    prizeInput: fields.prize ?? '',
+    timeInput: fields.time ?? '',
+    keyInput: fields.key ?? '',
+    titleInput: fields.title ?? '',
+    descriptionInput: fields.description ?? '',
+  }
+  if (!result.prizeInput) return { ok: false as const, error: 'no-prize' as const, ...result }
+  if (result.timeInput !== '' && result.timeInput !== 'n' && !checkDateInput(result.timeInput, 5)) {
+    return { ok: false as const, error: 'time' as const, ...result }
+  }
+  return { ok: true as const, error: null, ...result }
 }
