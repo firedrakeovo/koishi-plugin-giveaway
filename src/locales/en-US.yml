@@ -416,6 +416,8 @@ events:
       missing required interaction honors (required: {required})
     unavailable: |-
       your group member information is temporarily unavailable, please try again later or contact an admin
+  join.error: |-
+    <quote id={messageId}/> Failed to join, please send the join key again.
   roll.add:
     success: |-
       <quote id={messageId}/> 成功加入编号为 {rollCode} 的抽奖。
