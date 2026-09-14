@@ -11,7 +11,10 @@
 - **参与条件**（`join` 配置组，在「发送加入口令」与 `giveaway.join` 两条路径上统一生效）
   - 群聊等级下限 `minGroupLevel`（QQ 群聊等级 1~100）
   - 最近发言 `minActiveDays`（要求最近 N 天内在本群发过言）
-  - QQ 群互动标识 `requiredHonors`（群聊之火 / 群聊炽焰 / 龙王）与 `honorMode`（满足任一 / 必须全部）
+  - 最长连续发言天数 `minContinuousDays`（基于荣誉数据的 `day_count_max`，可自定义门槛，
+    与官方「群聊之火 7 天 / 群聊炽焰 30 天」同源但更灵活）
+  - QQ 群互动标识 `requiredHonors`（群聊之火 / 群聊炽焰 / 龙王）与 `honorMode`（满足任一 / 必须全部）；
+    龙王的判定口径可用 `dragonScope` 在「昨日活跃榜」与「仅当前龙王」之间切换
   - 取不到数据时的策略 `onFetchError`（放行 / 拒绝）与缓存时长 `cacheMinutes`
   - 拒绝时会说明具体原因（当前等级、上次发言距今天数、缺少哪个标识）
 - **荣誉数据自取能力**（`src/util/honorProvider.ts`）
@@ -19,7 +22,8 @@
     `honor_talkative`（龙王/活跃榜）、`honor_continuous`（`continuous_type` 2=群聊之火、3=群聊炽焰）、`honor_emotion`
   - 自动计算 CSRF 令牌 `bkn`，并按 `cookie-only → bkn(skey) → bkn(p_skey) → bkn+g_tk → bkn+Origin`
     顺序探测可用鉴权方式（命中即缓存，避免反复试错）
-  - 归一化成 OneBot 的 honor 结构，同时保留 `day_count` 等更细的字段
+  - 归一化成 OneBot 的 honor 结构，同时保留 `day_count` / `day_count_max` 等更细的字段
+    （支持「最长连续发言 ≥ N 天」这类自定义门槛）
 - **管理员诊断指令**：`giveaway.debug.honor`（荣誉接口）、`giveaway.debug.member`（群成员等级/发言），
   两者都会把原始返回写进插件日志，便于线上排查
 - **独立构建**：`npm run build`（`scripts/build.mjs`，esbuild + js-yaml，仅依赖 devDependencies），

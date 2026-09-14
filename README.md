@@ -16,7 +16,8 @@
 - **参与条件**（可组合，任一不满足即拒绝并说明原因）：
   - **群聊等级**下限（QQ 群聊等级 1~100）
   - **最近 N 天内发过言**（最稳的条件，不依赖 QQ 网页接口）
-  - **QQ 群互动标识**：群聊之火（连续发言）、群聊炽焰（连续 30 天）、龙王（昨日活跃）
+  - **最长连续发言天数**（可自定义门槛，如「连续 ≥ 14 天」）
+  - **QQ 群互动标识**：群聊之火（连续发言）、群聊炽焰（连续 30 天）、龙王（昨日活跃，可选「榜单 / 仅当前龙王」两种口径）
 - **权限沿用 Koishi 原生等级**：创建与「管理他人抽奖」分别配置最低权限等级，群主与群管理员可管理本群抽奖，抽奖创建者始终可管理自己的抽奖
 - **多语言 / 多时区**：简体中文 / English / Deutsch，用户可自设时区
 - **管理员诊断指令**：`giveaway.debug.honor`、`giveaway.debug.member` 一键体检数据来源
@@ -107,8 +108,10 @@ npm i koishi-plugin-giveaway
 | | `allowGuildAdminEnd` | 允许群主与群管理员对本群抽奖手动开奖，默认开启 |
 | `join` | `minGroupLevel` | 参与抽奖所需的最低**群聊等级**（1~100），默认 `0`（不限制） |
 | | `minActiveDays` | 要求最近 N 天内在本群发过言，默认 `0`（不限制） |
+| | `minContinuousDays` | 要求**最长连续发言天数**不低于 N，默认 `0`（不限制） |
 | | `requiredHonors` | 要求持有的 QQ 群**互动标识**（群聊之火 / 群聊炽焰 / 龙王），默认不限制 |
 | | `honorMode` | 勾选多个标识时是「满足任意一个」还是「必须全部满足」，默认任意一个 |
+| | `dragonScope` | 「龙王」的判定口径：昨日活跃榜（默认）/ 仅当前龙王 |
 | | `onFetchError` | 取不到成员/荣誉数据时放行还是拒绝，默认放行 |
 | | `cacheMinutes` | 群荣誉数据的缓存时长（分钟），默认 `5` |
 | `remind` | `defaultReminders` | 新建抽奖时默认启用的提醒器（定时提醒器 / 结束前提醒器） |
@@ -121,9 +124,10 @@ npm i koishi-plugin-giveaway
 | --- | --- | --- | --- |
 | 群聊等级 | OneBot `get_group_member_info` | `level` | NapCat 取 QQ NT 的 `memberRealLevel`，即群聊等级（1~100） |
 | 最近发言 | OneBot `get_group_member_info` | `last_sent_time` | 不依赖 QQ 网页接口，比互动标识稳定，建议作为兜底 |
+| 最长连续发言天数 | QQ 网页接口（火/炽焰榜） | `day_count_max` | 与官方「群聊之火 7 天 / 群聊炽焰 30 天」同源，但门槛可自定义；QQ 榜单只收录连续 ≥7 天的人，门槛建议 ≥7 |
 | 群聊之火（连续发言） | QQ 网页接口 `/cgi-bin/qunapp/honor_continuous` | `continuous_type=2` | 返回带 `day_count`（连续天数） |
 | 群聊炽焰（连续 30 天） | 同上 | `continuous_type=3` | 持有炽焰者不再出现在火列表，插件自动把炽焰视为满足 7 天 |
-| 龙王（昨日最活跃） | QQ 网页接口 `/cgi-bin/qunapp/honor_talkative` | `talkative_list` | 昨日群聊活跃榜 |
+| 龙王（昨日最活跃） | QQ 网页接口 `/cgi-bin/qunapp/honor_talkative` | `talkative_list` / `current_talkative` | 默认看昨日活跃榜；`dragonScope: current` 时必须是榜单第一名本人 |
 
 **为什么荣誉不走 OneBot 标准接口**：NapCat 的 `get_group_honor_info` 依赖 `qun.qq.com/interactive/honorlist` 页面里的 `window.__INITIAL_STATE__`，而该页已改版为 Vite SPA（变量不复存在），于是它**静默返回空列表**（截至 v4.18.19 仍未修复）。因此本插件改为：先用 OneBot 接口（未来修复即可自动生效），取不到数据时自动改用 QQ 新版网页接口兜底——后者通过 OneBot 的 `get_cookies` 取 `qun.qq.com` 的登录态，并归一化成同一套结构。
 

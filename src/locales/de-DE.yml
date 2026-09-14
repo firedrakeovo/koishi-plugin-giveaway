@@ -34,6 +34,10 @@ _config:
     minActiveDays: |-
       <p>Das Mitglied muss innerhalb der letzten N Tage in dieser Gruppe geschrieben haben. <code>0</code> bedeutet keine Einschränkung.</p>
       <p>Daten stammen aus <code>last_sent_time</code> von <code>get_group_member_info</code>. Sie hängen nicht von der QQ-Web-API ab, sind also zuverlässiger als die Ehrungen unten, und eignen sich als Fallback.</p>
+    minContinuousDays: |-
+      <p>Verlangt, dass die <b>längste Serie aufeinanderfolgender Tage</b> mit Nachrichten in dieser Gruppe mindestens diesem Wert entspricht (<code>0</code> = keine Einschränkung).</p>
+      <p>Der Wert stammt aus <code>day_count_max</code> der QQ-Gruppen-Ehrungs-API – dieselbe Quelle wie „Gruppenfeuer (7 Tage)“ / „Gruppenflamme (30 Tage)“, jedoch mit eigener Schwelle.</p>
+      <p>Hinweis: QQ listet nur Mitglieder mit einer Serie ab 7 Tagen, Schwellen unter <code>7</code> sind daher unzuverlässig; kombiniere sie mit „letzte Aktivität“ oben.</p>
     requiredHonors:
       $description: |-
         <p>Das Mitglied muss die gewählten QQ-Gruppen-<b>Interaktionsabzeichen</b> besitzen. Mehrfachauswahl möglich; leer bedeutet keine Einschränkung.</p>
@@ -54,6 +58,16 @@ _config:
       $inner:
         - Eines genügt
         - Alle erforderlich
+    dragonScope:
+      $description: |-
+        <p>Wie der „Drachenkönig“ gewertet wird:</p>
+        <ul>
+          <li><b>Liste von gestern:</b> wer auf der Liste steht, qualifiziert sich (Standard, lockerer)</li>
+          <li><b>Nur aktueller Drachenkönig:</b> nur der Erste der Liste (strenger)</li>
+        </ul>
+      $inner:
+        - Liste von gestern
+        - Nur aktueller Drachenkönig
     onFetchError:
       $description: |-
         <p>Verhalten, wenn Mitglieds-/Ehrungsdaten nicht abgerufen werden können (QQ-API-Timeout, abgelaufene Cookies, ...).</p>
@@ -391,6 +405,8 @@ events:
       Gruppenlevel zu niedrig (du bist Level {current}, diese Verlosung verlangt Level {required} oder höher)
     active: |-
       keine Nachricht in den letzten {required} Tagen (deine letzte Nachricht: {last})
+    continuous: |-
+      Serie aufeinanderfolgender Tage zu kurz (deine längste Serie: {current} Tage, erforderlich sind mindestens {required})
     honor: |-
       erforderliche Interaktionsabzeichen fehlen (erforderlich: {required})
     unavailable: |-

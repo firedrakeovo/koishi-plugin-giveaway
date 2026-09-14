@@ -150,6 +150,7 @@ function toMember(item: any): OneBotHonorMember {
     avatar: item?.avatar,
     description: item?.desc ?? item?.description,
     day_count: typeof item?.day_count === 'number' ? item.day_count : undefined,
+    day_count_max: typeof item?.day_count_max === 'number' ? item.day_count_max : undefined,
   }
 }
 

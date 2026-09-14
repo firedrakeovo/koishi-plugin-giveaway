@@ -40,8 +40,10 @@ export interface OneBotHonorMember {
   nickname?: string
   avatar?: string
   description?: string
-  /** 连续天数（新版网页接口会返回；NapCat 的旧路径没有） */
+  /** 当前连续发言天数（新版网页接口会返回；NapCat 的旧路径没有） */
   day_count?: number
+  /** 历史最长连续发言天数（新版网页接口会返回） */
+  day_count_max?: number
 }
 
 /** OneBot `get_group_honor_info` 返回值（按 NapCat 的实现） */
@@ -56,7 +58,7 @@ export interface OneBotHonorInfo {
 export interface JoinVerdict {
   ok: boolean
   /** 不通过时的 i18n 后缀（`events.join.reason.<key>`）与参数 */
-  reason?: { key: 'level' | 'active' | 'honor' | 'unavailable'; params?: Record<string, any> }
+  reason?: { key: 'level' | 'active' | 'continuous' | 'honor' | 'unavailable'; params?: Record<string, any> }
   /** 供日志/调试用的原始判定依据 */
   detail?: Record<string, any>
 }
@@ -90,7 +92,20 @@ export function normalizeHonors(honors: any): HonorRequirement[] {
 /** 配置里是否设置了任何参与条件 */
 export function hasJoinConditions(config: Config): boolean {
   const join = config.join
-  return join.minGroupLevel > 0 || join.minActiveDays > 0 || normalizeHonors(join.requiredHonors).length > 0
+  return join.minGroupLevel > 0 || join.minActiveDays > 0 || join.minContinuousDays > 0
+    || normalizeHonors(join.requiredHonors).length > 0
+}
+
+/** 取该成员在荣誉数据里的最长连续发言天数（`day_count_max` 优先，回退 `day_count`）；没有记录返回 null */
+export function maxContinuousDays(lists: Record<string, OneBotHonorMember[]>, userId: number): number | null {
+  let best: number | null = null
+  for (const members of Object.values(lists)) {
+    const found = members.find((m) => Number(m.user_id) === userId)
+    if (!found) continue
+    const days = Math.max(found.day_count_max ?? 0, found.day_count ?? 0)
+    best = best === null ? days : Math.max(best, days)
+  }
+  return best
 }
 
 async function fetchMember(onebot: any, groupId: number, userId: number): Promise<OneBotMemberInfo | null> {
@@ -122,14 +137,18 @@ async function fetchHonor(onebot: any, groupId: number, type: string, ttl: numbe
   return data
 }
 
-/** 配置 → 需要请求的荣誉类型（尽量少请求：只取用到的那几种） */
-export function requiredHonorTypes(honors: HonorRequirement[]): string[] {
+/**
+ * 配置 → 需要请求的荣誉类型（尽量少请求：只取用到的那几种）。
+ * 注意：设置了「最长连续发言天数」时也要拉火/炽焰榜——它们才是"连续发言 ≥7 天"的完整名单。
+ */
+export function requiredHonorTypes(honors: HonorRequirement[], needContinuous = false): string[] {
   const types = new Set<string>()
   for (const honor of honors) {
     if (honor === 'dragon') types.add('talkative')
     if (honor === 'fire7') { types.add('performer'); types.add('legend') }
     if (honor === 'fire30') types.add('legend')
   }
+  if (needContinuous) { types.add('performer'); types.add('legend') }
   return [...types]
 }
 
@@ -151,8 +170,10 @@ export async function checkJoinPolicy(ctx: Context, session: any, config: Config
   const groupId = Number(session.guildId)
   const userId = Number(session.userId)
   const honors = normalizeHonors(join.requiredHonors)
+  const needContinuous = join.minContinuousDays > 0
   const needMember = join.minGroupLevel > 0 || join.minActiveDays > 0
-  const needHonor = honors.length > 0
+  // 连续天数与互动标识都来自荣誉数据
+  const needHonor = honors.length > 0 || needContinuous
   const denyOnError = join.onFetchError === 'deny'
 
   // 1. 群聊等级 / 最近发言
@@ -197,14 +218,18 @@ export async function checkJoinPolicy(ctx: Context, session: any, config: Config
     }
   }
 
-  // 2. 互动标识（QQ 群荣誉）
+  // 2. 荣誉数据：连续发言天数 与 互动标识
   if (needHonor) {
-    const types = requiredHonorTypes(honors)
+    const types = requiredHonorTypes(honors, needContinuous)
     const ttl = join.cacheMinutes * 60 * 1000
     const lists: Record<string, OneBotHonorMember[]> = {}
+    let currentTalkative: OneBotHonorMember | null = null
     const merge = (info: OneBotHonorInfo) => {
       for (const [key, value] of Object.entries(info)) {
         if (Array.isArray(value)) lists[key] = (lists[key] ?? []).concat(value)
+        else if (key === 'current_talkative' && value && typeof value === 'object' && Number((value as any).user_id) > 0) {
+          currentTalkative = value as OneBotHonorMember
+        }
       }
     }
     let failed = false
@@ -240,27 +265,46 @@ export async function checkJoinPolicy(ctx: Context, session: any, config: Config
       return { ok: true, detail: { member, skipped: 'honor-unavailable' } }
     }
 
-    const inList = (name: string) => (lists[name] ?? []).some((m) => Number(m.user_id) === userId)
-    const owned: Record<HonorRequirement, boolean> = {
-      // 炽焰是火的升级形态，持有炽焰的人不再出现在火列表
-      fire7: inList('performer_list') || inList('legend_list'),
-      fire30: inList('legend_list'),
-      dragon: inList('talkative_list'),
-    }
-    const missing = honors.filter((honor) => !owned[honor])
-    const matched = honors.length - missing.length
-    const passed = join.honorMode === 'all' ? missing.length === 0 : matched > 0
-    if (!passed) {
-      return {
-        ok: false,
-        reason: {
-          key: 'honor',
-          params: { required: honors.map((h) => session.text(`events.join.honor.${h}`)).join(session.text('general.comma')) },
-        },
-        detail: { owned, missing, mode: join.honorMode },
+    // 最长连续发言天数（新接口的 day_count_max / day_count）
+    if (needContinuous) {
+      const days = maxContinuousDays(lists, userId)
+      if (days === null || days < join.minContinuousDays) {
+        return {
+          ok: false,
+          reason: { key: 'continuous', params: { current: days ?? 0, required: join.minContinuousDays } },
+          detail: { continuousDays: days },
+        }
       }
     }
-    return { ok: true, detail: { member, owned, mode: join.honorMode } }
+
+    // 互动标识
+    let owned: Record<HonorRequirement, boolean> | undefined
+    if (honors.length > 0) {
+      const inList = (name: string) => (lists[name] ?? []).some((m) => Number(m.user_id) === userId)
+      owned = {
+        // 炽焰是火的升级形态，持有炽焰的人不再出现在火列表
+        fire7: inList('performer_list') || inList('legend_list'),
+        fire30: inList('legend_list'),
+        // 龙王：默认看昨日活跃榜，可切换成"必须当前龙王本人"
+        dragon: join.dragonScope === 'current'
+          ? !!currentTalkative && Number(currentTalkative.user_id) === userId
+          : inList('talkative_list'),
+      }
+      const missing = honors.filter((honor) => !owned![honor])
+      const matched = honors.length - missing.length
+      const passed = join.honorMode === 'all' ? missing.length === 0 : matched > 0
+      if (!passed) {
+        return {
+          ok: false,
+          reason: {
+            key: 'honor',
+            params: { required: honors.map((h) => session.text(`events.join.honor.${h}`)).join(session.text('general.comma')) },
+          },
+          detail: { owned, missing, mode: join.honorMode },
+        }
+      }
+    }
+    return { ok: true, detail: { member, owned, mode: join.honorMode, continuousDays: needContinuous ? maxContinuousDays(lists, userId) : undefined } }
   }
 
   return { ok: true, detail: { member } }

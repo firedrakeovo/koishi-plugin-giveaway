@@ -34,6 +34,10 @@ _config:
     minActiveDays: |-
       <p>要求参与者最近 N 天内在本群发过言，填 <code>0</code> 表示不限制。</p>
       <p>数据来自 <code>get_group_member_info</code> 的 <code>last_sent_time</code>。它不依赖 QQ 网页接口，比下方的互动标识稳定，建议作为兜底条件。</p>
+    minContinuousDays: |-
+      <p>要求参与者在本群的<b>最长连续发言天数</b>不低于此值（填 <code>0</code> 表示不限制）。</p>
+      <p>数据来自 QQ 群荣誉接口的 <code>day_count_max</code>，与官方「群聊之火（7 天）/ 群聊炽焰（30 天）」同源，但门槛可以自定义。</p>
+      <p>注意：QQ 的连续发言榜只收录连续 ≥7 天的人，所以门槛建议设在 <code>7</code> 以上；想筛「最近还活跃」请配合上面的「最近发言」一起用。</p>
     requiredHonors:
       $description: |-
         <p>要求参与者持有指定的 QQ 群<b>互动标识</b>（群荣誉），可多选，留空表示不限制。</p>
@@ -54,6 +58,16 @@ _config:
       $inner:
         - 满足任意一个
         - 必须全部满足
+    dragonScope:
+      $description: |-
+        <p>「龙王」的判定口径：</p>
+        <ul>
+          <li><b>昨日活跃榜：</b>出现在榜单里就算（默认，较宽松）</li>
+          <li><b>仅当前龙王：</b>必须是榜首那一个人（严格）</li>
+        </ul>
+      $inner:
+        - 昨日活跃榜
+        - 仅当前龙王
     onFetchError:
       $description: |-
         <p>取不到群成员 / 群荣誉数据时的策略（QQ 接口超时、Cookie 失效等）。</p>
@@ -408,6 +422,8 @@ events:
       群聊等级不足（你当前 {current} 级，本抽奖要求 {required} 级以上）
     active: |-
       最近 {required} 天内没有发言记录（你上次发言：{last}）
+    continuous: |-
+      连续发言天数不足（你最长连续 {current} 天，本抽奖要求 {required} 天以上）
     honor: |-
       缺少所需的互动标识（需要：{required}）
     unavailable: |-

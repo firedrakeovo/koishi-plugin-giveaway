@@ -45,15 +45,18 @@ export function debugProbe(ctx: Context, config: Config) {
 
       // 3) QQ 网页接口（本插件的兜底实现）
       const probe = await fetchHonorViaWeb(ctx, session, groupId, ['talkative', 'performer', 'legend'])
+      lines.push(`   鉴权方式：${(probe.raw && Object.values(probe.raw)[0] as any)?.variant ?? '未确定'}`)
       const countOf = (key: string) => (probe.info as any)?.[key]?.length ?? 0
       lines.push(`③ QQ 网页接口：${probe.ok ? '✅' : '❌'} 龙王 ${countOf('talkative_list')} / 群聊之火 ${countOf('performer_list')} / 群聊炽焰 ${countOf('legend_list')}`)
       if (probe.error) lines.push(`   错误：${probe.error}`)
       if (probe.info) {
-        const sample = (key: string) => ((probe.info as any)[key] ?? []).slice(0, 2)
-          .map((m: any) => `${m.user_id}${m.day_count !== undefined ? `(${m.day_count}天)` : ''}`).join('、') || '—'
+        const sample = (key: string) => ((probe.info as any)[key] ?? []).slice(0, 3)
+          .map((m: any) => `${m.user_id}${m.day_count_max !== undefined ? `(最长${m.day_count_max}天` : ''}`
+            + `${m.day_count_max !== undefined && m.day_count !== undefined ? `/当前${m.day_count}天)` : m.day_count_max !== undefined ? ')' : ''}`)
+          .join('、') || '—'
         lines.push(`   样例：龙王 ${sample('talkative_list')}；火/炽焰 ${sample('performer_list')} / ${sample('legend_list')}`)
       }
-      logger.info(`[debug.honor] 网页接口原始返回：${JSON.stringify(probe.raw)?.slice(0, 1200)}`)
+      logger.info(`[debug.honor] 网页接口原始返回：${JSON.stringify(probe.raw)?.slice(0, 4000)}`)
       lines.push('（完整原始返回已写入插件日志）')
 
       return lines.join('\n')

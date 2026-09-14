@@ -23,8 +23,10 @@ namespace JoinConfig {
   export interface Config {
     minGroupLevel: number
     minActiveDays: number
+    minContinuousDays: number
     requiredHonors: HonorRequirement[]
     honorMode: 'any' | 'all'
+    dragonScope: 'list' | 'current'
     onFetchError: 'allow' | 'deny'
     cacheMinutes: number
   }
@@ -84,6 +86,7 @@ const permissionConfig: Schema<PermissionConfig.Config> = Schema.object({
 const joinConfig: Schema<JoinConfig.Config> = Schema.object({
   minGroupLevel: Schema.natural().max(100).default(0),
   minActiveDays: Schema.natural().max(365).default(0),
+  minContinuousDays: Schema.natural().max(365).default(0),
   requiredHonors: Schema.array(Schema.union([
     Schema.const('fire7').description('群聊之火（连续发言 7 天）'),
     Schema.const('fire30').description('群聊炽焰（连续发言 30 天）'),
@@ -93,6 +96,10 @@ const joinConfig: Schema<JoinConfig.Config> = Schema.object({
     Schema.const('any'),
     Schema.const('all'),
   ]).default('any'),
+  dragonScope: Schema.union([
+    Schema.const('list'),
+    Schema.const('current'),
+  ]).default('list'),
   onFetchError: Schema.union([
     Schema.const('allow'),
     Schema.const('deny'),

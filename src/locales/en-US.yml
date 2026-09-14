@@ -34,6 +34,10 @@ _config:
     minActiveDays: |-
       <p>Require the member to have spoken in this group within the last N days. <code>0</code> means no restriction.</p>
       <p>Data comes from <code>last_sent_time</code> of <code>get_group_member_info</code>. It does not depend on QQ's web API, so it is more reliable than the honors below and makes a good fallback.</p>
+    minContinuousDays: |-
+      <p>Require the member's <b>longest streak of consecutive days</b> with messages in this group to be at least this value (<code>0</code> means no restriction).</p>
+      <p>The value comes from <code>day_count_max</code> of the QQ group honor API — the same source as the official "group fire (7 days)" / "group blaze (30 days)" honors, but with a custom threshold.</p>
+      <p>Note: QQ only lists members whose streak is 7 days or more, so thresholds below <code>7</code> are unreliable; combine it with "recent activity" above to also require that the member is still active.</p>
     requiredHonors:
       $description: |-
         <p>Require the member to hold the selected QQ group <b>interaction honors</b>. Multiple choices allowed; empty means no restriction.</p>
@@ -54,6 +58,16 @@ _config:
       $inner:
         - Any of them
         - All of them
+    dragonScope:
+      $description: |-
+        <p>How the "Dragon King" honor is matched:</p>
+        <ul>
+          <li><b>Yesterday's board:</b> anyone on the list qualifies (default, looser)</li>
+          <li><b>Current Dragon King only:</b> only the single top member (stricter)</li>
+        </ul>
+      $inner:
+        - Yesterday's board
+        - Current Dragon King only
     onFetchError:
       $description: |-
         <p>What to do when member / honor data cannot be fetched (QQ API timeout, expired cookies, ...).</p>
@@ -391,6 +405,8 @@ events:
       group level too low (you are level {current}, this giveaway requires level {required} or above)
     active: |-
       no messages within the last {required} days (your last message: {last})
+    continuous: |-
+      consecutive-days streak too short (your longest streak is {current} days, this giveaway requires at least {required})
     honor: |-
       missing required interaction honors (required: {required})
     unavailable: |-
