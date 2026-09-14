@@ -67,6 +67,8 @@
 - 包名 / 插件名 / 指令根：`koishi-plugin-roll-bot` → **`koishi-plugin-giveaway`**；
   指令根由 `roll` + `remind` 两个根统一到 `giveaway`（`remind.*` → `giveaway.reminder.*`）；
   事件总线前缀 `roll-bot/*` → `giveaway/*`
+- **README 重构**：改为「特性 / 安装 / 指令列表（含完整指令-别名-权限表）/ 配置 / 事件 / 开发」结构，
+  上游信息只保留开头一个链接（本仓库作为独立插件说明），不再逐条罗列与上游的差异
 - **配置界面重写**为四组：`basic`（记录保留时长、默认时区）、`permission`（权限）、`join`（参与条件）、
   `remind`（提醒器）；三语文案全部重写（en/de 由上游的中文残留改为真正的英文 / 德文）
 - **en-US / de-DE 语言包补齐**：上游遗留的 125 条中文文案（命令回复、事件提示、消息模板）全部翻译为英文 / 德文，
