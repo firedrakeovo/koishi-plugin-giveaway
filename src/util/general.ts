@@ -114,17 +114,19 @@ export function getRemindValueFromDefaultReminder(endTime: Date, reminder: any, 
 }
 
 /**
- * 把奖品输入解析成奖品列表（忽略空行，数量缺省为 1）。
+ * 把奖品输入解析成奖品列表（忽略空项，数量缺省为 1）。
  *
- * 分隔符：换行、逗号（半角 `,` / 全角 `，` / 顿号 `、`），并兼容旧的 `|` / `｜`。
- * 注意奖品名里不要包含这些分隔符。
+ * 分隔符：换行、空格、逗号（半角 `,` / 全角 `，` / 顿号 `、`），并兼容旧的 `|` / `｜`。
+ * 注意奖品名里不要包含这些分隔符（带空格的名字会被拆成两个奖品）。
  */
 export function parsePrizeInput(input: string) {
   return String(input ?? '')
-    .split(/\r\n|\r|\n|[,，、|｜]/)
+    .split(/[\r\n\s,，、|｜]+/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
     .map((line) => stringToPrize(line))
+    // `显卡 *1` 这类输入会拆出 `*1`，解析后名字为空 → 丢弃
+    .filter((prize) => prize.name.trim().length > 0)
 }
 
 /**
