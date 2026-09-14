@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-giveaway",
   "description": "A versatile giveaway plugin for Koishi: interactive giveaway creation, scheduled auto-draw, reminders, i18n and multi-timezone support.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "contributors": [
     "Logthm <logthm@outlook.com>",
     "firedrakeovo"
@@ -24,7 +24,7 @@
     "build": "npm run build:types && node scripts/build.mjs",
     "build:types": "tsc -p tsconfig.json",
     "build:watch": "node scripts/build.mjs --watch",
-    "clean": "node -e \"require('node:fs').rmSync('lib', { recursive: true, force: true })\"",
+    "clean": "node -e \"const fs=require('node:fs');for(const p of ['lib','tsconfig.tsbuildinfo'])fs.rmSync(p,{recursive:true,force:true})\"",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "engines": {

@@ -2,9 +2,9 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 的格式，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [0.1.0] - 2026-09-14
+## [0.1.1] - 2026-09-14
 
-首个版本：基于上游 [Roll-Bot-Project/roll-bot](https://github.com/Roll-Bot-Project/roll-bot) v1.3.0（commit `6ce60ab`）二次开发，**完整保留上游提交历史**（分叉点见仓库 tag `upstream-fork-point`）。
+**首个公开发布到 npm 的版本**（`0.1.0` 仅用于本地开发，未发布、未打 tag）。基于上游 [Roll-Bot-Project/roll-bot](https://github.com/Roll-Bot-Project/roll-bot) v1.3.0（commit `6ce60ab`）二次开发，**完整保留上游提交历史**（分叉点见仓库 tag `upstream-fork-point`）。
 
 ### Added 新增
 
