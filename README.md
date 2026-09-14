@@ -7,6 +7,22 @@
 
 > A versatile giveaway plugin for Koishi: interactive giveaway creation, member participation, scheduled auto-draw and reminders, with i18n and multi-timezone support.
 
+## 功能特性
+
+- **交互式创建抽奖**：多轮问答（奖品 → 人数 → 时间 → 加入口令），中途可用 `undo` 回退；也支持 `-n` 快速创建
+- **两种参与方式**：在群里发送加入口令（如 `add`），或使用 `giveaway.join <编号>`
+- **定时自动开奖**：到点自动开奖，也可随时手动 `开奖`；开奖后按 `cacheHours` 自动清理记录
+- **提醒器**：定时提醒 / 结束前提醒，可设默认提醒器，并支持按抽奖启停
+- **参与条件**（可组合，任一不满足即拒绝并说明原因）：
+  - **群聊等级**下限（QQ 群聊等级 1~100）
+  - **最近 N 天内发过言**（最稳的条件，不依赖 QQ 网页接口）
+  - **QQ 群互动标识**：群聊之火（连续发言）、群聊炽焰（连续 30 天）、龙王（昨日活跃）
+- **权限沿用 Koishi 原生等级**：创建与「管理他人抽奖」分别配置最低权限等级，群主与群管理员可管理本群抽奖，抽奖创建者始终可管理自己的抽奖
+- **多语言 / 多时区**：简体中文 / English / Deutsch，用户可自设时区
+- **管理员诊断指令**：`giveaway.debug.honor`、`giveaway.debug.member` 一键体检数据来源
+
+> 参与条件里的荣誉数据通过 **QQ 新版网页接口**（`qun.qq.com/cgi-bin/qunapp/honor_*`）获取：NapCat 自带的 `get_group_honor_info` 因 QQ 荣誉页改版已失效（静默返回空列表），本插件接管了这段取数逻辑，并顺带拿到了 `day_count` 等更细的字段。详见 [参与条件](#参与条件)。
+
 ## ⚠️ 上游出处（Provenance）
 
 本仓库是 [Roll-Bot-Project/roll-bot](https://github.com/Roll-Bot-Project/roll-bot) 的**二次开发分支（fork）**，不是上游官方仓库：
@@ -24,10 +40,16 @@
 | 指令根 | `roll`、`remind` 两个根 | 统一到 `giveaway`（提醒器管理为 `giveaway.reminder.*`） |
 | 单字母别名 | `r`、`rd`、`d` | **已移除**（空前缀配置下极易误触，且 `r` 与骰子类插件冲突） |
 | 事件总线 | `roll-bot/xxx` | `giveaway/xxx` |
+| 配置界面 | `usage` + `basic.adminUsers` 等 | 重写为 `basic` / `permission` / `join` / `remind` 四组；管理员改用 Koishi 权限等级 |
+| 参与条件 | 无 | 新增 `join` 组：群聊等级 / 最近发言 / 互动标识（火、炽焰、龙王） |
+| 荣誉取数 | NapCat `get_group_honor_info`（QQ 改版后已失效） | 改用 QQ 新版网页接口，含 `bkn` 鉴权与多变体自动探测 |
+| 群管理员判定 | `roles[0]` 与字符串比较（**恒为 false**） | 修复：兼容对象数组；拿不到角色信息时不再一律放行 |
+| 诊断能力 | 无 | 新增 `giveaway.debug.honor` / `giveaway.debug.member` |
+| 构建 | 依赖 koishi-app 工作区工具链 | 自带 `npm run build`（esbuild + js-yaml，仅 devDependencies） |
 | 内部领域命名 | `roll` | 保持不变（数据库表 `roll`、字段 `roll_code` 等，便于与上游源码对照） |
 | 默认文档链接 | 上游文档站 | 本仓库 |
 
-后续规划：调整交互流程、增加抽奖参与条件、Web 界面与开奖结果图片渲染。
+后续规划：创建抽奖时可选自定义参与条件（per-roll 覆盖）、Web 控制台面板、开奖结果图片渲染。
 
 ## 安装
 
@@ -68,6 +90,8 @@ npm i koishi-plugin-giveaway
 | `giveaway.reminder.list` | 提醒器列表 / giveaway.reminder.ls | 查询提醒器列表 |
 | `giveaway.reminder.enable` | 启用提醒器 / giveaway.reminder.on | 启用一个提醒器 |
 | `giveaway.reminder.disable` | 禁用提醒器 / giveaway.reminder.off | 禁用一个提醒器 |
+| `giveaway.debug.honor` | 抽奖接口诊断 | **管理员**：诊断当前群的荣誉接口（选哪个变体、各榜条数） |
+| `giveaway.debug.member` | — | **管理员**：诊断群成员信息（群聊等级 / 最后发言 / 入群时间） |
 
 ## 配置
 
