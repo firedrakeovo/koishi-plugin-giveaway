@@ -18,6 +18,6 @@ export function detailRoll(ctx: Context, config: Config) {
       // get msg
       const currentOffset = await getCurrentUTCOffset(ctx, session, config)
       const currentLocales = getCurrentLocales(ctx, session, config)
-      return await rollDetailMsgFromRoll(session, roll[0], currentOffset, currentLocales[0])
+      return await rollDetailMsgFromRoll(session, roll[0], currentOffset, currentLocales[0], config)
     })
 }

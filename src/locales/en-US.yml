@@ -456,6 +456,8 @@ messageBuilder:
     listItem: |-
       <p>[{roll_code}] {title}</p>
   roll.detail:
+    noCondition: |-
+      none
     noEndTime: |-
       无
     divider: |-
@@ -464,6 +466,7 @@ messageBuilder:
       <p>{mark} [{roll_code}] {title}</p>
       <p>截止时间：{endTime}</p>
       <p>描述：{description}</p>
+      <p>Conditions: {condition}</p>
     body:
       prizeTitle: |-
         <p>奖品列表：</p>

@@ -31,6 +31,8 @@
     中/英/德三种标签都能解析；文本里没表达的维度（如龙王口径）自动沿用全局
   - 与全局等价的策略**不落库**（继续跟随控制台），有差异才写入新表 `roll_policy`；
     加入抽奖时 per-roll 策略优先于全局配置
+  - **`抽奖详情` 里显示当前生效的参与条件**（per-roll 优先，其次控制台配置；无限制时显示「不限」），
+    参加者被拒之前就能看到门槛
 - **管理员诊断指令**：`giveaway.debug.honor`（荣誉接口）、`giveaway.debug.member`（群成员等级/发言），
   两者都会把原始返回写进插件日志，便于线上排查
 - **独立构建**：`npm run build`（`scripts/build.mjs`，esbuild + js-yaml，仅依赖 devDependencies），

@@ -1,7 +1,8 @@
 import {Context, $, Session, h} from 'koishi'
 import {Config} from "../config";
 import {DateTime} from 'luxon';
-import {bots} from '../index'
+import {bots, logger} from '../index'
+import {pickLang, policyFromConfig, policyHasConditions, renderPolicy, rowToPolicy} from "./rollPolicy";
 import {getCurrentUTCOffset, offsetToUTCOffset} from "./time";
 import {getCurrentLocales} from "./locale";
 import {dateInputToDateTime, dateInputToDuration} from "./general";
@@ -36,7 +37,7 @@ export async function rollListMsgFromChannelId(session: Session, cid: string, pl
   return h.unescape(msg)
 }
 
-export async function rollDetailMsgFromRoll(session: Session, roll: any, currentOffset: string, currentLocale: string) {
+export async function rollDetailMsgFromRoll(session: Session, roll: any, currentOffset: string, currentLocale: string, config?: Config) {
   const dt = DateTime.fromJSDate(roll.endTime, {zone: 'UTC'}).setZone(currentOffset)
   let msgList = []
   let msg = ""
@@ -46,12 +47,24 @@ export async function rollDetailMsgFromRoll(session: Session, roll: any, current
   } else {
     endTime = dt.setLocale(currentLocale).toLocaleString(DateTime.DATETIME_FULL)
   }
+  // 参与条件：per-roll 覆盖优先，其次控制台全局配置
+  let policy = config ? policyFromConfig(config) : null
+  try {
+    const policyRows = await session.app.database.get('roll_policy', {roll_id: roll.id})
+    if (policyRows.length > 0) policy = rowToPolicy(policyRows[0])
+  } catch (error: any) {
+    logger.warn(`读取抽奖 ${roll.id} 的参与条件失败：${error?.message ?? error}`)
+  }
+  const condition = policy && policyHasConditions(policy)
+    ? renderPolicy(policy, pickLang(session))
+    : session.text('messageBuilder.roll.detail.noCondition')
   msgList.push(session.text('messageBuilder.roll.detail.header', {
     mark: roll.isEnd ? session.text('messageBuilder.marks.end') : session.text('messageBuilder.marks.open'),
     roll_code: roll.roll_code,
     title: roll.title,
     description: roll.description,
-    endTime: endTime
+    endTime: endTime,
+    condition: condition
   }))
   // prize list
   msgList.push(session.text('messageBuilder.roll.detail.divider'))
