@@ -9,7 +9,8 @@ export function rollJoinListener(ctx: Context, config: Config) {
     const content = session.content
     const channelId = session.channelId
     for (const roll of rollKeyCache.content) {
-      if (content === roll.joinKey && !roll.isEnd) {
+      // 口令为空的抽奖不接受关键词加入（否则内容为空的消息会误命中）
+      if (roll.joinKey && content === roll.joinKey && !roll.isEnd) {
         const res = await ctx.database.get('roll_channel', {channel_id: channelId, channel_platform: session.event.platform})
         for (const rollChannel of res) {
           if (rollChannel.roll_id === roll.id) {

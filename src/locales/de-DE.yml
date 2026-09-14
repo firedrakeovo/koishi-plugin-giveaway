@@ -133,14 +133,16 @@ commands:
         Verlosung von {0}
       success: |-
         Verlosung erstellt, Nummer {0}
+      successWithKey: |-
+        Verlosung erstellt, Nummer {0}; Beitrittswort: {1}
       createForm: |-
-        <p>Bitte die Vorlage unten kopieren, ausfüllen und zurücksenden (leere Felder werden übersprungen):</p>
+        Bitte die Vorlage unten kopieren, ausfüllen und zurücksenden (leere Felder werden übersprungen):
         Preise:
         Endzeit:
         Beitrittswort:
         Titel:
         Beschreibung:
-        <p>Hinweis: Preise im Format „Name*Anzahl“, mehrere mit <b>Komma oder Leerzeichen</b> trennen; Endzeit im Format „Jahr-Monat-Tag-Stunde-Minute“, leer = keine automatische Ziehung.</p>
+        Hinweis: Preise im Format „Name*Anzahl“, mehrere mit Komma oder Leerzeichen trennen; Endzeit im Format Jahr-Monat-Tag-Stunde-Minute, leer = keine automatische Ziehung.
       noPrize: |-
         Keine Zeile „Preise:“ gefunden, die Verlosung kann nicht erstellt werden.
       prizeEmpty: |-

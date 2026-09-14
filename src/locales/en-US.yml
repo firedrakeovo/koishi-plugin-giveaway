@@ -133,14 +133,16 @@ commands:
         {0}'s giveaway
       success: |-
         Giveaway created, code {0}
+      successWithKey: |-
+        Giveaway created, code {0}; join key: {1}
       createForm: |-
-        <p>Please copy the template below, fill in each item and send it back (leave an item empty to skip it):</p>
+        Copy the template below, fill in each item and send it back (leave an item empty to skip it):
         Prizes:
         End time:
         Join key:
         Title:
         Description:
-        <p>Notes: prizes use "name*amount", separate several with a <b>comma or space</b>; end time uses "year-month-day-hour-minute", leave it empty for no auto-draw.</p>
+        Notes: prizes use "name*amount", separate several with a comma or space; end time uses year-month-day-hour-minute, leave it empty for no auto-draw.
       noPrize: |-
         No "Prizes:" line found, the giveaway cannot be created.
       prizeEmpty: |-

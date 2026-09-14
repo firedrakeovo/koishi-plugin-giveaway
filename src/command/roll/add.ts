@@ -127,6 +127,8 @@ export function addRoll(ctx: Context, config: Config) {
         {}
       )
 
-      return session.text(`.success`, [roll.roll_code])
+      return roll.joinKey
+        ? session.text('.successWithKey', [roll.roll_code, roll.joinKey])
+        : session.text('.success', [roll.roll_code])
     })
 }
