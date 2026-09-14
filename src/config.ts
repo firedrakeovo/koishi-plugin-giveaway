@@ -87,10 +87,14 @@ const joinConfig: Schema<JoinConfig.Config> = Schema.object({
   minGroupLevel: Schema.natural().max(100).default(0),
   minActiveDays: Schema.natural().max(365).default(0),
   minContinuousDays: Schema.natural().max(365).default(0),
+  // 每个候选项都要 required：控制台里新增的空行值是 null，而 schemastery-vue 判定选项是否
+  // 「匹配」时用的是 `optional(schema)(null)`，非 required 的 const 会接受 null —— 结果是空行
+  // 在界面上显示成第一个选项（群聊之火），实际存的却是 null，看起来「选了 3 个只生效 2 个」。
+  // 加上 required 后空行在界面上显示为空，用户能一眼看出哪一行没选值。
   requiredHonors: Schema.array(Schema.union([
-    Schema.const('fire7').description('群聊之火（连续发言 7 天）'),
-    Schema.const('fire30').description('群聊炽焰（连续发言 30 天）'),
-    Schema.const('dragon').description('龙王（昨日群聊最活跃）'),
+    Schema.const('fire7').description('群聊之火（连续发言 7 天）').required(),
+    Schema.const('fire30').description('群聊炽焰（连续发言 30 天）').required(),
+    Schema.const('dragon').description('龙王（昨日群聊最活跃）').required(),
   ])).default([]),
   honorMode: Schema.union([
     Schema.const('any'),
