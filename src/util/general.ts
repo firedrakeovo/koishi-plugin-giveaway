@@ -113,10 +113,15 @@ export function getRemindValueFromDefaultReminder(endTime: Date, reminder: any, 
   }
 }
 
-/** 把「一行一个奖品」的输入解析成奖品列表（忽略空行，数量缺省为 1） */
+/**
+ * 把奖品输入解析成奖品列表（忽略空行，数量缺省为 1）。
+ *
+ * 分隔符：换行、逗号（半角 `,` / 全角 `，` / 顿号 `、`），并兼容旧的 `|` / `｜`。
+ * 注意奖品名里不要包含这些分隔符。
+ */
 export function parsePrizeInput(input: string) {
   return String(input ?? '')
-    .split(/\r\n|\r|\n/)
+    .split(/\r\n|\r|\n|[,，、|｜]/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
     .map((line) => stringToPrize(line))

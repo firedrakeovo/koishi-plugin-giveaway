@@ -140,7 +140,7 @@ commands:
         Beitrittswort:
         Titel:
         Beschreibung:
-        <p>Hinweis: Preise im Format „Name*Anzahl“, mehrere mit | trennen; Endzeit im Format „Jahr-Monat-Tag-Stunde-Minute“, leer = keine automatische Ziehung.</p>
+        <p>Hinweis: Preise im Format „Name*Anzahl“, mehrere mit <b>Komma</b> trennen; Endzeit im Format „Jahr-Monat-Tag-Stunde-Minute“, leer = keine automatische Ziehung.</p>
       noPrize: |-
         Keine Zeile „Preise:“ gefunden, die Verlosung kann nicht erstellt werden.
       prizeEmpty: |-

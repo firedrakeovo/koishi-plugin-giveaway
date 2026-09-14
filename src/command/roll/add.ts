@@ -90,7 +90,7 @@ export function addRoll(ctx: Context, config: Config) {
       }
 
       // 奖品
-      const prizeList = parsePrizeInput(String(prizeInput ?? '').replace(/[|｜]/g, '\n'))
+      const prizeList = parsePrizeInput(String(prizeInput ?? ''))
       if (prizeList.length === 0) {
         await session.send(session.text('.prizeEmpty'))
         return session.text('.cancelled')

@@ -140,7 +140,7 @@ commands:
         Join key:
         Title:
         Description:
-        <p>Notes: prizes use "name*amount", separate several with |; end time uses "year-month-day-hour-minute", leave it empty for no auto-draw.</p>
+        <p>Notes: prizes use "name*amount", separate several with a <b>comma</b>; end time uses "year-month-day-hour-minute", leave it empty for no auto-draw.</p>
       noPrize: |-
         No "Prizes:" line found, the giveaway cannot be created.
       prizeEmpty: |-
