@@ -11,7 +11,7 @@ import {
 } from "../../util/general";
 import {hasPermission, isGuildAdmin, hasAuthority} from "../../util/role";
 import {getCurrentUTCOffset} from "../../util/time";
-import {inheritPolicy, parsePolicy, pickLang, policyEquals, policyFromConfig, renderPolicy} from "../../util/rollPolicy";
+import {parsePolicy, pickLang, policyEquals, policyFromConfig, renderPolicy} from "../../util/rollPolicy";
 
 /**
  * 创建抽奖。
@@ -76,9 +76,8 @@ export function addRoll(ctx: Context, config: Config) {
           await session.send(session.text('.policyError', [policy.unknown ?? '']))
           return session.text('.cancelled')
         }
-        // 文本没表达的字段（龙王口径等）沿用全局，再判断是否真的与全局不同
-        const effective = inheritPolicy(policy.policy, globalPolicy)
-        if (!policyEquals(effective, globalPolicy)) policyOverride = effective
+        // 文本表达不了的口径（标识判定、龙王口径等）永远跟控制台走；这里只比文本能表达的项
+        if (!policyEquals(policy.policy, globalPolicy)) policyOverride = policy.policy
         prizeInput = form.prizeInput
         timeInput = form.timeInput
         keyInput = form.keyInput

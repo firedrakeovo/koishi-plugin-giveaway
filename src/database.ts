@@ -43,8 +43,6 @@ export interface RollPolicy {
   minActiveDays: number
   minContinuousDays: number
   requiredHonors: string
-  honorMode: string
-  dragonScope: string
 }
 
 export interface Prize {
@@ -176,8 +174,6 @@ export function apply(ctx: Context) {
     minActiveDays: 'unsigned',
     minContinuousDays: 'unsigned',
     requiredHonors: 'string',
-    honorMode: 'string',
-    dragonScope: 'string',
   }, {
     autoInc: true,
   })

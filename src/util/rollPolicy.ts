@@ -6,12 +6,15 @@ import { Config, HonorRequirement } from '../config'
  * 创建抽奖时模板里的「参与条件：」一行就是它的文本形态：
  * 用户**沿用不改** = 用控制台全局配置；**删空** = 这个抽奖不限制；**改写** = 自定义。
  *
+ * 这里只包含**文本能表达**的门槛；互动标识的判定口径（任一 / 全部）与「龙王」口径
+ * （昨日活跃榜 / 仅当前龙王）属于控制台全局配置，不参与 per-roll 覆盖。
+ *
  * 文本形态是固定 token，便于人改也便于解析（三种语言都认）：
  * ```
- * 等级≥40 活跃≥1 连续≥7 标识=群聊炽焰,龙王 模式=任一
+ * 等级≥40 活跃≥1 连续≥7 标识=群聊炽焰,龙王
  * ```
  * - 等级：群聊等级下限；活跃：最近 N 天内有发言；连续：最长连续发言天数
- * - 标识：群聊之火 / 群聊炽焰 / 龙王；模式：任一 / 全部
+ * - 标识：群聊之火 / 群聊炽焰 / 龙王
  * - 值为 0 或留空的项直接不渲染；整行留空表示不限制
  */
 export interface RollPolicy {
@@ -19,29 +22,24 @@ export interface RollPolicy {
   minActiveDays: number
   minContinuousDays: number
   requiredHonors: HonorRequirement[]
-  honorMode: 'any' | 'all'
-  dragonScope: 'list' | 'current'
 }
 
 type Lang = 'zh' | 'en' | 'de'
 
 const LABELS: Record<Lang, {
-  level: string; active: string; streak: string; honors: string; mode: string
-  any: string; all: string; honorsNames: Record<HonorRequirement, string>
+  level: string; active: string; streak: string; honors: string
+  honorsNames: Record<HonorRequirement, string>
 }> = {
   zh: {
-    level: '等级', active: '活跃', streak: '连续', honors: '标识', mode: '模式',
-    any: '任一', all: '全部',
+    level: '等级', active: '活跃', streak: '连续', honors: '标识',
     honorsNames: { fire7: '群聊之火', fire30: '群聊炽焰', dragon: '龙王' },
   },
   en: {
-    level: 'Level', active: 'Active', streak: 'Streak', honors: 'Honors', mode: 'Mode',
-    any: 'any', all: 'all',
+    level: 'Level', active: 'Active', streak: 'Streak', honors: 'Honors',
     honorsNames: { fire7: 'fire', fire30: 'blaze', dragon: 'dragon' },
   },
   de: {
-    level: 'Stufe', active: 'Aktiv', streak: 'Serie', honors: 'Abzeichen', mode: 'Modus',
-    any: 'beliebig', all: 'alle',
+    level: 'Stufe', active: 'Aktiv', streak: 'Serie', honors: 'Abzeichen',
     honorsNames: { fire7: 'Feuer', fire30: 'Flamme', dragon: 'Drachenkoenig' },
   },
 }
@@ -61,7 +59,19 @@ export function pickLang(session: any): Lang {
   return 'zh'
 }
 
-/** 控制台全局配置 → 策略对象 */
+/** 标识 → 显示名（日志 / 提示用，取中文名） */
+export function honorLabel(honor: HonorRequirement): string {
+  return LABELS.zh.honorsNames[honor]
+}
+
+/** 配置里被丢弃的标识项（控制台里留空的一行会被存成 null，另有手填的错值） */
+export function invalidHonors(honors: any): any[] {
+  return Array.isArray(honors)
+    ? honors.filter((honor) => !(honor === 'fire7' || honor === 'fire30' || honor === 'dragon'))
+    : []
+}
+
+/** 控制台全局配置 → 策略对象（只取文本能表达的项） */
 export function policyFromConfig(config: Config): RollPolicy {
   const join = config.join
   return {
@@ -70,8 +80,6 @@ export function policyFromConfig(config: Config): RollPolicy {
     minContinuousDays: join.minContinuousDays,
     requiredHonors: (join.requiredHonors ?? []).filter(
       (honor): honor is HonorRequirement => honor === 'fire7' || honor === 'fire30' || honor === 'dragon'),
-    honorMode: join.honorMode,
-    dragonScope: join.dragonScope,
   }
 }
 
@@ -85,9 +93,6 @@ export function renderPolicy(policy: RollPolicy, lang: Lang = 'zh'): string {
   if (policy.requiredHonors.length > 0) {
     tokens.push(`${labels.honors}=${policy.requiredHonors.map((honor) => labels.honorsNames[honor]).join(',')}`)
   }
-  if (policy.requiredHonors.length > 1) {
-    tokens.push(`${labels.mode}=${policy.honorMode === 'all' ? labels.all : labels.any}`)
-  }
   return tokens.join(' ')
 }
 
@@ -99,8 +104,7 @@ export interface PolicyParseResult {
 }
 
 const EMPTY_POLICY: RollPolicy = {
-  minGroupLevel: 0, minActiveDays: 0, minContinuousDays: 0,
-  requiredHonors: [], honorMode: 'any', dragonScope: 'list',
+  minGroupLevel: 0, minActiveDays: 0, minContinuousDays: 0, requiredHonors: [],
 }
 
 /**
@@ -135,13 +139,6 @@ export function parsePolicy(input: string): PolicyParseResult {
       if (!policy.requiredHonors.includes(alias[1])) policy.requiredHonors.push(alias[1])
     }
   }
-  const mode = consume(/(?:模式|mode|modus)\s*[=:]\s*([^\s]+)/i)
-  if (mode) {
-    const value = mode[1].toLowerCase()
-    if (['任一', 'any', 'beliebig'].includes(value)) policy.honorMode = 'any'
-    else if (['全部', 'all', 'alle'].includes(value)) policy.honorMode = 'all'
-    else return { ok: false, policy, unknown: mode[1] }
-  }
 
   // 去掉已识别的部分与分隔符后，若还有残留内容 → 视为无法识别
   const leftover = rest.replace(/[\s,，、;；|｜:：=≥>]+/g, '')
@@ -150,7 +147,12 @@ export function parsePolicy(input: string): PolicyParseResult {
   return { ok: true, policy }
 }
 
-/** 把 per-roll 策略叠加到全局 join 配置上（未提供策略时原样返回） */
+/**
+ * 把 per-roll 策略叠加到全局 join 配置上（未提供策略时原样返回）。
+ *
+ * 只覆盖模板里能表达的项，其余（互动标识判定口径、龙王口径、取数失败策略、缓存时长）
+ * 永远由控制台配置决定，避免创建时的快照把后来改的控制台配置顶掉。
+ */
 export function mergePolicy(config: Config, policy: RollPolicy | null): Config['join'] {
   if (!policy) return config.join
   return {
@@ -159,8 +161,6 @@ export function mergePolicy(config: Config, policy: RollPolicy | null): Config['
     minActiveDays: policy.minActiveDays,
     minContinuousDays: policy.minContinuousDays,
     requiredHonors: policy.requiredHonors,
-    honorMode: policy.honorMode,
-    dragonScope: policy.dragonScope,
   }
 }
 
@@ -178,8 +178,6 @@ export function policyToRow(rollId: number, policy: RollPolicy) {
     minActiveDays: policy.minActiveDays,
     minContinuousDays: policy.minContinuousDays,
     requiredHonors: policy.requiredHonors.join(','),
-    honorMode: policy.honorMode,
-    dragonScope: policy.dragonScope,
   }
 }
 
@@ -191,8 +189,6 @@ export function rowToPolicy(row: any): RollPolicy {
     minContinuousDays: Number(row?.minContinuousDays ?? 0) || 0,
     requiredHonors: String(row?.requiredHonors ?? '').split(',').filter(
       (honor): honor is HonorRequirement => honor === 'fire7' || honor === 'fire30' || honor === 'dragon'),
-    honorMode: row?.honorMode === 'all' ? 'all' : 'any',
-    dragonScope: row?.dragonScope === 'current' ? 'current' : 'list',
   }
 }
 
@@ -201,20 +197,6 @@ export function policyEquals(a: RollPolicy, b: RollPolicy): boolean {
   return a.minGroupLevel === b.minGroupLevel
     && a.minActiveDays === b.minActiveDays
     && a.minContinuousDays === b.minContinuousDays
-    && a.honorMode === b.honorMode
-    && a.dragonScope === b.dragonScope
     && a.requiredHonors.length === b.requiredHonors.length
     && a.requiredHonors.every((honor) => b.requiredHonors.includes(honor))
-}
-
-/**
- * 文本里没有表达的字段（如龙王口径、标识只有一个时的模式）从全局策略继承，
- * 避免用户只改了等级却把其它维度重置掉。
- */
-export function inheritPolicy(parsed: RollPolicy, base: RollPolicy): RollPolicy {
-  return {
-    ...parsed,
-    dragonScope: base.dragonScope,
-    honorMode: parsed.requiredHonors.length > 1 ? parsed.honorMode : base.honorMode,
-  }
 }

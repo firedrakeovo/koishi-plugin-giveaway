@@ -54,7 +54,7 @@ _config:
         - Dragon King (most active yesterday)
     honorMode:
       $description: |-
-        When several honors are selected, whether any one of them is enough or all of them are required.
+        When several honors are selected, whether any one of them is enough or all of them are required. This is console-only and applies to every giveaway (the "Conditions" line never contains it).
       $inner:
         - Any of them
         - All of them
@@ -146,7 +146,7 @@ commands:
         Description:
         Conditions: {0}
         Note 1: prizes use "name*amount", separate several with a comma or space; end time uses year-month-day-hour-minute, leave it empty for no auto-draw.
-        Note 2: the "Conditions" line may be kept as is (use the console config), emptied (no restrictions for this giveaway), or rewritten as "Level≥40 Active≥1 Streak≥7 Honors=blaze,dragon Mode=any" (delete whatever you do not need).
+        Note 2: the "Conditions" line may be kept as is (use the console config), emptied (no restrictions for this giveaway), or rewritten as "Level≥40 Active≥1 Streak≥7 Honors=blaze,dragon" (delete whatever you do not need). The multi-honor mode and the Dragon King scope are set in the console.
       noPrize: |-
         No "Prizes:" line found, the giveaway cannot be created.
       prizeEmpty: |-

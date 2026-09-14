@@ -54,7 +54,7 @@ _config:
         - Drachenkönig (gestern am aktivsten)
     honorMode:
       $description: |-
-        Ob bei mehreren gewählten Abzeichen eines genügt oder alle erfüllt sein müssen.
+        Ob bei mehreren gewählten Abzeichen eines genügt oder alle erfüllt sein müssen. Gilt nur hier in der Konsole für alle Verlosungen (die Zeile „Bedingungen“ enthält das nie).
       $inner:
         - Eines genügt
         - Alle erforderlich
@@ -146,7 +146,7 @@ commands:
         Beschreibung:
         Bedingungen: {0}
         Hinweis 1: Preise im Format „Name*Anzahl“, mehrere mit Komma oder Leerzeichen trennen; Endzeit im Format Jahr-Monat-Tag-Stunde-Minute, leer = keine automatische Ziehung.
-        Hinweis 2: Die Zeile „Bedingungen“ kann unverändert bleiben (Konsole-Einstellungen verwenden), geleert werden (keine Einschränkung für diese Verlosung) oder umgeschrieben werden, z. B. „Stufe≥40 Aktiv≥1 Serie≥7 Abzeichen=Flamme,Drachenkoenig Modus=beliebig“ (nicht Benötigtes löschen).
+        Hinweis 2: Die Zeile „Bedingungen“ kann unverändert bleiben (Konsole-Einstellungen verwenden), geleert werden (keine Einschränkung für diese Verlosung) oder umgeschrieben werden, z. B. „Stufe≥40 Aktiv≥1 Serie≥7 Abzeichen=Flamme,Drachenkoenig“ (nicht Benötigtes löschen). Modus für mehrere Abzeichen und der Drachenkönig-Umfang werden in der Konsole eingestellt.
       noPrize: |-
         Keine Zeile „Preise:“ gefunden, die Verlosung kann nicht erstellt werden.
       prizeEmpty: |-
