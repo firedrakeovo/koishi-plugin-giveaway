@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/koishi-plugin-giveaway?style=flat-square)](https://www.npmjs.com/package/koishi-plugin-giveaway)
 [![license](https://img.shields.io/npm/l/koishi-plugin-giveaway?style=flat-square)](./LICENSE)
 
-一个多功能的 Koishi 群抽奖插件：交互式创建抽奖、成员参与、定时自动开奖、开奖前提醒，支持多语言与多时区，并提供频道、权限、提醒器三个维度的细粒度配置。
+一个多功能的 Koishi 群抽奖插件：交互式创建抽奖、成员参与、定时自动开奖、开奖前提醒，支持参与条件（群聊等级 / 活跃度 / QQ 群互动标识）、Koishi 原生权限等级、多语言与多时区。
 
 > A versatile giveaway plugin for Koishi: interactive giveaway creation, member participation, scheduled auto-draw and reminders, with i18n and multi-timezone support.
 
