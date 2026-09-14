@@ -494,7 +494,7 @@ messageBuilder:
       <p>恭喜以下用户：</p>
     body:
       winner: |-
-        <p>{userName} ({userId}) 获得了：</p>
+        <p><at id={userId}/> ({userId}) 获得了：</p>
       winList: |-
         <p> - {name} * {amount}</p>
   roll.remind:

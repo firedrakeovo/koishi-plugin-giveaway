@@ -166,7 +166,8 @@ export async function rollEndMsgFromRollId(ctx: Context, config: Config, roll: a
       }
     }
     msgList.push(ctx.i18n.render(locales, ['messageBuilder.roll.end.body.winner'], {
-      userName: user.name,
+      // 开奖行用 <at> 展示中奖者；取不到昵称（已退群 / 接口失败）也不能让整条开奖消息发不出去
+      userName: user?.name ?? '',
       userId: userPlatformId[0].pid
     })[0])
     for (const e of r) {

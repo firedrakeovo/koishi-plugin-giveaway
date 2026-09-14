@@ -488,11 +488,11 @@ messageBuilder:
         <p>{userName} ({userId})</p>
   roll.end:
     header: |-
-      <p>抽奖 {0} 开奖啦！</p>
-      <p>恭喜以下用户：</p>
+      <p>Giveaway {0} has ended!</p>
+      <p>Congratulations to:</p>
     body:
       winner: |-
-        <p>{userName} ({userId}) 获得了：</p>
+        <p><at id={userId}/> ({userId}) won:</p>
       winList: |-
         <p> - {name} * {amount}</p>
   roll.remind:
