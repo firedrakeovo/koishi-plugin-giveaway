@@ -1,24 +1,49 @@
 import {Context} from 'koishi';
 import {Config} from '../../config';
 import {DateTime} from 'luxon';
-import {stringToPrize, generateUniqueCode, dateInputToDateTime, checkDateInput} from "../../util/general";
+import {
+  stringToPrize,
+  generateUniqueCode,
+  dateInputToDateTime,
+  checkDateInput,
+  parsePrizeInput,
+  parseTimeAndKey,
+} from "../../util/general";
 import {hasPermission, isGuildAdmin, hasAuthority} from "../../util/role";
 import {getCurrentUTCOffset} from "../../util/time";
 
+/**
+ * 创建抽奖。
+ *
+ * 交互被压缩成**最多两步**（原来的 6 步）：
+ *   ① 奖品（一行一个，`名称*数量`）
+ *   ② 开奖时间与加入口令（合并成一条回答，`n` 表示该项不要）
+ *
+ * 标题 / 描述 / 开奖类型 不再提问，直接取默认值，需要自定义时用参数：
+ *   `抽奖 add -t <标题> -d <描述> -r <可重复中奖>`
+ *
+ * 也支持完全非交互的写法（位置参数对应 奖品 / 开奖时间 / 加入口令）：
+ *   `抽奖 add 显卡*1 09-15-20-00 参加`
+ *   `抽奖 add 显卡*1|鼠标*2 n n`（多个奖品用 `|` 分隔，不自动开奖、不用口令）
+ *
+ * 省略的字段会逐项提问；`q` 取消，`undo` 回上一步。
+ */
 export function addRoll(ctx: Context, config: Config) {
-  ctx.command("giveaway.add")
+  ctx.command("giveaway.add [prize] [endTime] [key]")
     .alias('创建抽奖')
-    .option('n', '-n')
+    .option('title', '-t <title>', {descPath: 'commands.giveaway.add.options.title'})
+    .option('description', '-d <text>', {descPath: 'commands.giveaway.add.options.description'})
+    .option('repeat', '-r', {descPath: 'commands.giveaway.add.options.repeat'})
+    .option('fast', '-n', {descPath: 'commands.giveaway.add.options.fast'})
     .userFields(['offset'])
     .channelFields(['offset'])
-    .action(async ({session, options}) => {
+    .action(async ({session, options}, prizeArg, endTimeArg, keyArg) => {
       // auth：达到创建等级，或群主/群管理员
       if (!hasPermission(
         hasAuthority(session, config.permission.authorityCreate),
         isGuildAdmin(session)
       )) return session.text('.noAuth')
 
-      // time offset
       const offset = await getCurrentUTCOffset(ctx, session, config)
 
       // init
@@ -29,146 +54,125 @@ export function addRoll(ctx: Context, config: Config) {
         platform: session.event.platform,
         joinKey: null,
         isAutoEnd: null,
-        rollType: null,
+        rollType: options.repeat ? '0' : '1',
         endTime: null,
         isEnd: false,
         title: null,
         description: null,
       } as any
 
-      const a = {
-        session: session,
-        roll: roll,
-        prizeList: null,
+      let prizeList: ReturnType<typeof stringToPrize>[] = []
+
+      // 标题 / 描述：默认值，可用 -t / -d 覆盖
+      roll.title = options.title
+        ? await ctx.assets.transform(options.title)
+        : session.text('.defaultTitle', [session.author.name])
+      roll.description = options.description
+        ? await ctx.assets.transform(options.description)
+        : session.text('.defaultDescription', [session.author.name])
+
+      // 奖品：位置参数里多个奖品用 | 分隔
+      if (prizeArg !== undefined) {
+        prizeList = parsePrizeInput(prizeArg.replace(/[|｜]/g, '\n'))
+        if (prizeList.length === 0) return session.text('.prizeEmpty')
       }
 
-      // Fast add
-      if (options.n) {
-        roll.joinKey = ''
-        roll.isAutoEnd = false
-        roll.rollType = 1
-        roll.endTime = ''
-        roll.isEnd = false
-        roll.title = session.text('.defaultTitle', [session.author.name])
-        roll.description = session.text('.defaultDescription', [session.author.name])
+      // 时间 / 口令的预置值：位置参数优先；`-n` 表示"都不要"（于是只剩奖品一问）
+      const presetTime = endTimeArg !== undefined ? endTimeArg : (options.fast ? 'n' : undefined)
+      const presetKey = keyArg !== undefined ? keyArg : (options.fast ? 'n' : undefined)
 
-        await session.send(session.text('.prizeFast'))
-        const prize = await session.prompt()
-        if (!prize) return session.text('commands.timeout')
-        if (prize === 'q') return session.text('.quit')
-        a.prizeList = prize.split(/\r\n|\r|\n/).map(s => {
-          return stringToPrize(s)
+      const applyTime = async (input: string): Promise<string | null> => {
+        if (input === '' || input === 'n') {
+          roll.endTime = ''
+          roll.isAutoEnd = false
+          return null
+        }
+        if (!checkDateInput(input, 5)) return '.timeError'
+        try {
+          roll.endTime = dateInputToDateTime(input, offset).toUTC().toJSDate()
+        } catch (e) {
+          return '.timeError'
+        }
+        roll.isAutoEnd = true
+        return null
+      }
+
+      const applyKey = async (input: string): Promise<string | null> => {
+        roll.joinKey = (input === '' || input === 'n') ? '' : input
+        return null
+      }
+
+      // 待问的问题清单（声明式：顺序即提问顺序，undo 自动回退）
+      type Question = { prompt: string; run: (input: string) => Promise<string | null> }
+      const questions: Question[] = []
+
+      if (prizeArg === undefined) {
+        questions.push({
+          prompt: '.prize',
+          run: async (input) => {
+            const list = parsePrizeInput(input)
+            if (list.length === 0) return '.prizeEmpty'
+            prizeList = list
+            return null
+          },
         })
       }
 
-      while (Object.values(roll).some(value => value === null) || a.prizeList === null) {
-        if (!roll.title) {
-          await session.send(session.text('.title', [session.author.name]))
-          const title = await session.prompt()
-          if (!title) return session.text('commands.timeout')
-          if (title === 'q') return session.text('.quit')
-          roll.title = title != 'n' ? await ctx.assets.transform(title) : session.text('.defaultTitle', [session.author.name])
+      const askTime = presetTime === undefined
+      const askKey = presetKey === undefined
+      if (askTime && askKey) {
+        // 两者都未知 → 合并成一步，省一次往返
+        questions.push({
+          prompt: '.timeAndKey',
+          run: async (input) => {
+            const {timeInput, keyInput} = parseTimeAndKey(input)
+            const error = await applyTime(timeInput)
+            if (error) return error
+            return applyKey(keyInput)
+          },
+        })
+      } else {
+        if (askTime) {
+          questions.push({prompt: '.autoEnd', run: applyTime})
+        } else {
+          const error = await applyTime(presetTime)
+          if (error) return session.text(error)
         }
-
-        if (!roll.description) {
-          await session.send(session.text('.description', [session.author.name]))
-          const description = await session.prompt()
-          if (!description) return session.text('commands.timeout')
-          if (description === 'q') return session.text('.quit')
-          if (description === 'undo') {
-            roll.title = null
-            continue
-          }
-          roll.description = description != 'n' ? await ctx.assets.transform(description) : session.text('.defaultDescription', [session.author.name])
-        }
-
-        if (!a.prizeList) {
-          if (options.n) await session.send(session.text('.prizeFast'))
-          else await session.send(session.text('.prize'))
-
-          const prize = await session.prompt()
-          if (!prize) return session.text('commands.timeout')
-          if (prize === 'q') return session.text('.quit')
-          if (!options.n && prize === 'undo') {
-            roll.description = null
-            continue
-          }
-          a.prizeList = prize.split(/\r\n|\r|\n/).map(s => {
-            return stringToPrize(s)
-          })
-        }
-
-        if (!roll.endTime) {
-          let endTime = null
-          await session.send(session.text('.autoEnd', [offset]))
-          let endTimeInput = await session.prompt()
-          if (!endTimeInput) return session.text('commands.timeout')
-          if (endTimeInput === 'q') return session.text('.quit')
-          if (endTimeInput === 'undo') {
-            a.prizeList = null
-            continue
-          }
-          if (endTimeInput === 'n') endTime = ''
-          else if (!checkDateInput(endTimeInput, 5)) return session.text('.timeError')
-          else {
-            try {
-              endTime = dateInputToDateTime(endTimeInput, offset).toUTC().toJSDate()
-            } catch (e) {
-              return session.text('.timeError')
-            }
-          }
-          roll.endTime = endTime
-          roll.isAutoEnd = endTime !== ''
-          if (endTime === '') roll.rollType = '1'
-        }
-
-        if (!roll.rollType) {
-          let rollType = '1'
-          if (roll.endTime !== '') {
-            await session.send(session.text('.type'))
-            let rollTypeInput = await session.prompt()
-            if (!rollTypeInput) return session.text('commands.timeout')
-            if (rollTypeInput === 'q') return session.text('.quit')
-            if (rollTypeInput === 'undo') {
-              roll.endTime = null
-              continue
-            }
-            if (rollTypeInput === 'n') rollTypeInput = '1'
-            if (rollTypeInput != '0' && rollTypeInput != '1') return session.text('.typeError')
-            rollType = rollTypeInput
-          }
-
-          roll.rollType = rollType
-        }
-
-        if (!roll.joinKey) {
-          await session.send(session.text('.joinKey'))
-          let joinKey = await session.prompt()
-          if (!joinKey) return session.text('commands.timeout')
-          if (joinKey === 'q') return session.text('.quit')
-          if (joinKey === 'undo') {
-            if (roll.isAutoEnd) {
-              roll.rollType = null
-            } else {
-              roll.endTime = null
-              roll.rollType = null
-            }
-            continue
-          }
-          if (joinKey === 'n') joinKey = ''
-          roll.joinKey = joinKey
+        if (askKey) {
+          questions.push({prompt: '.joinKey', run: applyKey})
+        } else {
+          const error = await applyKey(presetKey)
+          if (error) return session.text(error)
         }
       }
 
+      // 交互（q 取消 / undo 回上一步 / 非法输入重问本步）
+      let index = 0
+      while (index < questions.length) {
+        const question = questions[index]
+        await session.send(session.text(question.prompt, [offset]))
+        const input = await session.prompt()
+        if (!input) return session.text('commands.timeout')
+        if (input === 'q') return session.text('.quit')
+        if (input === 'undo') {
+          if (index > 0) index--
+          continue
+        }
+        const error = await question.run(input)
+        if (error) {
+          await session.send(session.text(error))
+          continue
+        }
+        index++
+      }
+
       ctx.emit('giveaway/roll-add',
-        a.session,
-        a.roll,
-        a.prizeList,
+        session,
+        roll,
+        prizeList,
         {}
       )
 
       return session.text(`.success`, [roll.roll_code])
     })
 }
-
-

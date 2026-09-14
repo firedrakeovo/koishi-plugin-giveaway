@@ -112,3 +112,24 @@ export function getRemindValueFromDefaultReminder(endTime: Date, reminder: any, 
       return
   }
 }
+
+/** 把「一行一个奖品」的输入解析成奖品列表（忽略空行，数量缺省为 1） */
+export function parsePrizeInput(input: string) {
+  return String(input ?? '')
+    .split(/\r\n|\r|\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => stringToPrize(line))
+}
+
+/**
+ * 解析「开奖时间 + 加入口令」的合并回答：
+ * 第一段是开奖时间（`n` 表示不自动开奖），其余全部视作口令（可含空格，`n` 或留空表示不用口令）。
+ * 例：`09-15-20-00 参加` / `n 参加` / `09-15-20-00`（口令默认不用）/ `n n`
+ */
+export function parseTimeAndKey(input: string) {
+  const parts = String(input ?? '').trim().split(/\s+/).filter(Boolean)
+  const timeInput = parts.shift() ?? 'n'
+  const keyInput = parts.join(' ')
+  return { timeInput, keyInput }
+}

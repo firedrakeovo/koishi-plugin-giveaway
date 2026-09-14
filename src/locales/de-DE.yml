@@ -116,42 +116,55 @@ commands:
         当前频道id为：{0}
   giveaway.add:
     description: |-
-      交互式地创建一个抽奖
+      Verlosung interaktiv erstellen (maximal zwei Schritte: Preise → Endzeit & Beitrittswort)
+    options:
+      title: |-
+        Eigener Titel (Standard: „Verlosung von {0}“)
+      description: |-
+        Eigene Beschreibung (Standard: der Titel)
+      repeat: |-
+        Derselbe Gewinner darf mehrfach gezogen werden (standardmäßig aus)
+      fast: |-
+        Schnellerstellung: nur nach Preisen fragen, keine automatische Ziehung, kein Beitrittswort
     messages:
       noAuth: |-
-        你没有权限创建抽奖！
+        Du darfst keine Verlosungen erstellen.
       defaultTitle: |-
-        {0} 的抽奖
+        Verlosung von {0}
       defaultDescription: |-
-        {0} 的抽奖
+        Verlosung von {0}
       success: |-
-        创建抽奖成功，编号为 {0}
-      title: |-
-        <p>请输入抽奖的标题：</p>
-        <p>（回复 n 使用默认内容：{0} 的抽奖）</p>
-      description: |-
-        <p>请输入抽奖的描述：</p>
-        <p>（回复 n 使用默认内容：{0} 的抽奖）</p>
+        Verlosung erstellt, Nummer {0}
       prize: |-
-        <p>请输入你要抽的奖品：</p>
-        <p>格式为 奖品名称*数量 (留空为1)，每行视为一个独立奖品。</p>
+        <p>Bitte die Preise senden:</p>
+        <p>Format: Preisname*Anzahl (Anzahl standardmäßig 1), ein Preis pro Zeile.</p>
+        <p>- q zum Abbrechen</p>
+      prizeEmpty: |-
+        Die Preise dürfen nicht leer sein, bitte erneut senden.
+      timeAndKey: |-
+        <p>Bitte <b>Endzeit</b> und <b>Beitrittswort</b> senden (durch Leerzeichen getrennt):</p>
+        <p>Format der Endzeit: Jahr-Monat-Tag-Stunde-Minute; n = keine automatische Ziehung</p>
+        <p>Beitrittswort: Mitglieder senden dieses Wort zum Beitreten; n = kein Beitrittswort</p>
+        <p>Aktuelle Zeitzone: {0}</p>
+        <p>Beispiele: <code>09-15-20-00 mitmachen</code> / <code>n mitmachen</code> / <code>09-15-20-00 n</code></p>
+        <p>- undo = einen Schritt zurück</p>
+        <p>- q = abbrechen</p>
       autoEnd: |-
-        <p>请输入自动开奖的时间：</p>
-        <p>格式：年-月-日-时-分</p>
-        <p>当前时区：{0}</p>
-        <p>（回复 n 则不使用自动开奖）</p>
-      timeError: |-
-        时间格式错误，请重新创建！
-      type: |-
-        <p>请选择自动开奖的抽奖类型，仅需回复数字：</p>
-        <p>0：中奖人可重复</p>
-        <p>1：中奖人不可重复</p>
-        <p>（回复 n 使用默认类型：1）</p>
-      typeError: |-
-        抽奖类型错误，请重新创建！
+        <p>Bitte die Zeit der automatischen Ziehung senden:</p>
+        <p>Format: Jahr-Monat-Tag-Stunde-Minute</p>
+        <p>Aktuelle Zeitzone: {0}</p>
+        <p>- n = keine automatische Ziehung</p>
+        <p>- undo = einen Schritt zurück</p>
+        <p>- q = abbrechen</p>
       joinKey: |-
-        <p>请输入加入抽奖的口令，用户可以直接发送口令来加入抽奖：</p>
-        <p>（回复 n 则不使用加入口令）</p>
+        <p>Bitte das Beitrittswort senden; Mitglieder treten durch dieses Wort bei:</p>
+        <p>- n = kein Beitrittswort</p>
+        <p>- undo = einen Schritt zurück</p>
+        <p>- q = abbrechen</p>
+      timeError: |-
+        Ungültiges Zeitformat, bitte erneut senden (Jahr-Monat-Tag-Stunde-Minute).
+      quit: |-
+        Erstellung abgebrochen.
   giveaway.delete:
     description: |-
       手动删除一个抽奖

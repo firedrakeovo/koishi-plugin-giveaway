@@ -116,42 +116,55 @@ commands:
         当前频道id为：{0}
   giveaway.add:
     description: |-
-      交互式地创建一个抽奖
+      Create a giveaway interactively (at most two steps: prizes → end time & join key)
+    options:
+      title: |-
+        Custom giveaway title (defaults to "{0}'s giveaway")
+      description: |-
+        Custom giveaway description (defaults to the title)
+      repeat: |-
+        Allow the same member to win more than once (disabled by default)
+      fast: |-
+        Quick create: only ask for prizes, no auto-draw and no join key
     messages:
       noAuth: |-
-        你没有权限创建抽奖！
+        You are not allowed to create giveaways.
       defaultTitle: |-
-        {0} 的抽奖
+        {0}'s giveaway
       defaultDescription: |-
-        {0} 的抽奖
+        {0}'s giveaway
       success: |-
-        创建抽奖成功，编号为 {0}
-      title: |-
-        <p>请输入抽奖的标题：</p>
-        <p>（回复 n 使用默认内容：{0} 的抽奖）</p>
-      description: |-
-        <p>请输入抽奖的描述：</p>
-        <p>（回复 n 使用默认内容：{0} 的抽奖）</p>
+        Giveaway created, code {0}
       prize: |-
-        <p>请输入你要抽的奖品：</p>
-        <p>格式为 奖品名称*数量 (留空为1)，每行视为一个独立奖品。</p>
+        <p>Please send the prizes:</p>
+        <p>Format: prize name*amount (amount defaults to 1), one prize per line.</p>
+        <p>- Send q to cancel</p>
+      prizeEmpty: |-
+        Prizes cannot be empty, please try again.
+      timeAndKey: |-
+        <p>Please send the <b>end time</b> and the <b>join key</b> (separated by a space):</p>
+        <p>End time format: year-month-day-hour-minute; send n for no auto-draw</p>
+        <p>Join key: members send this word to join; send n for no join key</p>
+        <p>Current timezone: {0}</p>
+        <p>Examples: <code>09-15-20-00 join</code> / <code>n join</code> / <code>09-15-20-00 n</code></p>
+        <p>- Send undo to go back</p>
+        <p>- Send q to cancel</p>
       autoEnd: |-
-        <p>请输入自动开奖的时间：</p>
-        <p>格式：年-月-日-时-分</p>
-        <p>当前时区：{0}</p>
-        <p>（回复 n 则不使用自动开奖）</p>
-      timeError: |-
-        时间格式错误，请重新创建！
-      type: |-
-        <p>请选择自动开奖的抽奖类型，仅需回复数字：</p>
-        <p>0：中奖人可重复</p>
-        <p>1：中奖人不可重复</p>
-        <p>（回复 n 使用默认类型：1）</p>
-      typeError: |-
-        抽奖类型错误，请重新创建！
+        <p>Please send the auto-draw time:</p>
+        <p>Format: year-month-day-hour-minute</p>
+        <p>Current timezone: {0}</p>
+        <p>- Send n for no auto-draw</p>
+        <p>- Send undo to go back</p>
+        <p>- Send q to cancel</p>
       joinKey: |-
-        <p>请输入加入抽奖的口令，用户可以直接发送口令来加入抽奖：</p>
-        <p>（回复 n 则不使用加入口令）</p>
+        <p>Please send the join key; members join by sending this word:</p>
+        <p>- Send n for no join key</p>
+        <p>- Send undo to go back</p>
+        <p>- Send q to cancel</p>
+      timeError: |-
+        Invalid time format, please try again (year-month-day-hour-minute).
+      quit: |-
+        Creation cancelled.
   giveaway.delete:
     description: |-
       手动删除一个抽奖
