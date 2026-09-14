@@ -97,7 +97,7 @@ _config:
           - Before end
 commands:
   timeout: |-
-    输入超时
+    Input timed out
   giveaway:
     description: |-
       Giveaway commands
@@ -118,10 +118,10 @@ commands:
         <p>Docs: <a>https://github.com/firedrakeovo/koishi-plugin-giveaway</a></p>
   giveaway.channel:
     description: |-
-      获取当前频道的频道id
+      Show the current channel id
     messages:
       result: |-
-        当前频道id为：{0}
+        Current channel id: {0}
   giveaway.add:
     description: |-
       Create a giveaway: the bot sends a template, copy it, fill it in and send it back
@@ -162,227 +162,227 @@ commands:
       timeError: |-
         Invalid end time: use year-month-day-hour-minute, or leave it empty for no auto-draw.
       cancelled: |-
-        Creation cancelled; just send "创建抽奖" again when needed.
+        Creation cancelled; just send "giveaway add" again when needed.
       quit: |-
         Creation cancelled.
   giveaway.delete:
     description: |-
-      手动删除一个抽奖
+      Delete a giveaway manually
     messages:
       empty: |-
-        请输入抽奖编号！
+        Please enter the giveaway code!
       notFound: |-
-        没有找到该抽奖！
+        Giveaway not found!
       noAuth: |-
-        你没有权限删除该抽奖！
+        You are not allowed to delete this giveaway!
       success: |-
-        删除了抽奖 {0}
+        Giveaway {0} deleted
   giveaway.end:
     description: |-
-      手动进行开奖
+      Draw a giveaway manually
     messages:
       wait:
         header: |-
-          <p>当前你创建的抽奖如下：</p>
+          <p>Giveaways you created:</p>
         body:
           rollList: |-
             <p>[{roll_code}] {title}</p>
         footer: |-
-          <p>请输入要开奖的抽奖编号：</p>
+          <p>Enter the code of the giveaway to draw:</p>
       noAuth: |-
-        你没有权限进行开奖！
+        You are not allowed to draw this giveaway!
       isEnd: |-
-        该抽奖已开奖！
+        This giveaway has already been drawn!
       notFound: |-
-        没有找到该抽奖！
+        Giveaway not found!
   giveaway.list:
     description: |-
-      查询指定频道内的抽奖
+      List giveaways in this channel
   giveaway.detail:
     description: |-
-      查询指定抽奖的详细描述
+      Show the details of a giveaway
     messages:
       empty: |-
-        请输入抽奖编号！
+        Please enter the giveaway code!
       notFound: |-
-        没有找到该抽奖！
+        Giveaway not found!
   giveaway.member:
     description: |-
-      查询指定抽奖的参与成员
+      Show the members of a giveaway
     messages:
       empty: |-
-        请输入抽奖编号！
+        Please enter the giveaway code!
       notFound: |-
-        没有找到该抽奖！
+        Giveaway not found!
   giveaway.join:
     description: |-
-      加入指定的抽奖
+      Join a giveaway
     messages:
       failed: |-
-        找不到此抽奖！
+        Giveaway not found!
       empty: |-
-        请输入抽奖编号！
+        Please enter the giveaway code!
   giveaway.quit:
     description: |-
-      退出指定的抽奖
+      Leave a giveaway
     messages:
       failed: |-
-        找不到此抽奖！
+        Giveaway not found!
       empty: |-
-        请输入抽奖编号！
+        Please enter the giveaway code!
   giveaway.time:
     description: |-
-      修改时区
+      Change the timezone
     messages:
       inValidFormat: |-
-        请输入正确的时区偏移值格式！
+        Please enter a valid timezone offset!
       noAuth: |-
-        你没有修改的权限！
+        You are not allowed to change this!
       empty: |-
-        无
+        None
       selected: |-
-        使用此时区
+        Use this timezone
       result: |-
-        <p>当前时区设置：</p>
-        <p> - 频道时区：{0}</p>
-        <p> - 你的时区：{1}</p>
-        <p> - 默认时区：{2}</p>
+        <p>Current timezone settings:</p>
+        <p> - Channel timezone: {0}</p>
+        <p> - Your timezone: {1}</p>
+        <p> - Default timezone: {2}</p>
       success:
         channel: |-
-          修改成功，频道当前的时区为 UTC{0}。
+          Updated: the channel timezone is now UTC{0}.
         user: |-
-          修改成功，你当前的时区为 UTC{0}。
+          Updated: your timezone is now UTC{0}.
         defaultChannel: |-
-          已清除频道时区设置
+          The channel timezone setting has been cleared
         defaultUser: |-
-          已清除你的时区设置
+          Your timezone setting has been cleared
   giveaway.locale:
     description: |-
-      修改语言偏好
+      Change the language
     messages:
       inValidFormat: |-
-        请输入正确的语言偏好格式！
+        Please enter a valid language!
       noAuth: |-
-        你没有修改的权限！
+        You are not allowed to change this!
       empty: |-
-        无
+        None
       selected: |-
-        使用此语言偏好
+        Use this language
       result: |-
-        <p>当前语言偏好设置：</p>
-        <p> - 频道语言偏好：{0}</p>
-        <p> - 你的语言偏好：{1}</p>
-        <p> - 默认语言偏好：{2}</p>
+        <p>Current language settings:</p>
+        <p> - Channel language: {0}</p>
+        <p> - Your language: {1}</p>
+        <p> - Default language: {2}</p>
       success:
         channel: |-
-          修改成功，频道当前的语言偏好为 {0}。
+          Updated: the channel language is now {0}.
         user: |-
-          修改成功，你当前的语言偏好为 {0}。
+          Updated: your language is now {0}.
         defaultChannel: |-
-          已清除频道语言偏好设置
+          The channel language setting has been cleared
         defaultUser: |-
-          已清除你的语言偏好设置
+          Your language setting has been cleared
   giveaway.remind:
     description: |-
-      查询抽奖启用的提醒
+      Show the giveaway's reminders
     messages:
       notFound: |-
-        没有找到该抽奖！
+        Giveaway not found!
 
   giveaway.reminder:
     description: |-
-      Giveaway 提醒功能
+      Giveaway reminders
   giveaway.reminder.add:
     description: |-
-      创建一个提醒器
+      Create a reminder
     messages:
       success: |-
-        创建提醒器成功，编号为 {0}
+        Reminder created, code {0}
       exist: |-
-        已有相同的提醒器，编号为 {0}
+        An identical reminder already exists, code {0}
       timeError: |-
-        时间格式错误，请重新创建！
+        Invalid time format, please create it again!
       typeError: |-
-        提醒器类型错误，请重新创建！
+        Invalid reminder type, please create it again!
       type: |-
-        <p>请选择提醒器的类型，仅需回复数字：</p>
-        <p>0：在指定时间提醒一次</p>
-        <p>1：抽奖结束前一定时间提醒一次</p>
-        <p>2：每隔一定时间提醒一次</p>
+        <p>Choose the reminder type, reply with the number only:</p>
+        <p>0: remind once at a given time</p>
+        <p>1: remind once a while before the giveaway ends</p>
+        <p>2: remind repeatedly at a fixed interval</p>
       specified: |-
-        <p>请输入提醒的具体时间：</p>
-        <p>格式：年-月-日-时-分</p>
-        <p>当前时区：{0}</p>
+        <p>Enter the exact time to remind:</p>
+        <p>Format: year-month-day-hour-minute</p>
+        <p>Current timezone: {0}</p>
       before-end: |-
-        <p>请输入提醒距离抽奖结束的时间间隔：</p>
-        <p>格式：年-月-日-时-分</p>
-        <p>例如：0-0-0-1-30</p>
+        <p>Enter how long before the giveaway ends to remind:</p>
+        <p>Format: year-month-day-hour-minute</p>
+        <p>Example: 0-0-0-1-30</p>
       interval:
         error: |-
-          无效的选项！
+          Invalid option!
         select: |-
-          <p>你希望每过多久提醒一次？</p>
-          <p>0：在 每年 的 某月某日某时某分</p>
-          <p>1：在 每月 的 某日某时某分</p>
-          <p>2：在 每天 的 某时某分</p>
-          <p>3：在 每小时 的 某分</p>
+          <p>How often should it remind?</p>
+          <p>0: every year on a given month/day/hour/minute</p>
+          <p>1: every month on a given day/hour/minute</p>
+          <p>2: every day at a given hour/minute</p>
+          <p>3: every hour at a given minute</p>
         per-year: |-
-          <p>你希望每年的什么时候提醒？</p>
-          <p>格式：月-日-时-分</p>
-          <p>当前时区：{0}</p>
+          <p>When every year should it remind?</p>
+          <p>Format: month-day-hour-minute</p>
+          <p>Current timezone: {0}</p>
         per-month: |-
-          <p>你希望每月的什么时候提醒？</p>
-          <p>格式：日-时-分</p>
-          <p>当前时区：{0}</p>
+          <p>When every month should it remind?</p>
+          <p>Format: day-hour-minute</p>
+          <p>Current timezone: {0}</p>
         per-day: |-
-          <p>你希望每天的什么时候提醒？</p>
-          <p>格式：时-分</p>
-          <p>当前时区：{0}</p>
+          <p>What time of day should it remind?</p>
+          <p>Format: hour-minute</p>
+          <p>Current timezone: {0}</p>
         per-hour: |-
-          <p>你希望每小时的什么时候提醒？</p>
-          <p>格式：分</p>
-          <p>当前时区：{0}</p>
+          <p>Which minute of every hour should it remind?</p>
+          <p>Format: minute</p>
+          <p>Current timezone: {0}</p>
   giveaway.reminder.delete:
     description: |-
-      删除一个提醒器
+      Delete a reminder
     messages:
       success: |-
-        删除提醒器成功！
+        Reminder deleted!
       emptyReminder: |-
-        未找到提醒器编号，请重新输入！
+        Reminder code not found, please enter it again!
       notYourReminder: |-
-        你没有权限删除该提醒器！
+        You are not allowed to delete this reminder!
   giveaway.reminder.list:
     description: |-
-      查询提醒器列表
+      List reminders
   giveaway.reminder.enable:
     description: |-
-      启用一个提醒器
+      Enable a reminder
     messages:
       emptyRoll: |-
-        未找到抽奖编号，请重新输入！
+        Giveaway code not found, please enter it again!
       emptyReminder: |-
-        未找到提醒器编号，请重新输入！
+        Reminder code not found, please enter it again!
       rollEnd: |-
-        该抽奖已结束，无法启用提醒器！
+        This giveaway has ended, reminders cannot be enabled!
       noAuth: |-
-        你没有权限启用提醒器！
+        You are not allowed to enable reminders!
       success: |-
-        启用提醒器成功！
+        Reminder enabled!
   giveaway.reminder.disable:
     description: |-
-      禁用一个提醒
+      Disable a reminder
     messages:
       emptyRoll: |-
-        未找到抽奖编号，请重新输入！
+        Giveaway code not found, please enter it again!
       emptyReminder: |-
-        未找到提醒器编号，请重新输入！
+        Reminder code not found, please enter it again!
       rollEnd: |-
-        该抽奖已结束，无需禁用提醒。
+        This giveaway has ended, no need to disable reminders.
       noAuth: |-
-        你没有权限禁用提醒器！
+        You are not allowed to disable reminders!
       success: |-
-        禁用提醒器成功！
+        Reminder disabled!
   giveaway.debug.honor:
     description: |-
       Diagnose the group honor APIs (admin only)
@@ -428,71 +428,71 @@ events:
     <quote id={messageId}/> Failed to join, please send the join key again.
   roll.add:
     success: |-
-      <quote id={messageId}/> 成功加入编号为 {rollCode} 的抽奖。
+      <quote id={messageId}/> Successfully joined giveaway {rollCode}.
     failed: |-
-      <quote id={messageId}/> 您已加入编号为 {rollCode} 的抽奖，无需重复加入。
+      <quote id={messageId}/> You already joined giveaway {rollCode}, no need to join again.
   roll.end:
     success: |-
-      <quote id={messageId}/> 成功退出编号为 {rollCode} 的抽奖。
+      <quote id={messageId}/> Successfully left giveaway {rollCode}.
     failed: |-
-      <quote id={messageId}/> 您未加入编号为 {rollCode} 的抽奖。
+      <quote id={messageId}/> You have not joined giveaway {rollCode}.
   remind.broadcast:
     message: |-
-      <p>编号为 {rollCode} 的抽奖正在进行中~</p>
+      <p>Giveaway {rollCode} is running~</p>
     messageWithDiff: |-
-      <p>编号为 {rollCode} 的抽奖还有 {diff} 就要结束啦~</p>
+      <p>Giveaway {rollCode} ends in {diff}~</p>
 
 messageBuilder:
   marks:
     open: |-
-      [进行中]
+      [running]
     end: |-
-      [已结束]
+      [ended]
     enable: |-
-      [启用中]
+      [enabled]
     disable: |-
-      [已禁用]
+      [disabled]
     specified: |-
-      [定时提醒]
+      [scheduled]
     beforeEnd: |-
-      [结束前提醒]
+      [before end]
     interval: |-
-      [间隔提醒]
+      [interval]
   roll.list:
     error: |-
-      没有找到抽奖！
+      No giveaway found!
     header: |-
-      <p>抽奖列表：</p>
+      <p>Giveaway list:</p>
     listItem: |-
       <p>[{roll_code}] {title}</p>
   roll.detail:
     noCondition: |-
       none
     noEndTime: |-
-      无
+      None
     divider: |-
       <p>---------</p>
     header: |-
       <p>{mark} [{roll_code}] {title}</p>
-      <p>截止时间：{endTime}</p>
-      <p>描述：{description}</p>
+      <p>Ends at: {endTime}</p>
+      <p>Description: {description}</p>
       <p>Conditions: {condition}</p>
     body:
       prizeTitle: |-
-        <p>奖品列表：</p>
+        <p>Prizes:</p>
       prizeListItem: |-
         <p>{name} * {amount}</p>
       winnerTitle: |-
-        <p>中奖名单：</p>
+        <p>Winners:</p>
       winner: |-
-        <p>{userName} ({userId}) 获得了：</p>
+        <p>{userName} ({userId}) won:</p>
       winList: |-
         <p> - {name} * {amount}</p>
   roll.member:
     empty: |-
-      当前抽奖没有参与成员！
+      This giveaway has no members yet!
     header: |-
-      <p>共有 {0} 人参与了抽奖 {1}：</p>
+      <p>{0} member(s) joined giveaway {1}:</p>
     body:
       memberListItem: |-
         <p>{userName} ({userId})</p>
@@ -507,51 +507,51 @@ messageBuilder:
         <p> - {name} * {amount}</p>
   roll.remind:
     defaultReminder: |-
-      默认
+      Default
     empty: |-
-      当前抽奖没有启用的提醒！
+      This giveaway has no enabled reminder!
     header: |-
-      <p>启用的提醒：</p>
+      <p>Enabled reminders:</p>
     listItem: |-
       <p>[{reminder_code}] {description}</p>
     description:
       specified: |-
-        在 {timeDescription} 提醒一次
+        Remind once at {timeDescription}
       beforeEnd: |-
-        在抽奖结束前 {timeDescription} 提醒一次
+        Remind once {timeDescription} before the giveaway ends
       interval: |-
-        在每个 {intervalDescription} 提醒一次
+        Remind every {intervalDescription}
       year: |-
-        {0} 年
+        {0} year(s)
       month: |-
-        {0} 月
+        {0} month(s)
       day: |-
-        {0} 日
+        {0} day(s)
       hour: |-
-        {0} 时
+        {0} hour(s)
       minute: |-
-        {0} 分
+        {0} minute(s)
   reminder.list:
     error: |-
-      你还没有创建过提醒器！
+      You have not created any reminder yet!
     header: |-
-      <p>你创建的提醒器列表：</p>
+      <p>Reminders you created:</p>
     listItem: |-
       <p>[{reminder_code}] {description}</p>
     description:
       specified: |-
-        在 {timeDescription} 提醒一次
+        Remind once at {timeDescription}
       beforeEnd: |-
-        在抽奖结束前 {timeDescription} 提醒一次
+        Remind once {timeDescription} before the giveaway ends
       interval: |-
-        在每个 {intervalDescription} 提醒一次
+        Remind every {intervalDescription}
       year: |-
-        {0} 年
+        {0} year(s)
       month: |-
-        {0} 月
+        {0} month(s)
       day: |-
-        {0} 日
+        {0} day(s)
       hour: |-
-        {0} 时
+        {0} hour(s)
       minute: |-
-        {0} 分
+        {0} minute(s)
