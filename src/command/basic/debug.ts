@@ -63,6 +63,7 @@ export function debugProbe(ctx: Context, config: Config) {
     })
 
   ctx.command("giveaway.debug.member [user]")
+    .alias('抽奖成员诊断')
     .action(async ({session}, user) => {
       if (!hasAuthority(session, config.permission.authorityManage)) return session.text('.noAuth')
       if (!session.guildId) return session.text('.groupOnly')

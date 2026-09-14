@@ -100,14 +100,22 @@ commands:
     输入超时
   giveaway:
     description: |-
-      Giveaway 抽奖功能
+      Giveaway commands
   giveaway.help:
     description: |-
-      显示 Giveaway 帮助信息
+      Show the command list
+    item: "    {0}  {1}"
+    groups:
+      join: '[Join]'
+      manage: '[Create & manage]'
+      settings: '[Settings]'
+      admin: '[Admin]'
     messages:
       help: |-
-        <p>帮助文档：</p>
-        <a>https://github.com/firedrakeovo/koishi-plugin-giveaway</a>
+        <p>Giveaway commands (prefix with "giveaway"; sending "giveaway" alone shows this list):</p>
+      footer: |-
+        <p>The detail message shows the conditions in effect; you can also join by sending the giveaway's join key in the group.</p>
+        <p>Docs: <a>https://github.com/firedrakeovo/koishi-plugin-giveaway</a></p>
   giveaway.channel:
     description: |-
       获取当前频道的频道id

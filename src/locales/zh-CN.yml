@@ -103,11 +103,19 @@ commands:
       Giveaway 抽奖功能
   giveaway.help:
     description: |-
-      显示 Giveaway 帮助信息
+      显示抽奖指令一览
+    item: "    {0}  {1}"
+    groups:
+      join: 【参与】
+      manage: 【创建与管理】
+      settings: 【设置】
+      admin: 【管理员】
     messages:
       help: |-
-        <p>帮助文档：</p>
-        <a>https://github.com/firedrakeovo/koishi-plugin-giveaway</a>
+        <p>抽奖指令一览（前缀用「抽奖」或 giveaway，直接发「抽奖」就能看到这份表）：</p>
+      footer: |-
+        <p>详情里能看到当前生效的参与条件；也可以直接把抽奖的「加入口令」发到群里参与。</p>
+        <p>文档：<a>https://github.com/firedrakeovo/koishi-plugin-giveaway</a></p>
   giveaway.channel:
     description: |-
       获取当前频道的频道id
