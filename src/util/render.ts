@@ -202,7 +202,8 @@ export async function rollEndImage(
 ): Promise<h[] | null> {
   const winners = await collectWinners(ctx, roll, bot)
   const t = translator(ctx, locales)
-  const MEDALS = ['🥇', '🥈', '🥉']
+  // 名次符号随风格变化：哥特用罗马数字，其余用奖牌
+  const MEDALS = style === 'gothic' ? ['Ⅰ', 'Ⅱ', 'Ⅲ'] : ['🥇', '🥈', '🥉']
   const rows = winners.map((winner, index) => `<div class="winner">
       <div class="rank">${MEDALS[index] ?? index + 1}</div>
       ${showAvatar && winner.avatar

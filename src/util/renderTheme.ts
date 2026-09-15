@@ -5,10 +5,10 @@
  * 只通过 `data-theme` 切换主题，因此新增风格只要再写一份主题 CSS 即可。
  */
 
-export type RenderStyle = 'default' | 'anime'
+export type RenderStyle = 'default' | 'anime' | 'gothic'
 
 /** 可选风格（供 Schema 与控制台展示） */
-export const RENDER_STYLES: RenderStyle[] = ['default', 'anime']
+export const RENDER_STYLES: RenderStyle[] = ['default', 'anime', 'gothic']
 
 export interface ShellOptions {
   eyebrow: string
@@ -161,9 +161,63 @@ const ANIME_THEME_CSS = `
   .foot { color: #d7b9cd; }
 `
 
+/** 哥特风格：暗夜黑 + 血红 + 古金，衬线字体与四角装饰 */
+const GOTHIC_THEME_CSS = `
+  :root {
+    --brand: #b3122b; --brand-2: #4a0d1a;
+    --ink: #ece5d8; --ink-2: #c3b8a4; --ink-3: #8d8172;
+    --line: rgba(201, 162, 39, .20); --bg: #0c0a0f; --card: #17131c; --card-border: #3a2f22;
+    --ok: #e0b64a; --ok-bg: rgba(224, 182, 74, .14); --muted-ink: #9a9082; --muted-bg: rgba(255, 255, 255, .06);
+    --chip-bg: rgba(201, 162, 39, .10); --chip-ink: #e2cf9b; --chip-radius: 3px;
+    --key-bg: rgba(179, 18, 43, .20); --key-ink: #ffb3be; --key-border: rgba(255, 120, 140, .55);
+    --avatar-bg: linear-gradient(135deg, #2a2130, #3a2430); --avatar-ink: #e0b64a;
+    --avatar-ring: 0 0 0 2px #17131c, 0 0 0 3px rgba(201, 162, 39, .8);
+    --accent-bar: linear-gradient(#c9a227, #b3122b);
+    --head-bg: linear-gradient(135deg, #33000e 0%, #140d18 55%, #241430 100%);
+    --meta-bg: rgba(201, 162, 39, .16); --foot-ink: #6f6455;
+    --radius: 6px;
+    --card-shadow: 0 0 0 1px rgba(201, 162, 39, .16) inset, 0 3px 0 rgba(201, 162, 39, .10),
+                   0 26px 52px -28px #000;
+    --bg-image: radial-gradient(80% 60% at 50% -10%, rgba(179, 18, 43, .38) 0%, rgba(12, 10, 15, 0) 62%),
+                radial-gradient(60% 45% at 50% 108%, rgba(109, 16, 32, .40) 0%, rgba(12, 10, 15, 0) 60%);
+    --sans: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  body { padding: 24px; }
+  /* 顶栏：暗红渐隐 + 金色下边线 + 哥特窗格纹 */
+  .head { border-bottom: 1px solid rgba(201, 162, 39, .45); padding-bottom: 22px; }
+  .head::before { content: ""; position: absolute; inset: 0; opacity: .5;
+    background-image: radial-gradient(circle at 50% 140%, rgba(201, 162, 39, .30) 0 2px, rgba(0, 0, 0, 0) 3px),
+                      repeating-linear-gradient(90deg, rgba(201, 162, 39, .09) 0 1px, rgba(0, 0, 0, 0) 1px 26px); }
+  .head .eyebrow { color: #d9c07a; letter-spacing: 3.5px; }
+  .head .title { font-weight: 700; letter-spacing: 2px; text-shadow: 0 2px 14px rgba(179, 18, 43, .65); }
+  .head .meta span { background: var(--meta-bg); border: 1px solid rgba(201, 162, 39, .32); letter-spacing: .6px; }
+  /* 四角纹章 */
+  .card::before, .card::after { position: absolute; z-index: 3; color: rgba(214, 178, 70, .75);
+    line-height: 1; pointer-events: none; text-shadow: 0 0 6px rgba(201, 162, 39, .5); }
+  .card::before { content: "❖"; top: 14px; right: 20px; font-size: 16px; }
+  .card::after { content: "✦"; bottom: 14px; right: 20px; font-size: 14px; }
+  .row { padding: 16px 0; }
+  .chip { border: 1px solid rgba(201, 162, 39, .34); font-weight: 500; letter-spacing: .5px; }
+  .chip::before { content: "◆"; width: auto; height: auto; background: none; font-size: 8px; }
+  .chip.open { color: #e6c163; }
+  .chip.ended { color: #9a9082; border-color: rgba(255, 255, 255, .14); }
+  .code { color: #c9a227; }
+  .name { letter-spacing: .3px; }
+  .prize { border: 1px solid rgba(201, 162, 39, .30); letter-spacing: .3px; }
+  .key { border-style: solid; }
+  .section .sec-title { color: #c9a227; letter-spacing: 1.5px; }
+  .rank { color: #c9a227; font-size: 17px; letter-spacing: 1px; }
+  .who .nick { letter-spacing: .3px; }
+  .winner { border-radius: 2px; }
+  .winner:nth-child(odd) { background: linear-gradient(90deg, rgba(179, 18, 43, .12), rgba(0, 0, 0, 0)); }
+  .empty { color: #8d8172; letter-spacing: 1px; }
+`
+
 const THEMES: Record<RenderStyle, string> = {
   default: DEFAULT_THEME_CSS,
   anime: ANIME_THEME_CSS,
+  gothic: GOTHIC_THEME_CSS,
 }
 
 /** 拼出完整 HTML：骨骼 + 主题 + 数据 */

@@ -86,10 +86,12 @@ _config:
         <ul>
           <li><b>Standard:</b> Koishi-Verlauf in Blau-Violett, klare Karte</li>
           <li><b>Anime:</b> Sakura-Rosa / Lavendel, runde Formen, niedliche Symbole und Glitzer</li>
+          <li><b>Gotisch:</b> Mitternachtsschwarz + Blutrot + Altgold, Serifenschrift, Goldlinien und Wappenornamente</li>
         </ul>
       $inner:
         - Standard
         - Anime
+        - Gotisch
     create: |-
       <p>Nach dem Erstellen einer Verlosung deren Inhalt (Nummer / Titel / Beschreibung / Endzeit / Beitrittswort / Preise / Bedingungen) als Bild rendern.</p>
       <p>Erfordert installiertes und aktiviertes <code>koishi-plugin-puppeteer</code>; ohne dieses (oder bei Fehlern) wird nur die Textnachricht gesendet.</p>

@@ -205,7 +205,7 @@ npm i koishi-plugin-giveaway
 | | `dragonScope` | 「龙王」的判定口径：昨日活跃榜（默认）/ 仅当前龙王（仅控制台配置） |
 | | `onFetchError` | 取不到成员 / 荣誉数据时放行还是拒绝，默认放行 |
 | | `cacheMinutes` | 群荣誉数据的缓存时长（分钟），默认 `5` |
-| `render` | `style` | 图片卡片风格：`default`（Koishi 品牌蓝紫渐变，默认）/ `anime`（二次元：樱花粉 + 薰衣草紫、圆角描边、表情与星光） |
+| `render` | `style` | 图片卡片风格：`default`（Koishi 品牌蓝紫渐变，默认）/ `anime`（二次元：樱花粉 + 薰衣草紫、圆角描边、表情与星光）/ `gothic`（哥特：暗夜黑 + 血红 + 古金、衬线字体与纹章装饰） |
 | | `create` | 创建成功后把抽奖内容渲染成图片，默认开启 |
 | | `list` | `抽奖列表` 用图片渲染（需要 `puppeteer` 服务），默认开启 |
 | | `result` | 开奖结果用图片渲染（需要 `puppeteer` 服务），默认开启 |
@@ -229,7 +229,7 @@ npm i koishi-plugin-giveaway
 - 图片里的标签随语言变化（简体中文 / English / Deutsch），抽奖标题等用户输入会做 HTML 转义，避免破坏排版
 - 中奖者头像：优先用 OneBot 用户资料里的 `avatar`，取不到就按 QQ 号拼 qlogo 地址；
   昵称取不到时退化为只显示 QQ 号，头像加载失败时显示昵称首字（都不会出现破图）
-- **两种风格**（`render.style`）：`default` 走 Koishi 品牌蓝紫渐变；`anime` 走樱花粉 / 薰衣草紫渐变、圆润描边、💗/🤍 状态表情、🎁 奖品与 ✨🌸 点缀
+- **三种风格**（`render.style`）：`default` 走 Koishi 品牌蓝紫渐变；`anime` 走樱花粉 / 薰衣草紫渐变、圆润描边、💗/🤍 状态表情、🎁 奖品与 ✨🌸 点缀；`gothic` 走暗夜黑 + 血红 + 古金、衬线字体、金色细描边、❖/✦ 纹章与罗马数字名次
 - 卡片结构：顶栏为 eyebrow + 标题 + 信息胶囊，正文用状态胶囊、等宽编号、奖品胶囊与分区小标题，
   开奖结果给中奖者加名次奖牌（🥇🥈🥉）、头像圆环与等宽 QQ 号，页脚是插件名（两种风格共用同一套排版，只换主题）
 - 想要纯文字：把 `render.create` / `render.list` / `render.result` 关掉即可

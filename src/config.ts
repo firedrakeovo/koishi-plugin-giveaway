@@ -43,7 +43,7 @@ export type HonorRequirement = 'fire7' | 'fire30' | 'dragon'
  */
 namespace RenderConfig {
   export interface Config {
-    style: 'default' | 'anime'
+    style: 'default' | 'anime' | 'gothic'
     create: boolean
     list: boolean
     result: boolean
@@ -132,6 +132,7 @@ const renderConfig: Schema<RenderConfig.Config> = Schema.object({
   style: Schema.union([
     Schema.const('default'),
     Schema.const('anime'),
+    Schema.const('gothic'),
   ]).default('default'),
   create: Schema.boolean().default(true),
   list: Schema.boolean().default(true),
