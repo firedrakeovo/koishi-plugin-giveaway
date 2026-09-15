@@ -80,6 +80,16 @@ _config:
   render:
     $description: |-
       Image rendering (optional)
+    style:
+      $description: |-
+        <p>Visual style of the rendered cards.</p>
+        <ul>
+          <li><b>Default:</b> Koishi brand blue-violet gradient, clean card</li>
+          <li><b>Anime:</b> sakura pink / lavender gradient, rounder shapes, cute icons and sparkles</li>
+        </ul>
+      $inner:
+        - Default
+        - Anime
     create: |-
       <p>After a giveaway is created, render its content (code / title / description / end time / join key / prizes / conditions) as an image.</p>
       <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; without it (or when rendering fails) only the plain text message is sent.</p>

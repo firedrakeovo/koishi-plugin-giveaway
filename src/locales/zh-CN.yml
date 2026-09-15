@@ -80,6 +80,16 @@ _config:
   render:
     $description: |-
       图片渲染（可选）
+    style:
+      $description: |-
+        <p>图片卡片的界面风格。</p>
+        <ul>
+          <li><b>默认：</b>Koishi 品牌蓝紫渐变 + 简洁卡片</li>
+          <li><b>二次元：</b>樱花粉 / 薰衣草紫渐变，圆润描边、状态表情与星光点缀</li>
+        </ul>
+      $inner:
+        - 默认
+        - 二次元
     create: |-
       <p>创建抽奖成功后，把抽奖内容（编号 / 标题 / 描述 / 开奖时间 / 口令 / 奖品 / 参与条件）渲染成一张图片。</p>
       <p>需要安装并启用 <code>koishi-plugin-puppeteer</code>；未安装或渲染失败时只发原来的文字提示。</p>

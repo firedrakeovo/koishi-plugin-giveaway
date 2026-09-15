@@ -1,6 +1,7 @@
 import { Context, Session, $, h } from 'koishi'
 import { DateTime } from 'luxon'
 import { bots, logger } from '../index'
+import { RenderStyle, esc, shellHtml } from './renderTheme'
 
 /**
  * 图片渲染（可选依赖 puppeteer）
@@ -40,13 +41,6 @@ export async function renderImage(ctx: Context, html: string): Promise<string | 
   }
 }
 
-const ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
-
-/** HTML 转义：抽奖标题 / 昵称都是用户输入，直接拼进模板会破坏排版 */
-function esc(input: unknown): string {
-  return String(input ?? '').replace(/[&<>"']/g, (char) => ESCAPES[char])
-}
-
 type Translate = (path: string, params?: Record<string, any>) => string
 
 /** 统一的文案取值：三语都走 i18n，图片里的标签也随语言变化 */
@@ -68,91 +62,6 @@ export async function channelLocaleList(ctx: Context, channelId: string, platfor
   const row: any = (await ctx.database.get('channel', { id: channelId, platform }))[0]
   const locales = row?.locales?.length ? [...row.locales] : [...ctx.root.options.i18n.locales]
   return locales
-}
-
-interface ShellOptions {
-  eyebrow: string
-  title: string
-  meta?: string[]
-  body: string
-  footRight?: string
-}
-
-/** 统一的卡片骨架：设计 token + 顶栏（eyebrow / 标题 / 信息胶囊）+ 正文 + 页脚 */
-function shell(t: Translate, options: ShellOptions): string {
-  const meta = (options.meta ?? []).filter(Boolean)
-  return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><style>
-  *, *::before, *::after { box-sizing: border-box; }
-  :root {
-    --brand: #4c7df0; --brand-2: #8a63f4;
-    --ink: #1d2430; --ink-2: #5b6472; --ink-3: #9aa3b2;
-    --line: #e9ecf1; --soft: #f4f6f9;
-    --ok: #15803d; --ok-bg: #e7f7ed;
-    --chip-bg: #eef3ff; --chip-ink: #3b4a66;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --sans: "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  }
-  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-  body { margin: 0; padding: 22px; display: flex; justify-content: center; color: var(--ink);
-    font-family: var(--sans); font-size: 15px; line-height: 1.5; background-color: #edf0f5;
-    background-image: radial-gradient(110% 80% at 10% 0%, #ffffff 0%, rgba(237,240,245,0) 62%),
-                      radial-gradient(90% 70% at 100% 100%, rgba(138, 99, 244, .12) 0%, rgba(237,240,245,0) 58%); }
-  .card { width: 760px; background: #fff; border-radius: 20px; overflow: hidden; border: 1px solid rgba(24, 39, 75, .06);
-    box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 2px 6px rgba(24,39,75,.05), 0 22px 48px -28px rgba(24,39,75,.5); }
-  .head { position: relative; padding: 24px 30px 20px; color: #fff; overflow: hidden;
-    background: linear-gradient(135deg, var(--brand), var(--brand-2)); }
-  .head::after { content: ""; position: absolute; width: 220px; height: 220px; right: -70px; top: -110px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 70%); }
-  .head .eyebrow { position: relative; font-size: 11px; letter-spacing: 2.6px; text-transform: uppercase; opacity: .82; }
-  .head .title { position: relative; margin-top: 10px; font-size: 26px; font-weight: 700; letter-spacing: .3px; }
-  .head .meta { position: relative; margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
-  .head .meta span { padding: 4px 11px; border-radius: 999px; font-size: 12.5px; background: rgba(255,255,255,.18); }
-  .body { padding: 6px 30px 4px; }
-  .row { display: flex; align-items: center; gap: 14px; padding: 15px 0; border-bottom: 1px solid var(--line); }
-  .row:last-child { border-bottom: 0; }
-  .chip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-  .chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .85; }
-  .chip.open { color: var(--ok); background: var(--ok-bg); }
-  .chip.ended { color: #6b7280; background: #f0f1f4; }
-  .code { flex: none; font-family: var(--mono); font-size: 14px; color: var(--ink-2); letter-spacing: .5px; }
-  .name { flex: 1; font-size: 16.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .time { flex: none; font-size: 12.5px; color: var(--ink-3); }
-  .kv { display: flex; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--line); }
-  .kv .k { flex: none; width: 92px; color: var(--ink-3); font-size: 13.5px; letter-spacing: .3px; }
-  .kv .v { flex: 1; word-break: break-word; }
-  .key { display: inline-block; padding: 3px 10px; border-radius: 8px; font-family: var(--mono); font-size: 15px;
-    color: #7c3aed; background: #f3efff; border: 1px dashed #d9cbff; }
-  .section { padding: 16px 0 2px; }
-  .section .sec-title { display: flex; align-items: center; gap: 8px; font-size: 12.5px; letter-spacing: .6px; color: var(--ink-3); margin-bottom: 12px; }
-  .section .sec-title::before { content: ""; width: 3px; height: 12px; border-radius: 2px; background: linear-gradient(var(--brand), var(--brand-2)); }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .prize { padding: 6px 13px; border-radius: 11px; font-size: 14px; color: var(--chip-ink); background: var(--chip-bg); }
-  .cond { color: var(--chip-ink); }
-  .winner { display: flex; align-items: center; gap: 14px; padding: 15px 0; border-bottom: 1px solid var(--line); }
-  .winner:last-child { border-bottom: 0; }
-  .rank { flex: none; width: 30px; text-align: center; font-size: 19px; line-height: 1; font-weight: 600; color: var(--ink-3); }
-  .avatar { position: relative; flex: none; width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
-    display: flex; align-items: center; justify-content: center; color: var(--brand); font-size: 17px; font-weight: 700;
-    background: linear-gradient(135deg, #e8efff, #f1e9ff); box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(76, 125, 240, .22); }
-  .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .who { flex: 1; min-width: 0; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .who .nick { font-size: 16.5px; font-weight: 600; }
-  .who .qq { margin-left: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
-  .prizes { flex: none; max-width: 300px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-  .empty { padding: 30px 0 34px; text-align: center; color: var(--ink-3); }
-  .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px;
-    padding: 14px 30px 18px; font-size: 11.5px; color: #b8c0cd; letter-spacing: .3px; }
-</style></head>
-<body><div class="card">
-  <div class="head">
-    <div class="eyebrow">${esc(options.eyebrow)}</div>
-    <div class="title">${esc(options.title)}</div>
-    ${meta.length ? `<div class="meta">${meta.map((item) => `<span>${esc(item)}</span>`).join('')}</div>` : ''}
-  </div>
-  <div class="body">${options.body}</div>
-  <div class="foot"><span>${esc(t('footer'))}</span><span>${esc(options.footRight ?? '')}</span></div>
-</div></body></html>`
 }
 
 export interface RollListItem {
@@ -186,7 +95,7 @@ export async function collectRollList(ctx: Context, cid: string, platform: strin
 }
 
 /** 抽奖列表图片（失败或没有数据时返回 null，由调用方回退文字） */
-export async function rollListImage(ctx: Context, session: Session, data: { open: RollListItem[]; ended: RollListItem[] }, offset: string, cid?: string): Promise<string | null> {
+export async function rollListImage(ctx: Context, session: Session, data: { open: RollListItem[]; ended: RollListItem[] }, offset: string, cid?: string, style: RenderStyle = 'default'): Promise<string | null> {
   const t = translator(ctx, localeList(session, ctx))
   const rows: string[] = []
   const push = (item: RollListItem) => {
@@ -205,12 +114,13 @@ export async function rollListImage(ctx: Context, session: Session, data: { open
   const body = rows.length
     ? rows.join('\n')
     : `<div class="empty">${esc(t('list.empty'))}</div>`
-  const html = shell(t, {
+  const html = shellHtml({
     eyebrow: t('eyebrow'),
     title: t('list.title'),
     meta: [t('list.summary', { 0: data.open.length, 1: data.ended.length }), cid ? t('list.channel', { 0: cid }) : ''],
     body,
-  })
+    brand: t('footer'),
+  }, style)
   return renderImage(ctx, html)
 }
 
@@ -288,6 +198,7 @@ export async function rollEndImage(
   locales: string[],
   bot?: BotLike,
   showAvatar = true,
+  style: RenderStyle = 'default',
 ): Promise<h[] | null> {
   const winners = await collectWinners(ctx, roll, bot)
   const t = translator(ctx, locales)
@@ -301,12 +212,13 @@ export async function rollEndImage(
       <div class="prizes">${winner.prizes.map((prize) => `<span class="prize">${esc(t('result.prize', { 0: prize.name, 1: prize.amount }))}</span>`).join('')}</div>
     </div>`).join('\n')
   const body = winners.length ? rows : `<div class="empty">${esc(t('result.noWinner'))}</div>`
-  const html = shell(t, {
+  const html = shellHtml({
     eyebrow: t('eyebrow'),
     title: t('result.title'),
     meta: [t('result.summary', { 0: roll.roll_code, 1: winners.length })],
     body,
-  })
+    brand: t('footer'),
+  }, style)
   const image = await renderImage(ctx, html)
   if (!image) return null
 
@@ -335,6 +247,7 @@ export async function rollCreatedImage(
   prizes: Array<{ name: string; amount: string | number }>,
   offset: string,
   conditions: string,
+  style: RenderStyle = 'default',
 ): Promise<string | null> {
   const t = translator(ctx, localeList(session, ctx))
   const rows: string[] = []
@@ -356,11 +269,12 @@ export async function rollCreatedImage(
     `<div class="section"><div class="sec-title">${esc(t('create.prizes'))}</div><div class="chips">${prizeChips}</div></div>`,
     `<div class="section"><div class="sec-title">${esc(t('create.conditions'))}</div><div class="cond">${esc(conditions)}</div></div>`,
   ].join('\n')
-  const html = shell(t, {
+  const html = shellHtml({
     eyebrow: t('eyebrow'),
     title: roll.title || t('create.title'),
     meta: [t('create.title'), t('create.summary', { 0: roll.roll_code })],
     body,
-  })
+    brand: t('footer'),
+  }, style)
   return renderImage(ctx, html)
 }
