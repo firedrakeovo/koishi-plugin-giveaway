@@ -116,6 +116,7 @@ _config:
       <p>How long before the scheduled draw to remind the group. Add more rows for more reminders.</p>
       <p>Format is <b>year-month-day-hour-minute</b> (fill unused parts with <code>0</code>): <code>0-0-0-1-0</code> = 1 hour before, <code>0-0-0-0-30</code> = 30 minutes before.</p>
       <p>Only applies to giveaways with an end time; leave empty to disable. The message looks like "Giveaway X ends in …".</p>
+      <p>Defaults: <code>0-0-0-0-10</code>, <code>0-0-0-1-0</code>, <code>0-0-0-5-0</code>, <code>0-0-1-0-0</code>, <code>0-0-3-0-0</code> (10 minutes / 1 hour / 5 hours / 1 day / 3 days before the draw). Offsets already in the past are skipped, so shorter giveaways simply get fewer reminders.</p>
 commands:
   timeout: |-
     Input timed out

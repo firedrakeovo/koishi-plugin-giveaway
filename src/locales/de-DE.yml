@@ -116,6 +116,7 @@ _config:
       <p>Wie lange vor der geplanten Ziehung die Gruppe erinnert wird. Weitere Zeilen = weitere Erinnerungen.</p>
       <p>Format: <b>Jahr-Monat-Tag-Stunde-Minute</b> (nicht genutzte Teile mit <code>0</code>): <code>0-0-0-1-0</code> = 1 Stunde vorher, <code>0-0-0-0-30</code> = 30 Minuten vorher.</p>
       <p>Gilt nur für Verlosungen mit Endzeit; leer = keine Erinnerung. Text z. B. „Verlosung X endet in …“.</p>
+      <p>Standardwerte: <code>0-0-0-0-10</code>, <code>0-0-0-1-0</code>, <code>0-0-0-5-0</code>, <code>0-0-1-0-0</code>, <code>0-0-3-0-0</code> (10 Minuten / 1 Stunde / 5 Stunden / 1 Tag / 3 Tage vor der Ziehung). Bereits vergangene Abstände werden übersprungen, kürzere Verlosungen bekommen also einfach weniger Erinnerungen.</p>
 commands:
   timeout: |-
     Zeitüberschreitung bei der Eingabe

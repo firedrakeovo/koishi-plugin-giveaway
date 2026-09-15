@@ -53,6 +53,14 @@ namespace RenderConfig {
   }
 }
 
+/**
+ * 「开奖前 N」提醒的默认时间点：开奖前 10 分钟 / 1 小时 / 5 小时 / 1 天 / 3 天。
+ *
+ * 偏移是「开奖前多久」，与抽奖本身多长无关：已经过去的偏移会被自动跳过，
+ * 所以 1 小时的短场次只会收到「开奖前 10 分钟」，7 天的长场次才会依次用满整条阶梯。
+ */
+export const DEFAULT_BEFORE_END = ['0-0-0-0-10', '0-0-0-1-0', '0-0-0-5-0', '0-0-1-0-0', '0-0-3-0-0']
+
 export namespace RemindConfig {
   export interface Config {
     /**
@@ -152,7 +160,7 @@ const remindConfig: Schema<RemindConfig.Config> = Schema.object({
     Schema.string()
       .pattern(/^\d{1,4}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}$/)
       .description('年-月-日-时-分，例如 0-0-0-1-0 = 开奖前 1 小时'),
-  ).role('table').default(['0-0-0-1-0']),
+  ).role('table').default(DEFAULT_BEFORE_END),
 })
 
 export const Config: Schema<Config> = Schema.object({
