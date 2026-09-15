@@ -111,22 +111,11 @@ _config:
       <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; falls back to the plain text message when it is missing or rendering fails.</p>
   remind:
     $description: |-
-      Reminders
-    defaultReminders:
-      $description: |-
-        <p>Reminders enabled by default when a giveaway is created.</p>
-        <p><b>type</b> — kind of reminder:</p>
-        <ul>
-          <li><b>Scheduled</b>: remind once at a given moment</li>
-          <li><b>Before end</b>: remind a given time before the giveaway ends</li>
-        </ul>
-        <p><b>value</b> — time or interval, formatted as <b>year-month-day-hour-minute</b> (pad unused parts with 0)</p>
-      value: |-
-        Format: year-month-day-hour-minute
-      type:
-        $inner:
-          - Scheduled
-          - Before end
+      Draw reminders
+    beforeEnd: |-
+      <p>How long before the scheduled draw to remind the group. Add more rows for more reminders.</p>
+      <p>Format is <b>year-month-day-hour-minute</b> (fill unused parts with <code>0</code>): <code>0-0-0-1-0</code> = 1 hour before, <code>0-0-0-0-30</code> = 30 minutes before.</p>
+      <p>Only applies to giveaways with an end time; leave empty to disable. The message looks like "Giveaway X ends in …".</p>
 commands:
   timeout: |-
     Input timed out

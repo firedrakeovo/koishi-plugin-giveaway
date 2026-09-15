@@ -208,7 +208,7 @@ export async function rollRemindMsgFromRollId(session: Session, config: Config, 
   let isIntervalListEmpty = true
 
   const r = await ctx.database.get('remind', {roll_id: rollId})
-  if (r.length === 0 && config.remind.defaultReminders.length === 0) return session.text('messageBuilder.roll.remind.empty')
+  if (r.length === 0 && (config.remind.beforeEnd ?? []).length === 0) return session.text('messageBuilder.roll.remind.empty')
   const res = r.map((item) => item.reminder_id)
 
   let listItem
@@ -237,38 +237,14 @@ export async function rollRemindMsgFromRollId(session: Session, config: Config, 
     }
   }
 
-  // from config
-  for (const remind of config.remind.defaultReminders) {
-    let reminder
-    switch (remind.type) {
-      case '0':
-        reminder = {
-          type: remind.type,
-          time: dateInputToDateTime(remind.value, offset).toJSDate()
-        }
-        break
-      case '1':
-        reminder = {
-          type: remind.type,
-          duration: dateInputToDuration(remind.value)
-        }
-        break
-    }
-
-    listItem = {
+  // from config：控制台配置的「开奖前 N」偏移（不落库，展示时合成一条）
+  const configOffset = await getCurrentUTCOffset(ctx, session, config)
+  for (const beforeEndOffset of config.remind.beforeEnd ?? []) {
+    beforeEndList += session.text('messageBuilder.reminder.list.listItem', {
       reminder_code: session.text('messageBuilder.roll.remind.defaultReminder'),
-      description: getReminderDescription(session, reminder, await getCurrentUTCOffset(ctx, session, config), getCurrentLocales(ctx, session, config)),
-    }
-    switch (remind.type) {
-      case '0':
-        specifedList += session.text('messageBuilder.reminder.list.listItem', listItem)
-        isSpecifedListEmpty = false
-        break
-      case '1':
-        beforeEndList += session.text('messageBuilder.reminder.list.listItem', listItem)
-        isBeforeEndListEmpty = false
-        break
-    }
+      description: getReminderDescription(session, { type: '1', duration: dateInputToDuration(beforeEndOffset) }, configOffset, getCurrentLocales(ctx, session, config)),
+    })
+    isBeforeEndListEmpty = false
   }
 
   if (!isSpecifedListEmpty) msg += specifedList

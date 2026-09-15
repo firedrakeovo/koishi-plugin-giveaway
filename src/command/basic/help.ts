@@ -8,8 +8,8 @@ import {pickLang} from '../../util/rollPolicy';
  * 新增指令时在这里补一行即可（create-test 里有用例检查漏掉的指令）。
  */
 const GROUPS: Array<[string, string[]]> = [
-  ['join', ['list', 'detail', 'join', 'quit', 'member', 'remind']],
-  ['manage', ['add', 'end', 'delete', 'help', 'reminder.add', 'reminder.list', 'reminder.enable', 'reminder.disable', 'reminder.delete']],
+  ['join', ['list', 'detail', 'join', 'quit', 'member']],
+  ['manage', ['add', 'end', 'delete', 'help']],
   ['settings', ['time', 'locale', 'channel']],
   ['admin', ['debug.honor', 'debug.member']],
 ]

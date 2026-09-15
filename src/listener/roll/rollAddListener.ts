@@ -1,7 +1,7 @@
 import {Context} from 'koishi'
 import {Config} from '../../config'
-import {autoEndManager, remindManager} from "../../index";
-import {getRemindValueFromDefaultReminder} from "../../util/general";
+import {autoEndManager} from "../../index";
+import {scheduleRollReminds} from "../../util/rollRemind";
 import {policyToRow} from "../../util/rollPolicy";
 
 export function rollAddListener(ctx: Context, config: Config) {
@@ -38,13 +38,14 @@ export function rollAddListener(ctx: Context, config: Config) {
     }
 
     ctx.emit('giveaway/roll-key-update')
-    // Apply default reminds
-    for (const defaultRemind of config.remind.defaultReminders) {
-      if (rollRes.endTime || defaultRemind.type != '1') {
-        remindManager.addJob(rollRes.id, getRemindValueFromDefaultReminder(rollRes.endTime, defaultRemind, config), function () {
-          ctx.emit('giveaway/remind-broadcast', rollRes.id)
-        })
-      }
+    // 开奖提醒（控制台配置的「开奖前 N」偏移）：只对填了开奖时间的抽奖生效
+    if (rollRes.endTime) {
+      scheduleRollReminds(
+        ((event, ...args) => ctx.emit(event as any, ...args)),
+        rollRes.id,
+        rollRes.endTime,
+        config.remind?.beforeEnd,
+      )
     }
     // Create auto end job
     if (rollRes.endTime) {

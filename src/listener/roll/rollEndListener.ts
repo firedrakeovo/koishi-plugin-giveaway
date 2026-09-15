@@ -5,6 +5,7 @@ import {getWinnerList} from "../../util/winnerGenerator";
 import {rollEndMsgFromRollId} from "../../util/messageBuilder";
 import {channelLocaleList, hasPuppeteer, rollEndImage} from "../../util/render";
 import {bots, expireManager} from "../../index";
+import {clearRollReminds} from "../../util/rollRemind";
 
 export function rollEndListener(ctx: Context, config: Config) {
   ctx.on('giveaway/roll-end', async (rollId) => {
@@ -52,6 +53,8 @@ export function rollEndListener(ctx: Context, config: Config) {
     for (const remind of remindRes) {
       ctx.emit('giveaway/remind-delete', remind.id)
     }
+    // 开奖后清理控制台配置的「开奖前 N」提醒任务
+    clearRollReminds(roll.id)
     // register expire listener
     const expireTime = DateTime.now().plus({hours: config.basic.cacheHours}).toUTC().toJSDate()
     expireManager.addJob(roll.id, expireTime, function () {

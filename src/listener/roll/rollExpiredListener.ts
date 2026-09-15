@@ -1,7 +1,8 @@
 import {Context} from 'koishi';
 import {DateTime} from 'luxon';
 import {Config} from '../../config';
-import {autoEndManager, expireManager, globalState} from "../../index";
+import {autoEndManager, expireManager} from "../../index";
+import {clearRollReminds} from "../../util/rollRemind";
 
 export function rollExpiredListener(ctx: Context, config: Config) {
   // init
@@ -36,6 +37,8 @@ export function rollExpiredListener(ctx: Context, config: Config) {
     for (const remind of remindRes) {
       ctx.emit('giveaway/remind-delete', remind.id)
     }
+    // 抽奖记录被清理时，控制台配置的提醒任务一并清掉
+    clearRollReminds(rollId)
     // remove join key listener
     ctx.emit('giveaway/roll-key-update')
   })

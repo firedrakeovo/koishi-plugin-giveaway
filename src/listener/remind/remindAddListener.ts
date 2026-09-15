@@ -1,7 +1,8 @@
 import {Context, $} from 'koishi'
 import {Config} from '../../config'
-import {globalState, remindManager} from "../../index";
-import {getRemindValueFromDefaultReminder, getRemindValueFromReminder} from "../../util/general";
+import {remindManager} from "../../index";
+import {getRemindValueFromReminder} from "../../util/general";
+import {scheduleRollReminds} from "../../util/rollRemind";
 
 export function remindAddListener(ctx: Context, config: Config) {
   ctx.on('ready', async () => {
@@ -18,16 +19,13 @@ export function remindAddListener(ctx: Context, config: Config) {
         })
       }
     }
-    // default remind from config
-    for (const defaultRemind of config.remind.defaultReminders) {
+    // 开奖提醒：按控制台配置的「开奖前 N」偏移，给所有未结束、有开奖时间的抽奖重建 job
+    const offsets = config.remind?.beforeEnd ?? []
+    if (offsets.length) {
       const rollRes = await ctx.database.get('roll', {isEnd: 0})
       for (const roll of rollRes) {
-        if (roll.endTime || defaultRemind.type != '1') {
-          remindManager.addJob(globalState.remindInitialId, getRemindValueFromDefaultReminder(roll.endTime, defaultRemind, config), function () {
-            ctx.emit('giveaway/remind-broadcast', roll.id)
-          })
-          globalState.remindInitialId++
-        }
+        if (!roll.endTime) continue
+        scheduleRollReminds(((event, ...args) => ctx.emit(event as any, ...args)), roll.id, roll.endTime, offsets)
       }
     }
   })

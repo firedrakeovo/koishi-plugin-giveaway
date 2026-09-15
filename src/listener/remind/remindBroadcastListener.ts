@@ -15,6 +15,8 @@ export function remindBroadcastListener(ctx: Context, config: Config) {
       remindRange = await ctx.database.get('remind_channel', {remind_id: remindId})
     }
     const rollRes = await ctx.database.get('roll', {id: rollId})
+    // 抽奖可能已经被手动删除 / 清理（提醒任务理论上会被一并取消，这里再兜一层，避免报错刷屏）
+    if (!rollRes[0]) return
     const rollCode = rollRes[0].roll_code
     if (rollRes[0].endTime) {
       const end = DateTime.fromJSDate(rollRes[0].endTime, {zone: 'UTC'})
@@ -26,11 +28,11 @@ export function remindBroadcastListener(ctx: Context, config: Config) {
     if (rollRes[0].isEnd) return
 
     for (const item of remindRange) {
-      for (const bot of bots) {
+      for (const bot of bots ?? []) {
         if (bot.platform === item.channel_platform) {
           let locales
           const currentChannel = await ctx.database.get('channel', {id: item.channel_id, platform: item.channel_platform})
-          if (currentChannel[0].locales.length === 0) {
+          if (!currentChannel[0] || currentChannel[0].locales.length === 0) {
             locales = ctx.root.options.i18n.locales
           } else {
             locales = currentChannel[0].locales

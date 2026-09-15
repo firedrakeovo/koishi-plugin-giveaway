@@ -101,22 +101,14 @@ export function getRemindValueFromReminder(endTime: Date, reminder: any) {
   }
 }
 
-export function getRemindValueFromDefaultReminder(endTime: Date, reminder: any, config: Config) {
-  // {type: string, value: string}
-  // Date / Duration / RecurrenceRule
-  const offset = offsetToUTCOffset(config.basic.defaultTimeOffset)
-  switch (reminder.type) {
-    case '0':
-      return dateInputToDateTime(reminder.value, offset).toJSDate()
-    case '1':
-      const duration = dateInputToDuration(reminder.value)
-      return DateTime.fromJSDate(endTime).minus(duration).toJSDate()
-    case '2':
-      // TODO: Support default interval reminder
-      return
-    default:
-      return
-  }
+/**
+ * 控制台配置的「开奖前偏移」→ 实际触发时刻
+ *
+ * @param endTime 抽奖的开奖时间
+ * @param value   形如 `0-0-0-1-0`（年-月-日-时-分），表示开奖前多久
+ */
+export function getRemindValueFromBeforeEnd(endTime: Date, value: string): Date {
+  return DateTime.fromJSDate(endTime).minus(dateInputToDuration(value)).toJSDate()
 }
 
 /**

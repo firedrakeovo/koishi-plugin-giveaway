@@ -111,22 +111,11 @@ _config:
       <p>Erfordert installiertes und aktiviertes <code>koishi-plugin-puppeteer</code>; ohne dieses oder bei Fehlern wird die reine Textnachricht gesendet.</p>
   remind:
     $description: |-
-      Erinnerungen
-    defaultReminders:
-      $description: |-
-        <p>Erinnerungen, die beim Erstellen einer Verlosung standardmäßig aktiv sind.</p>
-        <p><b>type</b> — Art der Erinnerung:</p>
-        <ul>
-          <li><b>Geplant</b>: einmal zu einem bestimmten Zeitpunkt erinnern</li>
-          <li><b>Vor Ende</b>: eine bestimmte Zeit vor Ende der Verlosung erinnern</li>
-        </ul>
-        <p><b>value</b> — Zeit oder Intervall im Format <b>Jahr-Monat-Tag-Stunde-Minute</b> (nicht genutzte Teile mit 0 füllen)</p>
-      value: |-
-        Format: Jahr-Monat-Tag-Stunde-Minute
-      type:
-        $inner:
-          - Geplant
-          - Vor Ende
+      Ziehungs-Erinnerungen
+    beforeEnd: |-
+      <p>Wie lange vor der geplanten Ziehung die Gruppe erinnert wird. Weitere Zeilen = weitere Erinnerungen.</p>
+      <p>Format: <b>Jahr-Monat-Tag-Stunde-Minute</b> (nicht genutzte Teile mit <code>0</code>): <code>0-0-0-1-0</code> = 1 Stunde vorher, <code>0-0-0-0-30</code> = 30 Minuten vorher.</p>
+      <p>Gilt nur für Verlosungen mit Endzeit; leer = keine Erinnerung. Text z. B. „Verlosung X endet in …“.</p>
 commands:
   timeout: |-
     Zeitüberschreitung bei der Eingabe

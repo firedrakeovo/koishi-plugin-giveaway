@@ -13,16 +13,10 @@ import {joinRoll} from './command/roll/join'
 import {quitRoll} from './command/roll/quit'
 import {listRoll} from './command/roll/list'
 import {memberRoll} from './command/roll/member'
-import {remindRoll} from './command/roll/remind'
 
 import {locale} from './command/i18n/locale'
 import {time} from './command/i18n/time'
 
-import {addReminder} from './command/remind/add'
-import {deleteReminder} from "./command/remind/delete"
-import {listReminder} from "./command/remind/list"
-import {enableRemind} from "./command/remind/enable"
-import {disableRemind} from "./command/remind/disable"
 
 export const name = 'Command'
 
@@ -43,13 +37,6 @@ export function apply(ctx: Context, config: Config) {
   quitRoll(ctx, config)
   listRoll(ctx, config)
   memberRoll(ctx, config)
-  remindRoll(ctx, config)
+  // 手动创建/管理提醒器的指令已下线：开奖提醒改为控制台配置（remind.beforeEnd）后自动排期
 
-  ctx.command('giveaway.reminder')
-  addReminder(ctx, config)
-  deleteReminder(ctx, config)
-  listReminder(ctx, config)
-
-  enableRemind(ctx, config)
-  disableRemind(ctx, config)
 }

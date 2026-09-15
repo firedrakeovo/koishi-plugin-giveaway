@@ -55,10 +55,13 @@ namespace RenderConfig {
 
 export namespace RemindConfig {
   export interface Config {
-    defaultReminders?: Array<{
-      type: "0" | "1"
-      value: string
-    }>
+    /**
+     * 定时开奖前的提醒偏移列表（留空 = 不提醒）。
+     *
+     * 每个元素形如 `0-0-0-1-0`（年-月-日-时-分，未用到的位填 0），表示「开奖前 1 小时提醒一次」；
+     * 只对填了开奖时间的抽奖生效，多个偏移就是多次提醒。
+     */
+    beforeEnd: string[]
   }
 }
 
@@ -145,15 +148,11 @@ const renderConfig: Schema<RenderConfig.Config> = Schema.object({
 })
 
 const remindConfig: Schema<RemindConfig.Config> = Schema.object({
-  defaultReminders: Schema.array(
-    Schema.object({
-      type: Schema.union([
-        Schema.const('0'),
-        Schema.const('1'),
-      ]),
-      value: Schema.string().pattern(/^\d{1,4}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}$/),
-    })
-  ).role('table').default([{ type: '1', value: '0-0-0-1-0' }])
+  beforeEnd: Schema.array(
+    Schema.string()
+      .pattern(/^\d{1,4}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}$/)
+      .description('年-月-日-时-分，例如 0-0-0-1-0 = 开奖前 1 小时'),
+  ).role('table').default(['0-0-0-1-0']),
 })
 
 export const Config: Schema<Config> = Schema.object({
