@@ -459,7 +459,11 @@ events:
 
 messageBuilder:
   render:
+    eyebrow: |-
+      GIVEAWAY
     list:
+      channel: |-
+        Channel {0}
       title: |-
         Giveaway list
       summary: |-

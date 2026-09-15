@@ -19,7 +19,7 @@ export function listRoll(ctx: Context, config: Config) {
         const data = await collectRollList(ctx, channelId, platform)
         if (data) {
           const offset = await getCurrentUTCOffset(ctx, session, config)
-          const image = await rollListImage(ctx, session, data, offset)
+          const image = await rollListImage(ctx, session, data, offset, channelId)
           if (image) return image
         }
       }

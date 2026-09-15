@@ -228,7 +228,9 @@ npm i koishi-plugin-giveaway
 - 图片里的标签随语言变化（简体中文 / English / Deutsch），抽奖标题等用户输入会做 HTML 转义，避免破坏排版
 - 中奖者头像：优先用 OneBot 用户资料里的 `avatar`，取不到就按 QQ 号拼 qlogo 地址；
   昵称取不到时退化为只显示 QQ 号，头像加载失败时显示昵称首字（都不会出现破图）
-- 想要纯文字：把 `render.list` / `render.result` 关掉即可
+- 卡片样式：顶栏为 eyebrow + 标题 + 信息胶囊，正文用状态胶囊（带状态点）、等宽编号、奖品胶囊与分区小标题，
+  开奖结果给中奖者加名次奖牌（🥇🥈🥉）、头像圆环与等宽 QQ 号，页脚是插件名
+- 想要纯文字：把 `render.create` / `render.list` / `render.result` 关掉即可
 
 ### 参与条件
 

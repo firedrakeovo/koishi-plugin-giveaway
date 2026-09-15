@@ -459,7 +459,11 @@ events:
 
 messageBuilder:
   render:
+    eyebrow: |-
+      GIVEAWAY · 群抽奖
     list:
+      channel: |-
+        频道 {0}
       title: |-
         抽奖列表
       summary: |-
