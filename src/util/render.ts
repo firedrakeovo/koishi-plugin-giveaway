@@ -1,6 +1,7 @@
 import { Context, Session, $, h } from 'koishi'
 import { DateTime } from 'luxon'
 import { bots, logger } from '../index'
+import { pathToFileURL } from 'node:url'
 import { RenderStyle, esc, shellHtml } from './renderTheme'
 
 /**
@@ -64,6 +65,26 @@ export async function channelLocaleList(ctx: Context, channelId: string, platfor
   return locales
 }
 
+/** 每张卡片的渲染选项（风格 + 可选头图） */
+export interface RenderOptions {
+  style?: RenderStyle
+  /** 头图：支持 http(s) / data: / file: URL，或本机绝对路径（自动转 file://） */
+  banner?: string
+}
+
+/** 头图地址规范化：本机绝对路径转成 file:// URL，其余原样交给浏览器 */
+export function bannerUrl(value?: string): string | undefined {
+  const raw = String(value ?? '').trim()
+  if (!raw) return undefined
+  if (/^(https?:|data:|file:)/i.test(raw)) return raw
+  if (raw.startsWith('/') || /^[a-zA-Z]:[\\/]/.test(raw)) return pathToFileURL(raw).href
+  return raw
+}
+
+function shellOptions(base: any, options: RenderOptions) {
+  return { ...base, banner: bannerUrl(options?.banner) }
+}
+
 export interface RollListItem {
   roll_code: string
   title: string
@@ -95,7 +116,7 @@ export async function collectRollList(ctx: Context, cid: string, platform: strin
 }
 
 /** 抽奖列表图片（失败或没有数据时返回 null，由调用方回退文字） */
-export async function rollListImage(ctx: Context, session: Session, data: { open: RollListItem[]; ended: RollListItem[] }, offset: string, cid?: string, style: RenderStyle = 'default'): Promise<string | null> {
+export async function rollListImage(ctx: Context, session: Session, data: { open: RollListItem[]; ended: RollListItem[] }, offset: string, cid?: string, options: RenderOptions = {}): Promise<string | null> {
   const t = translator(ctx, localeList(session, ctx))
   const rows: string[] = []
   const push = (item: RollListItem) => {
@@ -114,13 +135,13 @@ export async function rollListImage(ctx: Context, session: Session, data: { open
   const body = rows.length
     ? rows.join('\n')
     : `<div class="empty">${esc(t('list.empty'))}</div>`
-  const html = shellHtml({
+  const html = shellHtml(shellOptions({
     eyebrow: t('eyebrow'),
     title: t('list.title'),
     meta: [t('list.summary', { 0: data.open.length, 1: data.ended.length }), cid ? t('list.channel', { 0: cid }) : ''],
     body,
     brand: t('footer'),
-  }, style)
+  }, options), options?.style)
   return renderImage(ctx, html)
 }
 
@@ -198,12 +219,12 @@ export async function rollEndImage(
   locales: string[],
   bot?: BotLike,
   showAvatar = true,
-  style: RenderStyle = 'default',
+  options: RenderOptions = {},
 ): Promise<h[] | null> {
   const winners = await collectWinners(ctx, roll, bot)
   const t = translator(ctx, locales)
   // 名次符号随风格变化：哥特用罗马数字，其余用奖牌
-  const MEDALS = style === 'gothic' ? ['Ⅰ', 'Ⅱ', 'Ⅲ'] : ['🥇', '🥈', '🥉']
+  const MEDALS = options?.style === 'gothic' || options?.style === 'avemujica' ? ['Ⅰ', 'Ⅱ', 'Ⅲ'] : ['🥇', '🥈', '🥉']
   const rows = winners.map((winner, index) => `<div class="winner">
       <div class="rank">${MEDALS[index] ?? index + 1}</div>
       ${showAvatar && winner.avatar
@@ -213,13 +234,13 @@ export async function rollEndImage(
       <div class="prizes">${winner.prizes.map((prize) => `<span class="prize">${esc(t('result.prize', { 0: prize.name, 1: prize.amount }))}</span>`).join('')}</div>
     </div>`).join('\n')
   const body = winners.length ? rows : `<div class="empty">${esc(t('result.noWinner'))}</div>`
-  const html = shellHtml({
+  const html = shellHtml(shellOptions({
     eyebrow: t('eyebrow'),
     title: t('result.title'),
     meta: [t('result.summary', { 0: roll.roll_code, 1: winners.length })],
     body,
     brand: t('footer'),
-  }, style)
+  }, options), options?.style)
   const image = await renderImage(ctx, html)
   if (!image) return null
 
@@ -248,7 +269,7 @@ export async function rollCreatedImage(
   prizes: Array<{ name: string; amount: string | number }>,
   offset: string,
   conditions: string,
-  style: RenderStyle = 'default',
+  options: RenderOptions = {},
 ): Promise<string | null> {
   const t = translator(ctx, localeList(session, ctx))
   const rows: string[] = []
@@ -270,12 +291,12 @@ export async function rollCreatedImage(
     `<div class="section"><div class="sec-title">${esc(t('create.prizes'))}</div><div class="chips">${prizeChips}</div></div>`,
     `<div class="section"><div class="sec-title">${esc(t('create.conditions'))}</div><div class="cond">${esc(conditions)}</div></div>`,
   ].join('\n')
-  const html = shellHtml({
+  const html = shellHtml(shellOptions({
     eyebrow: t('eyebrow'),
     title: roll.title || t('create.title'),
     meta: [t('create.title'), t('create.summary', { 0: roll.roll_code })],
     body,
     brand: t('footer'),
-  }, style)
+  }, options), options?.style)
   return renderImage(ctx, html)
 }

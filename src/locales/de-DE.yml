@@ -80,6 +80,9 @@ _config:
   render:
     $description: |-
       Bild-Rendering (optional)
+    banner: |-
+      <p>Optionales <b>Titelbild</b> über dem Kartenkopf (leer = ausblenden).</p>
+      <p>Akzeptiert http(s)-URL, <code>data:</code>-Inline-Bild, <code>file:</code>-URL oder einen lokalen absoluten Pfad (wird zu file://).</p>
     style:
       $description: |-
         <p>Visueller Stil der gerenderten Karten.</p>
@@ -87,11 +90,13 @@ _config:
           <li><b>Standard:</b> Koishi-Verlauf in Blau-Violett, klare Karte</li>
           <li><b>Anime:</b> Sakura-Rosa / Lavendel, runde Formen, niedliche Symbole und Glitzer</li>
           <li><b>Gotisch:</b> Mitternachtsschwarz + Blutrot + Altgold, Serifenschrift, Goldlinien und Wappenornamente</li>
+          <li><b>Ave Mujica:</b> Dunkelviolett-Schwarz + Rosenpink + Gotikgold, Maskenball-Stimmung (🎭🌹, römische Ziffern)</li>
         </ul>
       $inner:
         - Standard
         - Anime
         - Gotisch
+        - Ave Mujica
     create: |-
       <p>Nach dem Erstellen einer Verlosung deren Inhalt (Nummer / Titel / Beschreibung / Endzeit / Beitrittswort / Preise / Bedingungen) als Bild rendern.</p>
       <p>Erfordert installiertes und aktiviertes <code>koishi-plugin-puppeteer</code>; ohne dieses (oder bei Fehlern) wird nur die Textnachricht gesendet.</p>

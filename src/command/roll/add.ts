@@ -152,7 +152,7 @@ export function addRoll(ctx: Context, config: Config) {
         const effective = policyOverride ?? globalPolicy
         const conditions = renderPolicy(effective, pickLang(session))
           || session.text('messageBuilder.roll.detail.noCondition')
-        const image = await rollCreatedImage(ctx, session, roll, prizeList, offset, conditions, config.render?.style)
+        const image = await rollCreatedImage(ctx, session, roll, prizeList, offset, conditions, { style: config.render?.style, banner: config.render?.banner })
         if (image) return [...h.parse(String(successText)), h.text('\n'), ...h.parse(image)]
       }
       return successText

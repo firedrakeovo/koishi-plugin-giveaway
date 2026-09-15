@@ -80,6 +80,9 @@ _config:
   render:
     $description: |-
       Image rendering (optional)
+    banner: |-
+      <p>Optional <b>banner image</b> shown above the card header (leave empty to hide).</p>
+      <p>Accepts an http(s) URL, <code>data:</code> inline image, <code>file:</code> URL, or a local absolute path (converted to file://).</p>
     style:
       $description: |-
         <p>Visual style of the rendered cards.</p>
@@ -87,11 +90,13 @@ _config:
           <li><b>Default:</b> Koishi brand blue-violet gradient, clean card</li>
           <li><b>Anime:</b> sakura pink / lavender gradient, rounder shapes, cute icons and sparkles</li>
           <li><b>Gothic:</b> midnight black + blood red + antique gold, serif type, gold hairlines and heraldic ornaments</li>
+          <li><b>Ave Mujica:</b> dark purple-black + rose pink + gothic gold, masquerade mood (🎭🌹 accents, roman numerals)</li>
         </ul>
       $inner:
         - Default
         - Anime
         - Gothic
+        - Ave Mujica
     create: |-
       <p>After a giveaway is created, render its content (code / title / description / end time / join key / prizes / conditions) as an image.</p>
       <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; without it (or when rendering fails) only the plain text message is sent.</p>

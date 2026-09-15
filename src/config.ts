@@ -43,7 +43,9 @@ export type HonorRequirement = 'fire7' | 'fire30' | 'dragon'
  */
 namespace RenderConfig {
   export interface Config {
-    style: 'default' | 'anime' | 'gothic'
+    style: 'default' | 'anime' | 'gothic' | 'avemujica'
+    /** 可选头图（http(s) / data: / file: URL 或本机绝对路径），用于卡片顶部横幅 */
+    banner: string
     create: boolean
     list: boolean
     result: boolean
@@ -133,7 +135,9 @@ const renderConfig: Schema<RenderConfig.Config> = Schema.object({
     Schema.const('default'),
     Schema.const('anime'),
     Schema.const('gothic'),
+    Schema.const('avemujica'),
   ]).default('default'),
+  banner: Schema.string().default(''),
   create: Schema.boolean().default(true),
   list: Schema.boolean().default(true),
   result: Schema.boolean().default(true),

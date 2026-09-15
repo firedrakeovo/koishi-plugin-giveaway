@@ -5,10 +5,10 @@
  * 只通过 `data-theme` 切换主题，因此新增风格只要再写一份主题 CSS 即可。
  */
 
-export type RenderStyle = 'default' | 'anime' | 'gothic'
+export type RenderStyle = 'default' | 'anime' | 'gothic' | 'avemujica'
 
 /** 可选风格（供 Schema 与控制台展示） */
-export const RENDER_STYLES: RenderStyle[] = ['default', 'anime', 'gothic']
+export const RENDER_STYLES: RenderStyle[] = ['default', 'anime', 'gothic', 'avemujica']
 
 export interface ShellOptions {
   eyebrow: string
@@ -19,6 +19,8 @@ export interface ShellOptions {
   brand: string
   /** 页脚右侧：可选补充信息 */
   footRight?: string
+  /** 头图（可选，http(s) / data: / file: URL）；不填则不渲染横幅 */
+  banner?: string
 }
 
 const ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
@@ -37,6 +39,10 @@ const BASE_CSS = `
     background-image: var(--bg-image); }
   .card { position: relative; width: 760px; overflow: hidden; background: var(--card);
     border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); }
+  .banner { position: relative; line-height: 0; }
+  .banner img { display: block; width: 100%; max-height: 240px; object-fit: cover; }
+  .banner::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 72px;
+    background: linear-gradient(rgba(0, 0, 0, 0), var(--card)); pointer-events: none; }
   .head { position: relative; padding: 24px 30px 20px; color: #fff; overflow: hidden; background: var(--head-bg); }
   .head::after { content: ""; position: absolute; width: 220px; height: 220px; right: -70px; top: -110px; border-radius: 50%;
     background: radial-gradient(circle, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 70%); }
@@ -214,10 +220,65 @@ const GOTHIC_THEME_CSS = `
   .empty { color: #8d8172; letter-spacing: 1px; }
 `
 
+/** Ave Mujica 风格：暗紫黑 + 玫红 + 哥特金，假面舞会气质（配色取自 community 色板） */
+const AVEMUJICA_THEME_CSS = `
+  :root {
+    --brand: #6B4F8C; --brand-2: #C84B7E;
+    --ink: #EAEAF0; --ink-2: #c3bcd4; --ink-3: #8e86a3;
+    --line: rgba(201, 169, 107, .22); --bg: #0f0c15; --card: #15121C; --card-border: #35294a;
+    --ok: #C9A96B; --ok-bg: rgba(201, 169, 107, .14); --muted-ink: #9a92ad; --muted-bg: rgba(255, 255, 255, .06);
+    --chip-bg: rgba(107, 79, 140, .22); --chip-ink: #e6dcf2; --chip-radius: 2px;
+    --key-bg: rgba(200, 75, 126, .20); --key-ink: #ffc0d8; --key-border: rgba(200, 75, 126, .62);
+    --avatar-bg: linear-gradient(135deg, #2a2140, #3a1f33); --avatar-ink: #C9A96B;
+    --avatar-ring: 0 0 0 2px #15121C, 0 0 0 3px rgba(200, 75, 126, .75);
+    --accent-bar: linear-gradient(#C9A96B, #C84B7E);
+    --head-bg: linear-gradient(135deg, #1b1230 0%, #3a1f47 42%, #6b2a52 78%, #C84B7E 100%);
+    --meta-bg: rgba(255, 255, 255, .16); --foot-ink: #6f6480;
+    --radius: 10px;
+    --card-shadow: 0 0 0 1px rgba(201, 169, 107, .18) inset, 0 3px 0 rgba(200, 75, 126, .18),
+                   0 28px 56px -30px #000;
+    --bg-image: radial-gradient(75% 55% at 50% -12%, rgba(107, 79, 140, .45) 0%, rgba(15, 12, 21, 0) 62%),
+                radial-gradient(55% 45% at 50% 108%, rgba(200, 75, 126, .32) 0%, rgba(15, 12, 21, 0) 60%);
+    --sans: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  body { padding: 24px; }
+  /* 顶栏：幕布渐隐 + 金色细边 + 舞台追光 */
+  .head { padding-bottom: 22px; border-bottom: 1px solid rgba(201, 169, 107, .42); }
+  .head::before { content: ""; position: absolute; inset: 0; opacity: .55;
+    background-image: radial-gradient(ellipse 60% 120% at 50% -30%, rgba(255, 255, 255, .22) 0%, rgba(0, 0, 0, 0) 70%),
+                      repeating-linear-gradient(90deg, rgba(201, 169, 107, .07) 0 1px, rgba(0, 0, 0, 0) 1px 30px); }
+  .head .eyebrow { color: #e8d5a8; letter-spacing: 4px; }
+  .head .title { letter-spacing: 2.5px; text-shadow: 0 2px 16px rgba(200, 75, 126, .7); }
+  .head .meta span { background: var(--meta-bg); border: 1px solid rgba(201, 169, 107, .36); letter-spacing: .6px; }
+  /* 顶栏右下的乐队字样 + 假面/玫瑰纹章 */
+  .head::after { content: "AVE MUJICA"; position: absolute; right: 24px; bottom: 14px;
+    font-size: 10px; letter-spacing: 5px; color: rgba(232, 213, 168, .72);
+    background: none; width: auto; height: auto; top: auto; border-radius: 0; }
+  .card::before, .card::after { position: absolute; z-index: 3; line-height: 1; pointer-events: none; }
+  .card::before { content: "🎭"; top: 14px; right: 20px; font-size: 18px; opacity: .9; }
+  .card::after { content: "🌹"; bottom: 13px; right: 20px; font-size: 15px; opacity: .8; }
+  .row { padding: 16px 0; }
+  .chip { border: 1px solid rgba(201, 169, 107, .34); font-weight: 500; letter-spacing: .5px; }
+  .chip::before { content: "◇"; width: auto; height: auto; background: none; font-size: 9px; }
+  .chip.open { color: #e2c88f; }
+  .chip.ended { color: #9a92ad; border-color: rgba(255, 255, 255, .14); }
+  .code { color: #C9A96B; }
+  .name { letter-spacing: .3px; }
+  .prize { border: 1px solid rgba(107, 79, 140, .55); letter-spacing: .3px; }
+  .key { border-style: solid; }
+  .section .sec-title { color: #C9A96B; letter-spacing: 1.6px; }
+  .rank { color: #C9A96B; font-size: 17px; letter-spacing: 1px; }
+  .winner { border-radius: 2px; }
+  .winner:nth-child(odd) { background: linear-gradient(90deg, rgba(107, 79, 140, .16), rgba(0, 0, 0, 0)); }
+  .empty { color: #8e86a3; letter-spacing: 1px; }
+`
+
 const THEMES: Record<RenderStyle, string> = {
   default: DEFAULT_THEME_CSS,
   anime: ANIME_THEME_CSS,
   gothic: GOTHIC_THEME_CSS,
+  avemujica: AVEMUJICA_THEME_CSS,
 }
 
 /** 拼出完整 HTML：骨骼 + 主题 + 数据 */
@@ -228,6 +289,7 @@ export function shellHtml(options: ShellOptions, style: RenderStyle = 'default')
 <html data-theme="${esc(style)}"><head><meta charset="utf-8"><style>
 ${BASE_CSS}${theme}</style></head>
 <body><div class="card">
+  ${options.banner ? `<div class="banner"><img src="${esc(options.banner)}" onerror="this.remove()"/></div>` : ''}
   <div class="head">
     <div class="eyebrow">${esc(options.eyebrow)}</div>
     <div class="title">${esc(options.title)}</div>
