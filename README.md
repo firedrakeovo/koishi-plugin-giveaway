@@ -1,7 +1,7 @@
 # koishi-plugin-giveaway
 
 [![npm](https://img.shields.io/npm/v/koishi-plugin-giveaway?style=flat-square)](https://www.npmjs.com/package/koishi-plugin-giveaway)
-[![license](https://img.shields.io/npm/l/koishi-plugin-giveaway?style=flat-square)](./LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/firedrakeovo/koishi-plugin-giveaway/blob/master/LICENSE)
 
 一个多功能的 Koishi 群抽奖插件：**复制模板即可创建抽奖**、支持参与门槛（群聊等级 / 活跃度 / QQ 群互动标识）、口令或指令两种参与方式、定时自动开奖与开奖前提醒，权限沿用 Koishi 原生等级，内置简体中文 / English / Deutsch 三语与多时区。
 
@@ -273,4 +273,4 @@ npm run clean
 
 ## 许可证
 
-[MIT](./LICENSE) © 2024 Roll Bot Project（上游），2026 giveaway contributors
+[MIT](https://github.com/firedrakeovo/koishi-plugin-giveaway/blob/master/LICENSE) © 2024 Roll Bot Project（上游），2026 giveaway contributors
