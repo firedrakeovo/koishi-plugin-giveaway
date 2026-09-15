@@ -310,107 +310,6 @@ commands:
           The channel language setting has been cleared
         defaultUser: |-
           Your language setting has been cleared
-  giveaway.remind:
-    description: |-
-      Show the giveaway's reminders
-    messages:
-      notFound: |-
-        Giveaway not found!
-
-  giveaway.reminder:
-    description: |-
-      Giveaway reminders
-  giveaway.reminder.add:
-    description: |-
-      Create a reminder
-    messages:
-      success: |-
-        Reminder created, code {0}
-      exist: |-
-        An identical reminder already exists, code {0}
-      timeError: |-
-        Invalid time format, please create it again!
-      typeError: |-
-        Invalid reminder type, please create it again!
-      type: |-
-        <p>Choose the reminder type, reply with the number only:</p>
-        <p>0: remind once at a given time</p>
-        <p>1: remind once a while before the giveaway ends</p>
-        <p>2: remind repeatedly at a fixed interval</p>
-      specified: |-
-        <p>Enter the exact time to remind:</p>
-        <p>Format: year-month-day-hour-minute</p>
-        <p>Current timezone: {0}</p>
-      before-end: |-
-        <p>Enter how long before the giveaway ends to remind:</p>
-        <p>Format: year-month-day-hour-minute</p>
-        <p>Example: 0-0-0-1-30</p>
-      interval:
-        error: |-
-          Invalid option!
-        select: |-
-          <p>How often should it remind?</p>
-          <p>0: every year on a given month/day/hour/minute</p>
-          <p>1: every month on a given day/hour/minute</p>
-          <p>2: every day at a given hour/minute</p>
-          <p>3: every hour at a given minute</p>
-        per-year: |-
-          <p>When every year should it remind?</p>
-          <p>Format: month-day-hour-minute</p>
-          <p>Current timezone: {0}</p>
-        per-month: |-
-          <p>When every month should it remind?</p>
-          <p>Format: day-hour-minute</p>
-          <p>Current timezone: {0}</p>
-        per-day: |-
-          <p>What time of day should it remind?</p>
-          <p>Format: hour-minute</p>
-          <p>Current timezone: {0}</p>
-        per-hour: |-
-          <p>Which minute of every hour should it remind?</p>
-          <p>Format: minute</p>
-          <p>Current timezone: {0}</p>
-  giveaway.reminder.delete:
-    description: |-
-      Delete a reminder
-    messages:
-      success: |-
-        Reminder deleted!
-      emptyReminder: |-
-        Reminder code not found, please enter it again!
-      notYourReminder: |-
-        You are not allowed to delete this reminder!
-  giveaway.reminder.list:
-    description: |-
-      List reminders
-  giveaway.reminder.enable:
-    description: |-
-      Enable a reminder
-    messages:
-      emptyRoll: |-
-        Giveaway code not found, please enter it again!
-      emptyReminder: |-
-        Reminder code not found, please enter it again!
-      rollEnd: |-
-        This giveaway has ended, reminders cannot be enabled!
-      noAuth: |-
-        You are not allowed to enable reminders!
-      success: |-
-        Reminder enabled!
-  giveaway.reminder.disable:
-    description: |-
-      Disable a reminder
-    messages:
-      emptyRoll: |-
-        Giveaway code not found, please enter it again!
-      emptyReminder: |-
-        Reminder code not found, please enter it again!
-      rollEnd: |-
-        This giveaway has ended, no need to disable reminders.
-      noAuth: |-
-        You are not allowed to disable reminders!
-      success: |-
-        Reminder disabled!
   giveaway.debug.honor:
     description: |-
       Diagnose the group honor APIs (admin only)
@@ -525,16 +424,6 @@ messageBuilder:
       [running]
     end: |-
       [ended]
-    enable: |-
-      [enabled]
-    disable: |-
-      [disabled]
-    specified: |-
-      [scheduled]
-    beforeEnd: |-
-      [before end]
-    interval: |-
-      [interval]
   roll.list:
     error: |-
       No giveaway found!
@@ -582,53 +471,3 @@ messageBuilder:
         <p><at id={userId}/> ({userId}) won:</p>
       winList: |-
         <p> - {name} * {amount}</p>
-  roll.remind:
-    defaultReminder: |-
-      Default
-    empty: |-
-      This giveaway has no enabled reminder!
-    header: |-
-      <p>Enabled reminders:</p>
-    listItem: |-
-      <p>[{reminder_code}] {description}</p>
-    description:
-      specified: |-
-        Remind once at {timeDescription}
-      beforeEnd: |-
-        Remind once {timeDescription} before the giveaway ends
-      interval: |-
-        Remind every {intervalDescription}
-      year: |-
-        {0} year(s)
-      month: |-
-        {0} month(s)
-      day: |-
-        {0} day(s)
-      hour: |-
-        {0} hour(s)
-      minute: |-
-        {0} minute(s)
-  reminder.list:
-    error: |-
-      You have not created any reminder yet!
-    header: |-
-      <p>Reminders you created:</p>
-    listItem: |-
-      <p>[{reminder_code}] {description}</p>
-    description:
-      specified: |-
-        Remind once at {timeDescription}
-      beforeEnd: |-
-        Remind once {timeDescription} before the giveaway ends
-      interval: |-
-        Remind every {intervalDescription}
-      year: |-
-        {0} year(s)
-      month: |-
-        {0} month(s)
-      day: |-
-        {0} day(s)
-      hour: |-
-        {0} hour(s)
-      minute: |-
-        {0} minute(s)

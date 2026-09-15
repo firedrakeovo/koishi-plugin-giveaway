@@ -48,12 +48,7 @@ export function rollEndListener(ctx: Context, config: Config) {
     }
     // remove join key listener
     ctx.emit('giveaway/roll-key-update')
-    // disable all reminds
-    const remindRes = await ctx.database.get('remind', {roll_id: roll.id})
-    for (const remind of remindRes) {
-      ctx.emit('giveaway/remind-delete', remind.id)
-    }
-    // 开奖后清理控制台配置的「开奖前 N」提醒任务
+    // 开奖后清理控制台配置的提醒任务（按剩余时长分档 + 百分比排的那些）
     clearRollReminds(roll.id)
     // register expire listener
     const expireTime = DateTime.now().plus({hours: config.basic.cacheHours}).toUTC().toJSDate()

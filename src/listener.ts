@@ -9,11 +9,7 @@ import {keyCacheListener} from "./listener/roll/keyCacheListener"
 import {rollJoinListener} from "./listener/roll/rollJoinListener"
 import {rollQuitListener} from "./listener/roll/rollQuitListener"
 
-import {reminderAddListener} from "./listener/reminder/reminderAddListener"
-import {reminderDeleteListener} from "./listener/reminder/reminderDeleteListener"
-
-import {remindAddListener} from "./listener/remind/remindAddListener"
-import {remindDeleteListener} from "./listener/remind/remindDeleteListener"
+import {remindScheduleListener} from "./listener/remind/remindScheduleListener"
 import {remindBroadcastListener} from "./listener/remind/remindBroadcastListener"
 
 
@@ -27,10 +23,6 @@ declare module 'koishi' {
     'giveaway/roll-expired'(...args: any[]): void
     'giveaway/roll-join'(...args: any[]): void
     'giveaway/roll-quit'(...args: any[]): void
-    'giveaway/reminder-add'(...args: any[]): void
-    'giveaway/reminder-delete'(...args: any[]): void
-    'giveaway/remind-add'(...args: any[]): void
-    'giveaway/remind-delete'(...args: any[]): void
     'giveaway/remind-broadcast'(...args: any[]): void
   }
 }
@@ -43,9 +35,6 @@ export function apply(ctx: Context, config: Config) {
   rollExpiredListener(ctx, config)
   rollJoinListener(ctx, config)
   rollQuitListener(ctx, config)
-  reminderAddListener(ctx, config)
-  reminderDeleteListener(ctx, config)
-  remindAddListener(ctx, config)
-  remindDeleteListener(ctx, config)
+  remindScheduleListener(ctx, config)
   remindBroadcastListener(ctx, config)
 }

@@ -32,11 +32,6 @@ export function rollExpiredListener(ctx: Context, config: Config) {
     // Delete jobs
     autoEndManager.deleteJob(rollId)
     expireManager.deleteJob(rollId)
-    // Delete remind
-    const remindRes = await ctx.database.get('remind', {roll_id: rollId})
-    for (const remind of remindRes) {
-      ctx.emit('giveaway/remind-delete', remind.id)
-    }
     // 抽奖记录被清理时，控制台配置的提醒任务一并清掉
     clearRollReminds(rollId)
     // remove join key listener

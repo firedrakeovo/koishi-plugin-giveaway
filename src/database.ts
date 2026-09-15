@@ -4,15 +4,11 @@ declare module 'koishi' {
   interface Tables {
     roll: Roll,
     prize: Prize,
-    remind: Remind,
-    reminder: Reminder,
     roll_creator: RollCreator,
     roll_member: RollMember,
     roll_channel: RollChannel,
     roll_prize: RollPrize,
-    remind_channel: RemindChennel
     user_prize: UserPrize
-    user_reminder: UserReminder
     roll_policy: RollPolicy
   }
   interface User {
@@ -51,22 +47,6 @@ export interface Prize {
   amount: number
 }
 
-export interface Remind {
-  id: number
-  roll_id: number
-  reminder_id: number
-}
-
-export interface Reminder {
-  id: number
-  reminder_code: string
-  type: string
-  time: Date
-  last_call: Date
-  duration: object
-  recurrence_rule: object
-}
-
 export interface RollCreator {
   id: number
   roll_id: number
@@ -92,24 +72,11 @@ export interface RollPrize {
   prize_id: number
 }
 
-export interface RemindChennel {
-  id: number
-  remind_id: number
-  channel_id: string
-  channel_platform: string
-}
-
 export interface UserPrize {
   id: number
   user_id: number
   prize_id: number
   amount: number
-}
-
-export interface UserReminder {
-  id: number
-  user_id: number
-  reminder_id: number
 }
 
 export const name = 'Database'
@@ -142,26 +109,6 @@ export function apply(ctx: Context) {
     id: 'unsigned',
     name: 'string',
     amount: 'unsigned'
-  }, {
-    autoInc: true,
-  })
-
-  ctx.model.extend('remind', {
-    id: 'unsigned',
-    roll_id: 'unsigned',
-    reminder_id: 'unsigned'
-  }, {
-    autoInc: true,
-  })
-
-  ctx.model.extend('reminder', {
-    id: 'unsigned',
-    reminder_code: 'string',
-    type: 'string',
-    time: 'timestamp',
-    last_call: 'timestamp',
-    duration: 'json',
-    recurrence_rule: 'json'
   }, {
     autoInc: true,
   })
@@ -211,28 +158,11 @@ export function apply(ctx: Context) {
     autoInc: true,
   })
 
-  ctx.model.extend('remind_channel', {
-    id: 'unsigned',
-    remind_id: 'unsigned',
-    channel_id: 'string',
-    channel_platform: 'string'
-  }, {
-    autoInc: true,
-  })
-
   ctx.model.extend('user_prize', {
     id: 'unsigned',
     user_id: 'unsigned',
     prize_id: 'unsigned',
     amount: 'unsigned'
-  }, {
-    autoInc: true,
-  })
-
-  ctx.model.extend('user_reminder', {
-    id: 'unsigned',
-    user_id: 'unsigned',
-    reminder_id: 'unsigned'
   }, {
     autoInc: true,
   })

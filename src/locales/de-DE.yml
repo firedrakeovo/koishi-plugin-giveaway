@@ -310,107 +310,6 @@ commands:
           Die Kanal-Spracheinstellung wurde entfernt
         defaultUser: |-
           Deine Spracheinstellung wurde entfernt
-  giveaway.remind:
-    description: |-
-      Aktivierte Erinnerungen der Verlosung anzeigen
-    messages:
-      notFound: |-
-        Verlosung nicht gefunden!
-
-  giveaway.reminder:
-    description: |-
-      Giveaway-Erinnerungen
-  giveaway.reminder.add:
-    description: |-
-      Eine Erinnerung erstellen
-    messages:
-      success: |-
-        Erinnerung erstellt, Nummer {0}
-      exist: |-
-        Eine identische Erinnerung existiert bereits, Nummer {0}
-      timeError: |-
-        Ungültiges Zeitformat, bitte neu erstellen!
-      typeError: |-
-        Ungültiger Erinnerungstyp, bitte neu erstellen!
-      type: |-
-        <p>Wähle den Erinnerungstyp, antworte nur mit der Nummer:</p>
-        <p>0: einmalig zu einer bestimmten Zeit erinnern</p>
-        <p>1: einmalig eine bestimmte Zeit vor Ende der Verlosung erinnern</p>
-        <p>2: in festen Abständen wiederholt erinnern</p>
-      specified: |-
-        <p>Gib die genaue Erinnerungszeit ein:</p>
-        <p>Format: Jahr-Monat-Tag-Stunde-Minute</p>
-        <p>Aktuelle Zeitzone: {0}</p>
-      before-end: |-
-        <p>Gib an, wie lange vor Ende der Verlosung erinnert werden soll:</p>
-        <p>Format: Jahr-Monat-Tag-Stunde-Minute</p>
-        <p>Beispiel: 0-0-0-1-30</p>
-      interval:
-        error: |-
-          Ungültige Option!
-        select: |-
-          <p>In welchem Abstand soll erinnert werden?</p>
-          <p>0: jedes Jahr an einem bestimmten Monat/Tag/Stunde/Minute</p>
-          <p>1: jeden Monat an einem bestimmten Tag/Stunde/Minute</p>
-          <p>2: jeden Tag zu einer bestimmten Stunde/Minute</p>
-          <p>3: jede Stunde zu einer bestimmten Minute</p>
-        per-year: |-
-          <p>Wann jedes Jahr soll erinnert werden?</p>
-          <p>Format: Monat-Tag-Stunde-Minute</p>
-          <p>Aktuelle Zeitzone: {0}</p>
-        per-month: |-
-          <p>Wann jeden Monat soll erinnert werden?</p>
-          <p>Format: Tag-Stunde-Minute</p>
-          <p>Aktuelle Zeitzone: {0}</p>
-        per-day: |-
-          <p>Zu welcher Tageszeit soll erinnert werden?</p>
-          <p>Format: Stunde-Minute</p>
-          <p>Aktuelle Zeitzone: {0}</p>
-        per-hour: |-
-          <p>Zu welcher Minute jeder Stunde soll erinnert werden?</p>
-          <p>Format: Minute</p>
-          <p>Aktuelle Zeitzone: {0}</p>
-  giveaway.reminder.delete:
-    description: |-
-      Eine Erinnerung löschen
-    messages:
-      success: |-
-        Erinnerung gelöscht!
-      emptyReminder: |-
-        Erinnerungsnummer nicht gefunden, bitte erneut eingeben!
-      notYourReminder: |-
-        Du darfst diese Erinnerung nicht löschen!
-  giveaway.reminder.list:
-    description: |-
-      Erinnerungen auflisten
-  giveaway.reminder.enable:
-    description: |-
-      Eine Erinnerung aktivieren
-    messages:
-      emptyRoll: |-
-        Verlosungsnummer nicht gefunden, bitte erneut eingeben!
-      emptyReminder: |-
-        Erinnerungsnummer nicht gefunden, bitte erneut eingeben!
-      rollEnd: |-
-        Diese Verlosung ist beendet, Erinnerungen können nicht aktiviert werden!
-      noAuth: |-
-        Du darfst Erinnerungen nicht aktivieren!
-      success: |-
-        Erinnerung aktiviert!
-  giveaway.reminder.disable:
-    description: |-
-      Eine Erinnerung deaktivieren
-    messages:
-      emptyRoll: |-
-        Verlosungsnummer nicht gefunden, bitte erneut eingeben!
-      emptyReminder: |-
-        Erinnerungsnummer nicht gefunden, bitte erneut eingeben!
-      rollEnd: |-
-        Diese Verlosung ist beendet, Erinnerungen müssen nicht deaktiviert werden.
-      noAuth: |-
-        Du darfst Erinnerungen nicht deaktivieren!
-      success: |-
-        Erinnerung deaktiviert!
   giveaway.debug.honor:
     description: |-
       Gruppen-Ehrungs-APIs diagnostizieren (nur Admins)
@@ -525,16 +424,6 @@ messageBuilder:
       [läuft]
     end: |-
       [beendet]
-    enable: |-
-      [aktiv]
-    disable: |-
-      [deaktiviert]
-    specified: |-
-      [Zeitplan]
-    beforeEnd: |-
-      [vor Ende]
-    interval: |-
-      [Intervall]
   roll.list:
     error: |-
       Keine Verlosung gefunden!
@@ -582,53 +471,3 @@ messageBuilder:
         <p><at id={userId}/> ({userId}) gewinnt:</p>
       winList: |-
         <p> - {name} * {amount}</p>
-  roll.remind:
-    defaultReminder: |-
-      Standard
-    empty: |-
-      Für diese Verlosung ist keine Erinnerung aktiviert!
-    header: |-
-      <p>Aktivierte Erinnerungen:</p>
-    listItem: |-
-      <p>[{reminder_code}] {description}</p>
-    description:
-      specified: |-
-        Einmalig erinnern: {timeDescription}
-      beforeEnd: |-
-        Einmalig {timeDescription} vor Ende der Verlosung erinnern
-      interval: |-
-        Erinnern bei jedem/jeder {intervalDescription}
-      year: |-
-        {0} Jahr(e)
-      month: |-
-        {0} Monat(e)
-      day: |-
-        {0} Tag(e)
-      hour: |-
-        {0} Stunde(n)
-      minute: |-
-        {0} Minute(n)
-  reminder.list:
-    error: |-
-      Du hast noch keine Erinnerung erstellt!
-    header: |-
-      <p>Von dir erstellte Erinnerungen:</p>
-    listItem: |-
-      <p>[{reminder_code}] {description}</p>
-    description:
-      specified: |-
-        Einmalig erinnern: {timeDescription}
-      beforeEnd: |-
-        Einmalig {timeDescription} vor Ende der Verlosung erinnern
-      interval: |-
-        Erinnern bei jedem/jeder {intervalDescription}
-      year: |-
-        {0} Jahr(e)
-      month: |-
-        {0} Monat(e)
-      day: |-
-        {0} Tag(e)
-      hour: |-
-        {0} Stunde(n)
-      minute: |-
-        {0} Minute(n)

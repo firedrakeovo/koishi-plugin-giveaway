@@ -2,7 +2,7 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 的格式，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [Unreleased]
+## [0.1.2] - 2026-09-15
 
 ### Added 新增
 
@@ -29,9 +29,14 @@
 
 ### Removed 移除
 
-- **手动提醒器交互全部下线**：`创建提醒器` / `提醒器列表` / `启用提醒器` / `禁用提醒器` / `删除提醒器` /
-  `抽奖提醒` 六条指令不再注册（指令一览里也不再出现），提醒统一由控制台 `remind.rules` 配置；
-  对应的指令实现文件与提醒消息构造函数一并删除（提醒引擎与旧的提醒器数据表 / 事件保留，避免历史数据加载失败）
+- **手动提醒器交互全部下线（连同整套旧实现）**：`创建提醒器` / `提醒器列表` / `启用提醒器` / `禁用提醒器` /
+  `删除提醒器` / `抽奖提醒` 六条指令不再注册（指令一览里也不再出现），提醒统一由控制台 `remind.rules` 配置
+  - 删除对应的 6 个指令文件、4 个监听器（`reminder*` / `remind-add` / `remind-delete`）、
+    3 个提醒消息构造函数与空壳 `util/reminder.ts`；`remind-add` / `remind-delete` / `reminder-add` /
+    `reminder-delete` 四个事件随之取消
+  - 数据模型去掉 4 张旧表（`reminder` / `remind` / `remind_channel` / `user_reminder`）的声明；
+    **已存在的表不会被删除**，只是插件不再读写
+  - 三语文案同步清掉这些指令的键（不留死翻译），包体从 189 KB 降到 171 KB
 
 ### Fixed 修复
 

@@ -4,16 +4,10 @@ import {bots} from "../../index";
 import { DateTime, Duration } from 'luxon'
 
 export function remindBroadcastListener(ctx: Context, config: Config) {
-  ctx.on('giveaway/remind-broadcast', async (
-    rollId,
-    remindId?
-  ) => {
-    let remindRange, minutesDiff
-    if (!remindId) {
-      remindRange = await ctx.database.get('roll_channel', {roll_id: rollId})
-    } else {
-      remindRange = await ctx.database.get('remind_channel', {remind_id: remindId})
-    }
+  ctx.on('giveaway/remind-broadcast', async (rollId) => {
+    let minutesDiff
+    // 提醒只按抽奖找频道（控制台驱动的提醒不落库、也没有「提醒器」这一层）
+    const remindRange = await ctx.database.get('roll_channel', {roll_id: rollId})
     const rollRes = await ctx.database.get('roll', {id: rollId})
     // 抽奖可能已经被手动删除 / 清理（提醒任务理论上会被一并取消，这里再兜一层，避免报错刷屏）
     if (!rollRes[0]) return

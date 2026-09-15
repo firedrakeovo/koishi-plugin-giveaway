@@ -310,107 +310,6 @@ commands:
           已清除频道语言偏好设置
         defaultUser: |-
           已清除你的语言偏好设置
-  giveaway.remind:
-    description: |-
-      查询抽奖启用的提醒
-    messages:
-      notFound: |-
-        没有找到该抽奖！
-
-  giveaway.reminder:
-    description: |-
-      Giveaway 提醒功能
-  giveaway.reminder.add:
-    description: |-
-      创建一个提醒器
-    messages:
-      success: |-
-          创建提醒器成功，编号为 {0}
-      exist: |-
-          已有相同的提醒器，编号为 {0}
-      timeError: |-
-          时间格式错误，请重新创建！
-      typeError: |-
-          提醒器类型错误，请重新创建！
-      type: |-
-        <p>请选择提醒器的类型，仅需回复数字：</p>
-        <p>0：在指定时间提醒一次</p>
-        <p>1：抽奖结束前一定时间提醒一次</p>
-        <p>2：每隔一定时间提醒一次</p>
-      specified: |-
-        <p>请输入提醒的具体时间：</p>
-        <p>格式：年-月-日-时-分</p>
-        <p>当前时区：{0}</p>
-      before-end: |-
-        <p>请输入提醒距离抽奖结束的时间间隔：</p>
-        <p>格式：年-月-日-时-分</p>
-        <p>例如：0-0-0-1-30</p>
-      interval:
-        error: |-
-          无效的选项！
-        select: |-
-          <p>你希望每过多久提醒一次？</p>
-          <p>0：在 每年 的 某月某日某时某分</p>
-          <p>1：在 每月 的 某日某时某分</p>
-          <p>2：在 每天 的 某时某分</p>
-          <p>3：在 每小时 的 某分</p>
-        per-year: |-
-          <p>你希望每年的什么时候提醒？</p>
-          <p>格式：月-日-时-分</p>
-          <p>当前时区：{0}</p>
-        per-month: |-
-          <p>你希望每月的什么时候提醒？</p>
-          <p>格式：日-时-分</p>
-          <p>当前时区：{0}</p>
-        per-day: |-
-          <p>你希望每天的什么时候提醒？</p>
-          <p>格式：时-分</p>
-          <p>当前时区：{0}</p>
-        per-hour: |-
-          <p>你希望每小时的什么时候提醒？</p>
-          <p>格式：分</p>
-          <p>当前时区：{0}</p>
-  giveaway.reminder.delete:
-    description: |-
-      删除一个提醒器
-    messages:
-      success: |-
-        删除提醒器成功！
-      emptyReminder: |-
-        未找到提醒器编号，请重新输入！
-      notYourReminder: |-
-        你没有权限删除该提醒器！
-  giveaway.reminder.list:
-    description: |-
-      查询提醒器列表
-  giveaway.reminder.enable:
-    description: |-
-      启用一个提醒器
-    messages:
-      emptyRoll: |-
-        未找到抽奖编号，请重新输入！
-      emptyReminder: |-
-        未找到提醒器编号，请重新输入！
-      rollEnd: |-
-        该抽奖已结束，无法启用提醒器！
-      noAuth: |-
-        你没有权限启用提醒器！
-      success: |-
-        启用提醒器成功！
-  giveaway.reminder.disable:
-    description: |-
-      禁用一个提醒
-    messages:
-      emptyRoll: |-
-        未找到抽奖编号，请重新输入！
-      emptyReminder: |-
-        未找到提醒器编号，请重新输入！
-      rollEnd: |-
-        该抽奖已结束，无需禁用提醒。
-      noAuth: |-
-        你没有权限禁用提醒器！
-      success: |-
-        禁用提醒器成功！
   giveaway.debug.honor:
     description: |-
       诊断当前群的荣誉接口（管理员）
@@ -525,16 +424,6 @@ messageBuilder:
       [进行中]
     end: |-
       [已结束]
-    enable: |-
-      [启用中]
-    disable: |-
-      [已禁用]
-    specified: |-
-      [定时提醒]
-    beforeEnd: |-
-      [结束前提醒]
-    interval: |-
-      [间隔提醒]
   roll.list:
     error: |-
       没有找到抽奖！
@@ -582,53 +471,3 @@ messageBuilder:
         <p><at id={userId}/> ({userId}) 获得了：</p>
       winList: |-
         <p> - {name} * {amount}</p>
-  roll.remind:
-    defaultReminder: |-
-      默认
-    empty: |-
-      当前抽奖没有启用的提醒！
-    header: |-
-      <p>启用的提醒：</p>
-    listItem: |-
-      <p>[{reminder_code}] {description}</p>
-    description:
-      specified: |-
-        在 {timeDescription} 提醒一次
-      beforeEnd: |-
-        在抽奖结束前 {timeDescription} 提醒一次
-      interval: |-
-        在每个 {intervalDescription} 提醒一次
-      year: |-
-        {0} 年
-      month: |-
-        {0} 月
-      day: |-
-        {0} 日
-      hour: |-
-        {0} 时
-      minute: |-
-        {0} 分
-  reminder.list:
-    error: |-
-      你还没有创建过提醒器！
-    header: |-
-      <p>你创建的提醒器列表：</p>
-    listItem: |-
-      <p>[{reminder_code}] {description}</p>
-    description:
-      specified: |-
-        在 {timeDescription} 提醒一次
-      beforeEnd: |-
-        在抽奖结束前 {timeDescription} 提醒一次
-      interval: |-
-        在每个 {intervalDescription} 提醒一次
-      year: |-
-        {0} 年
-      month: |-
-        {0} 月
-      day: |-
-        {0} 日
-      hour: |-
-        {0} 时
-      minute: |-
-        {0} 分

@@ -309,7 +309,6 @@ npm i koishi-plugin-giveaway
 | `giveaway/roll-join` / `giveaway/roll-quit` | 用户加入 / 退出抽奖 |
 | `giveaway/roll-key-update` | 加入口令缓存需要刷新 |
 | `giveaway/remind-broadcast` | 开奖提醒到点广播（参数：抽奖 id） |
-| `giveaway/reminder-add` / `giveaway/reminder-delete`、`giveaway/remind-add` / `giveaway/remind-delete` | 旧版手动提醒器事件，仅内部兼容保留，已不再有指令触发 |
 
 ## 开发
 

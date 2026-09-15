@@ -1,4 +1,4 @@
-import { DateTime, Duration } from 'luxon';
+import { DateTime } from 'luxon';
 import {Config} from "../config";
 import {offsetToUTCOffset} from "./time";
 
@@ -76,37 +76,6 @@ export function dateInputToDateTime(input: string, offset: string): DateTime {
   return DateTime.fromObject({ year, month, day, hour, minute: minute || undefined }, { zone: offset })
 }
 
-export function dateInputToDuration(input: string): Duration {
-  const timeArray = input.split('-')
-  const t = {
-    years: parseInt(timeArray[0]),
-    months: parseInt(timeArray[1]),
-    days: parseInt(timeArray[2]),
-    hours: parseInt(timeArray[3]),
-    minutes: parseInt(timeArray[4]) || undefined
-  }
-  return Duration.fromObject(t)
-}
-
-export function getRemindValueFromReminder(endTime: Date, reminder: any) {
-  switch (reminder.type) {
-    case '0':
-      return reminder.time
-    case '1':
-      return DateTime.fromJSDate(endTime).minus(reminder.duration).toJSDate()
-    case '2':
-      return reminder.recurrence_rule
-    default:
-      return
-  }
-}
-
-/**
- * 控制台配置的「开奖前偏移」→ 实际触发时刻
- *
- * @param endTime 抽奖的开奖时间
- * @param value   形如 `0-0-0-1-0`（年-月-日-时-分），表示开奖前多久
- */
 /**
  * 把奖品输入解析成奖品列表（忽略空项，数量缺省为 1）。
  *
