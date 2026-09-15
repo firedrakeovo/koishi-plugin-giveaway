@@ -46,6 +46,7 @@ namespace RenderConfig {
     create: boolean
     list: boolean
     result: boolean
+    avatar: boolean
   }
 }
 
@@ -130,6 +131,7 @@ const renderConfig: Schema<RenderConfig.Config> = Schema.object({
   create: Schema.boolean().default(true),
   list: Schema.boolean().default(true),
   result: Schema.boolean().default(true),
+  avatar: Schema.boolean().default(true),
 })
 
 const remindConfig: Schema<RemindConfig.Config> = Schema.object({

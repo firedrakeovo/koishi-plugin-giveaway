@@ -83,6 +83,9 @@ _config:
     create: |-
       <p>Nach dem Erstellen einer Verlosung deren Inhalt (Nummer / Titel / Beschreibung / Endzeit / Beitrittswort / Preise / Bedingungen) als Bild rendern.</p>
       <p>Erfordert installiertes und aktiviertes <code>koishi-plugin-puppeteer</code>; ohne dieses (oder bei Fehlern) wird nur die Textnachricht gesendet.</p>
+    avatar: |-
+      <p>Im Ergebnisbild <b>Avatar und Nickname</b> der Gewinner anzeigen (Avatar über die QQ-Nummer via qlogo, Nickname aus dem OneBot-Profil).</p>
+      <p>Ohne Profil wird nur die QQ-Nummer gezeigt, bei fehlgeschlagenem Avatar der Anfangsbuchstabe.</p>
     list: |-
       <p>Die Verlosungsliste als Bild rendern.</p>
       <p>Erfordert installiertes und aktiviertes <code>koishi-plugin-puppeteer</code>; ohne dieses oder bei Fehlern wird automatisch eine Textnachricht gesendet.</p>

@@ -93,7 +93,11 @@ function shell(t: Translate, title: string, summary: string, body: string): stri
   .time { flex: none; font-size: 13px; color: #98a1b0; }
   .winner { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f0f2f5; }
   .winner:last-child { border-bottom: none; }
-  .who { flex: none; width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .avatar { position: relative; flex: none; width: 46px; height: 46px; border-radius: 50%; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            background: #eef3ff; color: #4c7df0; font-size: 18px; font-weight: 600; }
+  .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .who { flex: none; width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .who .nick { font-size: 17px; font-weight: 600; color: #1f2530; }
   .who .qq { margin-left: 8px; font-size: 12px; color: #98a1b0; }
   .prizes { flex: 1; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -173,11 +177,30 @@ export async function rollListImage(ctx: Context, session: Session, data: { open
 export interface WinnerGroup {
   name: string
   pid: string
+  avatar?: string
   prizes: Array<{ name: string; amount: number }>
 }
 
-/** 中奖名单（按中奖人聚合奖品） */
-export async function collectWinners(ctx: Context, roll: any): Promise<WinnerGroup[]> {
+/** 参与人信息的最小接口（真实 bot / 测试桩都满足） */
+export interface BotLike {
+  platform?: string
+  getUser?: (id: string) => Promise<{ name?: string; avatar?: string } | null | undefined>
+}
+
+/**
+ * QQ 头像地址
+ *
+ * OneBot 适配器的 `getUser()` 一般不带 `avatar`，这里按 QQ 号兜底拼 qlogo 地址
+ * （非数字 id 或其他平台返回 undefined，图片里就不显示头像）。
+ */
+export function defaultAvatarUrl(platform: string | undefined, pid: string): string | undefined {
+  if (!/^\d{4,}$/.test(String(pid ?? ''))) return undefined
+  if (platform === 'onebot' || platform === 'qq') return `https://q1.qlogo.cn/g?b=qq&nk=${pid}&s=640`
+  return undefined
+}
+
+/** 中奖名单（按中奖人聚合奖品；bot 用于取昵称与头像） */
+export async function collectWinners(ctx: Context, roll: any, bot?: BotLike): Promise<WinnerGroup[]> {
   const members = await ctx.database.get('roll_member', { roll_id: roll.id }, ['user_id'])
   if (!members.length) return []
   const joined = await ctx.database.join(['roll_prize', 'user_prize'], (rollPrize, userPrize) => $.eq(rollPrize.prize_id, userPrize.prize_id)).execute()
@@ -191,16 +214,24 @@ export async function collectWinners(ctx: Context, roll: any): Promise<WinnerGro
     }
     if (!prizes.length) continue
     const binding = (await ctx.database.get('binding', { aid: member.user_id }))[0]
+    const pid = binding?.pid ?? String(member.user_id)
     let name = ''
+    let avatar: string | undefined
     if (binding) {
-      // bots 由 index.ts 在 ready 时写入；取不到昵称就退化成只显示号码
-      for (const bot of bots ?? []) {
-        if (bot.platform !== binding.platform) continue
-        const user = await bot.getUser(binding.pid)
-        name = user?.name ?? ''
+      // 优先用传入的 bot（开奖广播里就是收发这条消息的 bot），没有就按平台匹配
+      const target = bot ?? (bots ?? []).find((item) => item.platform === binding.platform)
+      if (target?.getUser) {
+        try {
+          const user = await target.getUser(binding.pid)
+          name = user?.name ?? ''
+          avatar = user?.avatar ?? undefined
+        } catch (error) {
+          logger.warn(`取中奖者资料失败（${binding.pid}）：${(error as Error)?.message ?? error}`)
+        }
       }
+      avatar = avatar || defaultAvatarUrl(binding.platform, binding.pid)
     }
-    winners.push({ name, pid: binding?.pid ?? String(member.user_id), prizes })
+    winners.push({ name, pid, avatar, prizes })
   }
   return winners
 }
@@ -211,10 +242,19 @@ export async function collectWinners(ctx: Context, roll: any): Promise<WinnerGro
  * @ 必须留在文字里 —— 图片虽然好看，但无法提醒到人。渲染失败时返回 null，
  * 调用方回退成原来的完整文字消息。
  */
-export async function rollEndImage(ctx: Context, roll: any, locales: string[]): Promise<h[] | null> {
-  const winners = await collectWinners(ctx, roll)
+export async function rollEndImage(
+  ctx: Context,
+  roll: any,
+  locales: string[],
+  bot?: BotLike,
+  showAvatar = true,
+): Promise<h[] | null> {
+  const winners = await collectWinners(ctx, roll, bot)
   const t = translator(ctx, locales)
   const rows = winners.map((winner) => `<div class="winner">
+      ${showAvatar && winner.avatar
+        ? `<div class="avatar"><span>${esc((winner.name || winner.pid).slice(0, 1))}</span><img src="${esc(winner.avatar)}" onerror="this.remove()"/></div>`
+        : ''}
       <div class="who"><span class="nick">${esc(winner.name || winner.pid)}</span><span class="qq">${esc(winner.pid)}</span></div>
       <div class="prizes">${winner.prizes.map((prize) => `<span class="prize">${esc(t('result.prize', { 0: prize.name, 1: prize.amount }))}</span>`).join('')}</div>
     </div>`).join('\n')

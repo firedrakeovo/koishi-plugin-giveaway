@@ -83,6 +83,9 @@ _config:
     create: |-
       <p>After a giveaway is created, render its content (code / title / description / end time / join key / prizes / conditions) as an image.</p>
       <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; without it (or when rendering fails) only the plain text message is sent.</p>
+    avatar: |-
+      <p>Show the winner's <b>avatar and nickname</b> in the result image (avatar from the QQ number via qlogo, nickname from the OneBot user profile).</p>
+      <p>Falls back to the QQ number when the profile cannot be fetched, and to the initial letter when the avatar fails to load.</p>
     list: |-
       <p>Render the giveaway list as an image.</p>
       <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; falls back to a text message when it is missing or rendering fails.</p>
