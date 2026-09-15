@@ -147,13 +147,14 @@ export function addRoll(ctx: Context, config: Config) {
         ? session.text('.successWithKey', [roll.roll_code, roll.joinKey])
         : session.text('.success', [roll.roll_code])
 
-      // 创建成功后再发一张「抽奖内容」卡片（可选依赖 puppeteer；失败只发文字）
+      // 创建结果：装了 puppeteer 且开了图片渲染 → 只发图片卡片（编号 / 口令 / 奖品 / 参与条件都在卡片里）；
+      // 没装或渲染失败 → 回退为文字成功提示
       if (config.render?.create && hasPuppeteer(ctx)) {
         const effective = policyOverride ?? globalPolicy
         const conditions = renderPolicy(effective, pickLang(session))
           || session.text('messageBuilder.roll.detail.noCondition')
         const image = await rollCreatedImage(ctx, session, roll, prizeList, offset, conditions, { style: config.render?.style, banner: config.render?.banner })
-        if (image) return [...h.parse(String(successText)), h.text('\n'), ...h.parse(image)]
+        if (image) return [...h.parse(image)]
       }
       return successText
     })

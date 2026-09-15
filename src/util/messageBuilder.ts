@@ -158,17 +158,24 @@ export async function rollEndMsgFromRollId(ctx: Context, config: Config, roll: a
   let isWinner = false
   for (let u of res) {
     const userId = u.user_id
-    const userPlatformId = await ctx.database.get('binding', {aid: userId})
-    let user = null
-    for (const bot of bots) {
-      if (bot.platform === userPlatformId[0].platform) {
-        user = await bot.getUser(userPlatformId[0].pid)
+    const binding: any = (await ctx.database.get('binding', {aid: userId}))[0]
+    let user: any = null
+    if (binding) {
+      for (const bot of bots ?? []) {
+        if (bot.platform !== binding.platform) continue
+        // 不是所有适配器都实现 getUser；取不到昵称就只显示 QQ 号，别让整条开奖消息发不出去
+        if (typeof (bot as any).getUser !== 'function') continue
+        try {
+          user = await (bot as any).getUser(binding.pid)
+        } catch (error) {
+          logger.warn(`取中奖者资料失败（${binding.pid}）：${(error as Error)?.message ?? error}`)
+        }
       }
     }
     msgList.push(ctx.i18n.render(locales, ['messageBuilder.roll.end.body.winner'], {
       // 开奖行用 <at> 展示中奖者；取不到昵称（已退群 / 接口失败）也不能让整条开奖消息发不出去
       userName: user?.name ?? '',
-      userId: userPlatformId[0].pid
+      userId: binding?.pid ?? String(userId)
     })[0])
     for (const e of r) {
       if (e.roll_prize.roll_id === roll.id && e.user_prize.user_id === userId) {
