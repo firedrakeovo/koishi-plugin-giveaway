@@ -54,22 +54,32 @@ namespace RenderConfig {
 }
 
 /**
- * 「开奖前 N」提醒的默认时间点：开奖前 10 分钟 / 1 小时 / 5 小时 / 1 天 / 3 天。
+ * 开奖提醒的默认规则表（按「剩余时长区间」分档，提醒位置 = 剩余时长的百分比）。
  *
- * 偏移是「开奖前多久」，与抽奖本身多长无关：已经过去的偏移会被自动跳过，
- * 所以 1 小时的短场次只会收到「开奖前 10 分钟」，7 天的长场次才会依次用满整条阶梯。
+ * - `maxDuration`：该行的时长上限（`30m` / `1h` / `5h` / `1d` / `7d`；`0` 或留空 = 不限）；
+ *   一个抽奖只命中**上限最小且 ≥ 自身时长**的那一行，所以默认每场只提醒一次。
+ * - `percent`：提醒位置，剩余时长的百分比（`20` = 开奖前 20% 处）；同一行写多个（`20,10`）就是多次提醒。
+ *
+ * 默认：≤1 小时按 20%、1~5 小时按 15%、5 小时~1 天按 10%、1 天以上按 10%
+ *（1 小时场次 → 开奖前 12 分钟；5 小时场次 → 开奖前 45 分钟；7 天场次 → 开奖前约 16.8 小时）。
  */
-export const DEFAULT_BEFORE_END = ['0-0-0-0-10', '0-0-0-1-0', '0-0-0-5-0', '0-0-1-0-0', '0-0-3-0-0']
+export const DEFAULT_REMIND_RULES: RemindConfig.Rule[] = [
+  { maxDuration: '1h', percent: '20' },
+  { maxDuration: '5h', percent: '15' },
+  { maxDuration: '1d', percent: '10' },
+  { maxDuration: '0', percent: '10' },
+]
 
 export namespace RemindConfig {
+  export interface Rule {
+    /** 时长上限：`30m` / `1h` / `5h` / `1d` / `7d`；`0` 或留空 = 不限（兜底行） */
+    maxDuration: string
+    /** 提醒位置：剩余时长的百分比，可写多个用逗号分隔（如 `20,10`） */
+    percent: string
+  }
   export interface Config {
-    /**
-     * 定时开奖前的提醒偏移列表（留空 = 不提醒）。
-     *
-     * 每个元素形如 `0-0-0-1-0`（年-月-日-时-分，未用到的位填 0），表示「开奖前 1 小时提醒一次」；
-     * 只对填了开奖时间的抽奖生效，多个偏移就是多次提醒。
-     */
-    beforeEnd: string[]
+    /** 按剩余时长分档的提醒规则（留空 = 不提醒） */
+    rules: Rule[]
   }
 }
 
@@ -156,11 +166,12 @@ const renderConfig: Schema<RenderConfig.Config> = Schema.object({
 })
 
 const remindConfig: Schema<RemindConfig.Config> = Schema.object({
-  beforeEnd: Schema.array(
-    Schema.string()
-      .pattern(/^\d{1,4}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}$/)
-      .description('年-月-日-时-分，例如 0-0-0-1-0 = 开奖前 1 小时'),
-  ).role('table').default(DEFAULT_BEFORE_END),
+  rules: Schema.array(Schema.object({
+    maxDuration: Schema.string()
+      .description('时长上限：30m / 1h / 5h / 1d / 7d；0 或留空 = 不限'),
+    percent: Schema.string()
+      .description('提醒位置：剩余时长的百分比，如 20；写 20,10 表示提醒两次'),
+  })).role('table').default(DEFAULT_REMIND_RULES),
 })
 
 export const Config: Schema<Config> = Schema.object({

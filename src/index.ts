@@ -9,6 +9,7 @@ import AutoEndManager from "./util/autoEndManager"
 import ExpireManager from "./util/expireManager"
 import {honorLabel, invalidHonors} from "./util/rollPolicy"
 import {normalizeHonors} from "./util/joinPolicy"
+import {normalizeRules} from "./util/remindPlan"
 import zhCN from './locales/zh-CN.yml'
 import enUS from './locales/en-US.yml'
 import deDE from './locales/de-DE.yml'
@@ -42,6 +43,14 @@ export async function apply(ctx: Context, config: Config) {
   if (droppedHonors.length > 0) {
     const effective = normalizeHonors(config.join?.requiredHonors).map(honorLabel).join('、') || '无（不限制）'
     logger.warn(`参与条件「互动标识」里有 ${droppedHonors.length} 项为空或无效（原始值 ${JSON.stringify(droppedHonors)}），已忽略；当前实际生效：${effective}。请在控制台把空项删掉，或选上具体的互动标识。`)
+  }
+  // 配置自检：开奖提醒规则表里被忽略的行（时长写不出来 / 百分比为空或越界）
+  const { rules: usableRules, invalid: invalidRules } = normalizeRules(config.remind?.rules)
+  if (invalidRules.length > 0) {
+    logger.warn(`开奖提醒规则里有 ${invalidRules.length} 行无效（原始值 ${JSON.stringify(invalidRules)}），已忽略；这些行不会产生提醒。时长写 ${'30m / 1h / 5h / 1d / 7d'}（0 或留空 = 不限），百分比写 1~99（可写 20,10 表示提醒两次）。`)
+  }
+  if (usableRules.length === 0) {
+    logger.info('开奖提醒规则表为空，本次不会有任何开奖前提醒。')
   }
   // localization
   [['de-DE', deDE], ['en-US', enUS], ['zh-CN', zhCN]]

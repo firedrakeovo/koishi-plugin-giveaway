@@ -112,11 +112,17 @@ _config:
   remind:
     $description: |-
       Draw reminders
-    beforeEnd: |-
-      <p>How long before the scheduled draw to remind the group. Add more rows for more reminders.</p>
-      <p>Format is <b>year-month-day-hour-minute</b> (fill unused parts with <code>0</code>): <code>0-0-0-1-0</code> = 1 hour before, <code>0-0-0-0-30</code> = 30 minutes before.</p>
-      <p>Only applies to giveaways with an end time; leave empty to disable. The message looks like "Giveaway X ends in …".</p>
-      <p>Defaults: <code>0-0-0-0-10</code>, <code>0-0-0-1-0</code>, <code>0-0-0-5-0</code>, <code>0-0-1-0-0</code>, <code>0-0-3-0-0</code> (10 minutes / 1 hour / 5 hours / 1 day / 3 days before the draw). Offsets already in the past are skipped, so shorter giveaways simply get fewer reminders.</p>
+    rules:
+      $description: |-
+        <p>Reminder rules bucketed by how long before the draw the giveaway is created: every row is a duration ceiling plus a reminder position (a percentage of the remaining time).</p>
+        <p>A giveaway only matches the row with the <b>smallest ceiling that is still >= its own duration</b>, so by default each giveaway is reminded once; write several percentages in one row (e.g. <code>20,10</code>) to remind more often.</p>
+        <p>Example: <code>1h -&gt; 20%</code> reminds a giveaway created less than 1 hour before the draw, 12 minutes before it ends; <code>5h -&gt; 15%</code> reminds a 1-5 hour giveaway 45 minutes before it ends.</p>
+        <p>Only applies to giveaways with an end time; clearing the whole table disables reminders. The message looks like "Giveaway X ends in ...".</p>
+      maxDuration: |-
+        Duration ceiling: 30m / 1h / 5h / 1d / 7d; 0 or empty = unlimited (fallback row)
+      percent: |-
+        Reminder position: percentage of the remaining time (20 = 20% before the draw); separate several with commas (20,10)
+
 commands:
   timeout: |-
     Input timed out

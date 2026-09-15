@@ -112,11 +112,17 @@ _config:
   remind:
     $description: |-
       Ziehungs-Erinnerungen
-    beforeEnd: |-
-      <p>Wie lange vor der geplanten Ziehung die Gruppe erinnert wird. Weitere Zeilen = weitere Erinnerungen.</p>
-      <p>Format: <b>Jahr-Monat-Tag-Stunde-Minute</b> (nicht genutzte Teile mit <code>0</code>): <code>0-0-0-1-0</code> = 1 Stunde vorher, <code>0-0-0-0-30</code> = 30 Minuten vorher.</p>
-      <p>Gilt nur für Verlosungen mit Endzeit; leer = keine Erinnerung. Text z. B. „Verlosung X endet in …“.</p>
-      <p>Standardwerte: <code>0-0-0-0-10</code>, <code>0-0-0-1-0</code>, <code>0-0-0-5-0</code>, <code>0-0-1-0-0</code>, <code>0-0-3-0-0</code> (10 Minuten / 1 Stunde / 5 Stunden / 1 Tag / 3 Tage vor der Ziehung). Bereits vergangene Abstände werden übersprungen, kürzere Verlosungen bekommen also einfach weniger Erinnerungen.</p>
+    rules:
+      $description: |-
+        <p>Erinnerungsregeln nach der Vorlaufzeit gestaffelt: Jede Zeile ist eine Zeitobergrenze plus Erinnerungsposition (Prozent der verbleibenden Zeit).</p>
+        <p>Eine Verlosung trifft nur die Zeile mit der <b>kleinsten Obergrenze, die noch >= ihrer eigenen Dauer</b> ist; standardmäßig wird also einmal erinnert. Mehrere Prozentwerte in einer Zeile (z. B. <code>20,10</code>) erinnern entsprechend öfter.</p>
+        <p>Beispiel: <code>1h -&gt; 20%</code> erinnert eine Verlosung, die weniger als 1 Stunde vor der Ziehung erstellt wurde, 12 Minuten vorher; <code>5h -&gt; 15%</code> erinnert eine 1-5 Stunden lange Verlosung 45 Minuten vorher.</p>
+        <p>Gilt nur für Verlosungen mit Endzeit; eine leere Tabelle deaktiviert die Erinnerungen. Text z. B. „Verlosung X endet in ...“.</p>
+      maxDuration: |-
+        Zeitobergrenze: 30m / 1h / 5h / 1d / 7d; 0 oder leer = unbegrenzt (Fallback-Zeile)
+      percent: |-
+        Erinnerungsposition: Prozent der verbleibenden Zeit (20 = 20% vor der Ziehung); mehrere durch Komma trennen (20,10)
+
 commands:
   timeout: |-
     Zeitüberschreitung bei der Eingabe

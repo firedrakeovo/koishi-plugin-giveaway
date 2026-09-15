@@ -107,10 +107,6 @@ export function getRemindValueFromReminder(endTime: Date, reminder: any) {
  * @param endTime 抽奖的开奖时间
  * @param value   形如 `0-0-0-1-0`（年-月-日-时-分），表示开奖前多久
  */
-export function getRemindValueFromBeforeEnd(endTime: Date, value: string): Date {
-  return DateTime.fromJSDate(endTime).minus(dateInputToDuration(value)).toJSDate()
-}
-
 /**
  * 把奖品输入解析成奖品列表（忽略空项，数量缺省为 1）。
  *

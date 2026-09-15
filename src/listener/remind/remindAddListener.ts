@@ -19,13 +19,14 @@ export function remindAddListener(ctx: Context, config: Config) {
         })
       }
     }
-    // 开奖提醒：按控制台配置的「开奖前 N」偏移，给所有未结束、有开奖时间的抽奖重建 job
-    const offsets = config.remind?.beforeEnd ?? []
-    if (offsets.length) {
+    // 开奖提醒：按控制台规则给所有未结束、有开奖时间的抽奖重建 job
+    // （不知道原始创建时刻，就用「现在」当基准：已过去的提醒自然不会被排上）
+    const rules = config.remind?.rules ?? []
+    if (rules.length) {
       const rollRes = await ctx.database.get('roll', {isEnd: 0})
       for (const roll of rollRes) {
         if (!roll.endTime) continue
-        scheduleRollReminds(((event, ...args) => ctx.emit(event as any, ...args)), roll.id, roll.endTime, offsets)
+        scheduleRollReminds(((event, ...args) => ctx.emit(event as any, ...args)), roll.id, roll.endTime, rules)
       }
     }
   })

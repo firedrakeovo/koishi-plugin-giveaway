@@ -37,6 +37,6 @@ export function apply(ctx: Context, config: Config) {
   quitRoll(ctx, config)
   listRoll(ctx, config)
   memberRoll(ctx, config)
-  // 手动创建/管理提醒器的指令已下线：开奖提醒改为控制台配置（remind.beforeEnd）后自动排期
+  // 手动创建/管理提醒器的指令已下线：开奖提醒改为控制台配置（remind.rules：按剩余时长分档 + 百分比）后自动排期
 
 }

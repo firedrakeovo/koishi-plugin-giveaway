@@ -38,13 +38,14 @@ export function rollAddListener(ctx: Context, config: Config) {
     }
 
     ctx.emit('giveaway/roll-key-update')
-    // 开奖提醒（控制台配置的「开奖前 N」偏移）：只对填了开奖时间的抽奖生效
+    // 开奖提醒（控制台按「剩余时长区间 + 百分比」配置）：只对填了开奖时间的抽奖生效；
+    // 以创建时刻为基准算剩余时长，命中一行规则 → 默认只排一次提醒
     if (rollRes.endTime) {
       scheduleRollReminds(
         ((event, ...args) => ctx.emit(event as any, ...args)),
         rollRes.id,
         rollRes.endTime,
-        config.remind?.beforeEnd,
+        config.remind?.rules,
       )
     }
     // Create auto end job
