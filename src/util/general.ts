@@ -58,16 +58,22 @@ export function checkDateInput(input: string, length: number): boolean {
   return regex.test(input);
 }
 
+/**
+ * 「开奖时间 / 提醒时间」文本 → DateTime
+ *
+ * 支持两种写法（模板说明与历史示例都能用）：
+ * - 5 段：`年-月-日-时-分`，如 `2026-09-15-20-00`
+ * - 4 段：`月-日-时-分`（年份取当前年），如 `09-15-20-00`
+ *
+ * 老实现按下标把第 0 段当 year：4 段输入会解析成 year=09、month=15 → Invalid Date，
+ * 抽奖的自动开奖时间直接失效（模板里的示例正是 4 段写法）。
+ */
 export function dateInputToDateTime(input: string, offset: string): DateTime {
-  const timeArray = input.split('-')
-  const t = {
-    year: parseInt(timeArray[0]),
-    month: parseInt(timeArray[1]),
-    day: parseInt(timeArray[2]),
-    hour: parseInt(timeArray[3]),
-    minute: parseInt(timeArray[4]) || undefined
-  }
-  return DateTime.fromObject(t, { zone: offset })
+  const parts = String(input ?? '').split('-').map((part) => parseInt(part, 10))
+  const [year, month, day, hour, minute] = parts.length >= 5
+    ? parts
+    : [new Date().getFullYear(), parts[0], parts[1], parts[2], parts[3]]
+  return DateTime.fromObject({ year, month, day, hour, minute: minute || undefined }, { zone: offset })
 }
 
 export function dateInputToDuration(input: string): Duration {

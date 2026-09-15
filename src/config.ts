@@ -43,6 +43,7 @@ export type HonorRequirement = 'fire7' | 'fire30' | 'dragon'
  */
 namespace RenderConfig {
   export interface Config {
+    create: boolean
     list: boolean
     result: boolean
   }
@@ -126,6 +127,7 @@ const joinConfig: Schema<JoinConfig.Config> = Schema.object({
 })
 
 const renderConfig: Schema<RenderConfig.Config> = Schema.object({
+  create: Schema.boolean().default(true),
   list: Schema.boolean().default(true),
   result: Schema.boolean().default(true),
 })

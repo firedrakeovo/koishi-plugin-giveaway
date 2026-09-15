@@ -80,6 +80,9 @@ _config:
   render:
     $description: |-
       图片渲染（可选）
+    create: |-
+      <p>创建抽奖成功后，把抽奖内容（编号 / 标题 / 描述 / 开奖时间 / 口令 / 奖品 / 参与条件）渲染成一张图片。</p>
+      <p>需要安装并启用 <code>koishi-plugin-puppeteer</code>；未安装或渲染失败时只发原来的文字提示。</p>
     list: |-
       <p>抽奖列表用图片渲染。</p>
       <p>需要安装并启用 <code>koishi-plugin-puppeteer</code>；未安装或渲染失败时自动回退为文字消息。</p>
@@ -162,7 +165,7 @@ commands:
         标题：
         描述：
         参与条件：{0}
-        说明一：奖品格式为「名称*数量」，多个奖品用逗号或空格分隔；开奖时间格式为「年-月-日-时-分」，留空表示不自动开奖。
+        说明一：奖品格式为「名称*数量」，多个奖品用逗号或空格分隔；开奖时间格式为「月-日-时-分」或「年-月-日-时-分」（如 09-15-20-00 / 2026-09-15-20-00），留空表示不自动开奖。
         说明二：「参与条件」一行可以不改（沿用控制台配置）、删空（本抽奖不做限制），或照「等级≥40 活跃≥1 连续≥7 标识=群聊炽焰,龙王」改写（不需要的项删掉即可）；多个标识的判定口径与「龙王」口径由控制台统一配置。
       noPrize: |-
         没有找到「奖品：」这一行，无法创建抽奖。
@@ -453,33 +456,50 @@ events:
 
 messageBuilder:
   render:
-      list:
-        title: |-
-          抽奖列表
-        summary: |-
-          {0} 个进行中 · {1} 个已结束
-        marks:
-          open: |-
-            进行中
-          ended: |-
-            已结束
-        deadline: |-
-          截止 {0}
-        noDeadline: |-
-          不自动开奖
-        empty: |-
-          当前频道还没有抽奖
-      result:
-        title: |-
-          开奖结果
-        summary: |-
-          抽奖 {0} · {1} 位中奖者
-        noWinner: |-
-          本次没有中奖者
-        prize: |-
-          {0} × {1}
-      footer: |-
-        koishi-plugin-giveaway 抽奖插件
+    list:
+      title: |-
+        抽奖列表
+      summary: |-
+        {0} 个进行中 · {1} 个已结束
+      marks:
+        open: |-
+          进行中
+        ended: |-
+          已结束
+      deadline: |-
+        截止 {0}
+      noDeadline: |-
+        不自动开奖
+      empty: |-
+        当前频道还没有抽奖
+    create:
+      title: |-
+        抽奖已创建
+      summary: |-
+        编号 {0}
+      deadline: |-
+        开奖时间
+      description: |-
+        描述
+      key: |-
+        加入口令
+      noKey: |-
+        无需口令（用「加入抽奖 编号」参与）
+      prizes: |-
+        奖品
+      conditions: |-
+        参与条件
+    result:
+      title: |-
+        开奖结果
+      summary: |-
+        抽奖 {0} · {1} 位中奖者
+      noWinner: |-
+        本次没有中奖者
+      prize: |-
+        {0} × {1}
+    footer: |-
+      koishi-plugin-giveaway 抽奖插件
   marks:
     open: |-
       [进行中]

@@ -99,6 +99,14 @@ function shell(t: Translate, title: string, summary: string, body: string): stri
   .prizes { flex: 1; display: flex; flex-wrap: wrap; gap: 8px; }
   .prize { padding: 5px 12px; border-radius: 10px; font-size: 14px; color: #3c4a63; background: #eef3ff; }
   .empty { padding: 26px 0 30px; text-align: center; color: #98a1b0; font-size: 15px; }
+  .kv { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f0f2f5; font-size: 15px; }
+  .kv:last-child { border-bottom: none; }
+  .kv .k { flex: none; width: 96px; color: #98a1b0; }
+  .kv .v { flex: 1; color: #1f2530; word-break: break-word; }
+  .block { padding: 14px 0 6px; }
+  .block-title { font-size: 13px; color: #98a1b0; margin-bottom: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cond { font-size: 15px; color: #3c4a63; }
   .foot { padding: 0 30px 20px; text-align: right; font-size: 12px; color: #b6bdc9; }
 </style></head>
 <body><div class="card">
@@ -218,4 +226,53 @@ export async function rollEndImage(ctx: Context, roll: any, locales: string[]): 
   const header = ctx.i18n.render(locales, ['messageBuilder.roll.end.header'], [roll.roll_code])
   const mentions = winners.length ? [h.text('\n'), ...winners.map((winner) => h.at(winner.pid))] : []
   return [...header, ...mentions, h.text('\n'), ...h.parse(image)]
+}
+
+/**
+ * 创建成功后的「抽奖内容」卡片
+ *
+ * 展示编号 / 标题 / 描述 / 开奖时间 / 加入口令 / 奖品 / 参与条件。
+ * 渲染失败返回 null，调用方只发原来的文字提示（图片是锦上添花，不该影响创建结果）。
+ */
+export async function rollCreatedImage(
+  ctx: Context,
+  session: Session,
+  roll: {
+    roll_code: string
+    title?: string
+    description?: string
+    joinKey?: string
+    isAutoEnd?: boolean | number
+    endTime?: Date | string | number | null
+  },
+  prizes: Array<{ name: string; amount: string | number }>,
+  offset: string,
+  conditions: string,
+): Promise<string | null> {
+  const t = translator(ctx, localeList(session, ctx))
+  const rows: string[] = []
+  const kv = (label: string, value: string) => {
+    rows.push(`<div class="kv"><span class="k">${esc(label)}</span><span class="v">${esc(value)}</span></div>`)
+  }
+  const deadline = roll.isAutoEnd && roll.endTime
+    ? DateTime.fromJSDate(new Date(roll.endTime), { zone: 'UTC' }).setZone(offset).toFormat('yyyy-MM-dd HH:mm')
+    : t('list.noDeadline')
+  kv(t('create.deadline'), deadline)
+  kv(t('create.description'), roll.description || '—')
+  kv(t('create.key'), roll.joinKey || t('create.noKey'))
+  const prizeChips = prizes
+    .map((prize) => `<span class="prize">${esc(t('result.prize', { 0: prize.name, 1: prize.amount }))}</span>`)
+    .join('')
+  const body = [
+    ...rows,
+    `<div class="block"><div class="block-title">${esc(t('create.prizes'))}</div><div class="chips">${prizeChips}</div></div>`,
+    `<div class="block"><div class="block-title">${esc(t('create.conditions'))}</div><div class="cond">${esc(conditions)}</div></div>`,
+  ].join('\n')
+  const html = shell(
+    t,
+    roll.title || t('create.title'),
+    `${t('create.title')} · ${t('create.summary', { 0: roll.roll_code })}`,
+    body,
+  )
+  return renderImage(ctx, html)
 }

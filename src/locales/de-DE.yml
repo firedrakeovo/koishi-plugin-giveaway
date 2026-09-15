@@ -80,6 +80,9 @@ _config:
   render:
     $description: |-
       Bild-Rendering (optional)
+    create: |-
+      <p>Nach dem Erstellen einer Verlosung deren Inhalt (Nummer / Titel / Beschreibung / Endzeit / Beitrittswort / Preise / Bedingungen) als Bild rendern.</p>
+      <p>Erfordert installiertes und aktiviertes <code>koishi-plugin-puppeteer</code>; ohne dieses (oder bei Fehlern) wird nur die Textnachricht gesendet.</p>
     list: |-
       <p>Die Verlosungsliste als Bild rendern.</p>
       <p>Erfordert installiertes und aktiviertes <code>koishi-plugin-puppeteer</code>; ohne dieses oder bei Fehlern wird automatisch eine Textnachricht gesendet.</p>
@@ -162,7 +165,7 @@ commands:
         Titel:
         Beschreibung:
         Bedingungen: {0}
-        Hinweis 1: Preise im Format „Name*Anzahl“, mehrere mit Komma oder Leerzeichen trennen; Endzeit im Format Jahr-Monat-Tag-Stunde-Minute, leer = keine automatische Ziehung.
+        Hinweis 1: Preise im Format „Name*Anzahl“, mehrere mit Komma oder Leerzeichen trennen; Endzeit im Format Monat-Tag-Stunde-Minute oder Jahr-Monat-Tag-Stunde-Minute (z. B. 09-15-20-00 / 2026-09-15-20-00); leer = keine automatische Ziehung.
         Hinweis 2: Die Zeile „Bedingungen“ kann unverändert bleiben (Konsole-Einstellungen verwenden), geleert werden (keine Einschränkung für diese Verlosung) oder umgeschrieben werden, z. B. „Stufe≥40 Aktiv≥1 Serie≥7 Abzeichen=Flamme,Drachenkoenig“ (nicht Benötigtes löschen). Modus für mehrere Abzeichen und der Drachenkönig-Umfang werden in der Konsole eingestellt.
       noPrize: |-
         Keine Zeile „Preise:“ gefunden, die Verlosung kann nicht erstellt werden.
@@ -453,33 +456,50 @@ events:
 
 messageBuilder:
   render:
-      list:
-        title: |-
-          Verlosungsliste
-        summary: |-
-          {0} laufend · {1} beendet
-        marks:
-          open: |-
-            läuft
-          ended: |-
-            beendet
-        deadline: |-
-          endet {0}
-        noDeadline: |-
-          keine automatische Ziehung
-        empty: |-
-          In diesem Kanal gibt es noch keine Verlosung
-      result:
-        title: |-
-          Ziehungsergebnis
-        summary: |-
-          Verlosung {0} · {1} Gewinner
-        noWinner: |-
-          Diesmal gibt es keinen Gewinner
-        prize: |-
-          {0} × {1}
-      footer: |-
-        koishi-plugin-giveaway
+    list:
+      title: |-
+        Verlosungsliste
+      summary: |-
+        {0} laufend · {1} beendet
+      marks:
+        open: |-
+          läuft
+        ended: |-
+          beendet
+      deadline: |-
+        endet {0}
+      noDeadline: |-
+        keine automatische Ziehung
+      empty: |-
+        In diesem Kanal gibt es noch keine Verlosung
+    create:
+      title: |-
+        Verlosung erstellt
+      summary: |-
+        Nummer {0}
+      deadline: |-
+        Endet am
+      description: |-
+        Beschreibung
+      key: |-
+        Beitrittswort
+      noKey: |-
+        kein Wort (Beitritt über „giveaway join“ + Nummer)
+      prizes: |-
+        Preise
+      conditions: |-
+        Bedingungen
+    result:
+      title: |-
+        Ziehungsergebnis
+      summary: |-
+        Verlosung {0} · {1} Gewinner
+      noWinner: |-
+        Diesmal gibt es keinen Gewinner
+      prize: |-
+        {0} × {1}
+    footer: |-
+      koishi-plugin-giveaway
   marks:
     open: |-
       [läuft]

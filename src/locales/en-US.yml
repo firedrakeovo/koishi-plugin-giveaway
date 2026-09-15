@@ -80,6 +80,9 @@ _config:
   render:
     $description: |-
       Image rendering (optional)
+    create: |-
+      <p>After a giveaway is created, render its content (code / title / description / end time / join key / prizes / conditions) as an image.</p>
+      <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; without it (or when rendering fails) only the plain text message is sent.</p>
     list: |-
       <p>Render the giveaway list as an image.</p>
       <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; falls back to a text message when it is missing or rendering fails.</p>
@@ -162,7 +165,7 @@ commands:
         Title:
         Description:
         Conditions: {0}
-        Note 1: prizes use "name*amount", separate several with a comma or space; end time uses year-month-day-hour-minute, leave it empty for no auto-draw.
+        Note 1: prizes use "name*amount", separate several with a comma or space; end time uses month-day-hour-minute or year-month-day-hour-minute (e.g. 09-15-20-00 / 2026-09-15-20-00); leave it empty for no auto-draw.
         Note 2: the "Conditions" line may be kept as is (use the console config), emptied (no restrictions for this giveaway), or rewritten as "Level≥40 Active≥1 Streak≥7 Honors=blaze,dragon" (delete whatever you do not need). The multi-honor mode and the Dragon King scope are set in the console.
       noPrize: |-
         No "Prizes:" line found, the giveaway cannot be created.
@@ -453,33 +456,50 @@ events:
 
 messageBuilder:
   render:
-      list:
-        title: |-
-          Giveaway list
-        summary: |-
-          {0} running · {1} ended
-        marks:
-          open: |-
-            running
-          ended: |-
-            ended
-        deadline: |-
-          ends {0}
-        noDeadline: |-
-          no auto-draw
-        empty: |-
-          No giveaway in this channel yet
-      result:
-        title: |-
-          Draw result
-        summary: |-
-          Giveaway {0} · {1} winner(s)
-        noWinner: |-
-          No winner this time
-        prize: |-
-          {0} × {1}
-      footer: |-
-        koishi-plugin-giveaway
+    list:
+      title: |-
+        Giveaway list
+      summary: |-
+        {0} running · {1} ended
+      marks:
+        open: |-
+          running
+        ended: |-
+          ended
+      deadline: |-
+        ends {0}
+      noDeadline: |-
+        no auto-draw
+      empty: |-
+        No giveaway in this channel yet
+    create:
+      title: |-
+        Giveaway created
+      summary: |-
+        Code {0}
+      deadline: |-
+        Ends at
+      description: |-
+        Description
+      key: |-
+        Join key
+      noKey: |-
+        no key (join with "giveaway join" + the code)
+      prizes: |-
+        Prizes
+      conditions: |-
+        Conditions
+    result:
+      title: |-
+        Draw result
+      summary: |-
+        Giveaway {0} · {1} winner(s)
+      noWinner: |-
+        No winner this time
+      prize: |-
+        {0} × {1}
+    footer: |-
+      koishi-plugin-giveaway
   marks:
     open: |-
       [running]

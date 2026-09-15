@@ -1,4 +1,4 @@
-import {Context} from 'koishi';
+import {Context, h} from 'koishi';
 import {Config} from '../../config';
 import {DateTime} from 'luxon';
 import {
@@ -12,6 +12,7 @@ import {
 import {hasPermission, isGuildAdmin, hasAuthority} from "../../util/role";
 import {getCurrentUTCOffset} from "../../util/time";
 import {parsePolicy, pickLang, policyEquals, policyFromConfig, renderPolicy} from "../../util/rollPolicy";
+import {hasPuppeteer, rollCreatedImage} from "../../util/render";
 
 /**
  * 创建抽奖。
@@ -93,7 +94,11 @@ export function addRoll(ctx: Context, config: Config) {
           return session.text('.cancelled')
         }
         try {
-          endTime = dateInputToDateTime(timeInput, offset).toUTC().toJSDate()
+          const dt = dateInputToDateTime(timeInput, offset)
+          // luxon 对非法日期不抛错，只返回 isValid=false —— 必须显式拦掉，
+          // 否则会带着 Invalid Date 创建抽奖（自动开奖直接失效）
+          if (!dt.isValid) throw new Error('invalid date')
+          endTime = dt.toUTC().toJSDate()
         } catch (e) {
           await session.send(session.text('.timeError'))
           return session.text('.cancelled')
@@ -138,8 +143,18 @@ export function addRoll(ctx: Context, config: Config) {
         policyOverride ? { policy: policyOverride } : {}
       )
 
-      return roll.joinKey
+      const successText = roll.joinKey
         ? session.text('.successWithKey', [roll.roll_code, roll.joinKey])
         : session.text('.success', [roll.roll_code])
+
+      // 创建成功后再发一张「抽奖内容」卡片（可选依赖 puppeteer；失败只发文字）
+      if (config.render?.create && hasPuppeteer(ctx)) {
+        const effective = policyOverride ?? globalPolicy
+        const conditions = renderPolicy(effective, pickLang(session))
+          || session.text('messageBuilder.roll.detail.noCondition')
+        const image = await rollCreatedImage(ctx, session, roll, prizeList, offset, conditions)
+        if (image) return [...h.parse(String(successText)), h.text('\n'), ...h.parse(image)]
+      }
+      return successText
     })
 }
