@@ -3,6 +3,7 @@ import {DateTime} from 'luxon'
 import {Config} from '../../config';
 import {getWinnerList} from "../../util/winnerGenerator";
 import {rollEndMsgFromRollId} from "../../util/messageBuilder";
+import {channelLocaleList, hasPuppeteer, rollEndImage} from "../../util/render";
 import {bots, expireManager} from "../../index";
 
 export function rollEndListener(ctx: Context, config: Config) {
@@ -27,13 +28,18 @@ export function rollEndListener(ctx: Context, config: Config) {
       endTime: roll.endTime? roll.endTime : DateTime.now().toUTC().toJSDate()
     })
     // Broadcast roll end message
-    // TODO: Support diverse messages such as countdowns, result pictures, etc
     const rollOpenRange = await ctx.database.get('roll_channel', {roll_id: roll.id})
     // support i18n
     for (const item of rollOpenRange) {
       for (const bot of bots) {
         if (bot.platform === item.channel_platform) {
-          const msg = await rollEndMsgFromRollId(ctx, config, roll, item)
+          // 图片版开奖结果（可选依赖 puppeteer）：渲染失败时回退为原来的完整文字消息
+          let msg: any = null
+          if (config.render?.result && hasPuppeteer(ctx)) {
+            const locales = await channelLocaleList(ctx, item.channel_id, item.channel_platform)
+            msg = await rollEndImage(ctx, roll, locales)
+          }
+          if (!msg) msg = await rollEndMsgFromRollId(ctx, config, roll, item)
           bot.sendMessage(item.channel_id, msg)
         }
       }

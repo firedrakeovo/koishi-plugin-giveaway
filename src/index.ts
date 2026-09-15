@@ -15,7 +15,11 @@ import deDE from './locales/de-DE.yml'
 
 export const name = 'giveaway'
 
-export const inject = ['database', 'assets']
+// puppeteer 是可选的：没装 / 没启用时图片渲染自动关闭，插件其余功能照常工作
+export const inject = {
+  required: ['database', 'assets'],
+  optional: ['puppeteer'],
+}
 
 export * from './config'
 

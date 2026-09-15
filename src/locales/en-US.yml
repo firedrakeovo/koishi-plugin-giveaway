@@ -77,6 +77,15 @@ _config:
         - Deny
     cacheMinutes: |-
       How long (in minutes) honor data is cached. <code>0</code> means fetch every time.
+  render:
+    $description: |-
+      Image rendering (optional)
+    list: |-
+      <p>Render the giveaway list as an image.</p>
+      <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; falls back to a text message when it is missing or rendering fails.</p>
+    result: |-
+      <p>Render the draw result (winners and prizes) as an image, keeping a text line that @-mentions the winners.</p>
+      <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; falls back to the plain text message when it is missing or rendering fails.</p>
   remind:
     $description: |-
       Reminders
@@ -443,6 +452,34 @@ events:
       <p>Giveaway {rollCode} ends in {diff}~</p>
 
 messageBuilder:
+  render:
+      list:
+        title: |-
+          Giveaway list
+        summary: |-
+          {0} running · {1} ended
+        marks:
+          open: |-
+            running
+          ended: |-
+            ended
+        deadline: |-
+          ends {0}
+        noDeadline: |-
+          no auto-draw
+        empty: |-
+          No giveaway in this channel yet
+      result:
+        title: |-
+          Draw result
+        summary: |-
+          Giveaway {0} · {1} winner(s)
+        noWinner: |-
+          No winner this time
+        prize: |-
+          {0} × {1}
+      footer: |-
+        koishi-plugin-giveaway
   marks:
     open: |-
       [running]

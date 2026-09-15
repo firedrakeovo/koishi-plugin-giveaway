@@ -35,6 +35,19 @@ namespace JoinConfig {
 /** 可选的互动标识（QQ 群荣誉）条件 */
 export type HonorRequirement = 'fire7' | 'fire30' | 'dragon'
 
+/**
+ * 图片渲染（可选依赖 puppeteer）
+ *
+ * 启用后，抽奖列表与开奖结果会用 HTML 模板渲染成图片发送；
+ * 未安装 / 未启用 `koishi-plugin-puppeteer`，或渲染失败时自动回退为文字消息。
+ */
+namespace RenderConfig {
+  export interface Config {
+    list: boolean
+    result: boolean
+  }
+}
+
 export namespace RemindConfig {
   export interface Config {
     defaultReminders?: Array<{
@@ -48,6 +61,7 @@ export interface Config {
   basic: BasicConfig.Config
   permission: PermissionConfig.Config
   join: JoinConfig.Config
+  render: RenderConfig.Config
   remind: RemindConfig.Config
 }
 
@@ -111,6 +125,11 @@ const joinConfig: Schema<JoinConfig.Config> = Schema.object({
   cacheMinutes: Schema.natural().max(60).default(5),
 })
 
+const renderConfig: Schema<RenderConfig.Config> = Schema.object({
+  list: Schema.boolean().default(true),
+  result: Schema.boolean().default(true),
+})
+
 const remindConfig: Schema<RemindConfig.Config> = Schema.object({
   defaultReminders: Schema.array(
     Schema.object({
@@ -127,6 +146,7 @@ export const Config: Schema<Config> = Schema.object({
   basic: basicConfig,
   permission: permissionConfig,
   join: joinConfig,
+  render: renderConfig,
   remind: remindConfig,
 }).i18n({
   "de-DE": deDE._config,

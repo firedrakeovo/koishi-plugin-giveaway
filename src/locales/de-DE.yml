@@ -77,6 +77,15 @@ _config:
         - Ablehnen
     cacheMinutes: |-
       Wie lange (in Minuten) Ehrungsdaten zwischengespeichert werden. <code>0</code> bedeutet jedes Mal neu abrufen.
+  render:
+    $description: |-
+      Bild-Rendering (optional)
+    list: |-
+      <p>Die Verlosungsliste als Bild rendern.</p>
+      <p>Erfordert installiertes und aktiviertes <code>koishi-plugin-puppeteer</code>; ohne dieses oder bei Fehlern wird automatisch eine Textnachricht gesendet.</p>
+    result: |-
+      <p>Das Ziehungsergebnis (Gewinner und Preise) als Bild rendern, zusätzlich eine Textzeile mit @-Erwähnung der Gewinner.</p>
+      <p>Erfordert installiertes und aktiviertes <code>koishi-plugin-puppeteer</code>; ohne dieses oder bei Fehlern wird die reine Textnachricht gesendet.</p>
   remind:
     $description: |-
       Erinnerungen
@@ -443,6 +452,34 @@ events:
       <p>Die Verlosung {rollCode} endet in {diff}~</p>
 
 messageBuilder:
+  render:
+      list:
+        title: |-
+          Verlosungsliste
+        summary: |-
+          {0} laufend · {1} beendet
+        marks:
+          open: |-
+            läuft
+          ended: |-
+            beendet
+        deadline: |-
+          endet {0}
+        noDeadline: |-
+          keine automatische Ziehung
+        empty: |-
+          In diesem Kanal gibt es noch keine Verlosung
+      result:
+        title: |-
+          Ziehungsergebnis
+        summary: |-
+          Verlosung {0} · {1} Gewinner
+        noWinner: |-
+          Diesmal gibt es keinen Gewinner
+        prize: |-
+          {0} × {1}
+      footer: |-
+        koishi-plugin-giveaway
   marks:
     open: |-
       [läuft]

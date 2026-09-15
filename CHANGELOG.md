@@ -2,6 +2,18 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 的格式，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [Unreleased]
+
+### Added 新增
+
+- **图片渲染（可选依赖 puppeteer）**：安装并启用 `koishi-plugin-puppeteer` 后，
+  `抽奖列表` 与开奖结果会用内置 HTML 模板渲染成图片
+  - 配置新增 `render` 组：`list`（列表出图）、`result`（开奖结果出图），默认都开启
+  - 未安装 / 未启用 / 渲染失败时**自动回退为文字消息**，只打一条 warn 日志，不影响开奖与列表逻辑
+  - 开奖消息仍保留一条带真实 `@中奖者` 的文字行（图片无法提醒到人），图片附在其后
+  - 图片标签跟随语言（zh-CN / en-US / de-DE），用户输入（标题、昵称）做 HTML 转义
+  - `package.json` 的 `koishi.service` 声明 `optional: ["puppeteer"]`
+
 ## [0.1.1] - 2026-09-14
 
 **首个公开发布到 npm 的版本**（`0.1.0` 仅用于本地开发，未发布、未打 tag）。基于上游 [Roll-Bot-Project/roll-bot](https://github.com/Roll-Bot-Project/roll-bot) v1.3.0（commit `6ce60ab`）二次开发，**完整保留上游提交历史**（分叉点见仓库 tag `upstream-fork-point`）。
