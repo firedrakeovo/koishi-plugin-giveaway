@@ -18,3 +18,7 @@ tsconfig.tsbuildinfo
 *.njsproj
 *.sln
 /tests/
+
+# 测试产物
+test/.perm.cjs
+test/previews/

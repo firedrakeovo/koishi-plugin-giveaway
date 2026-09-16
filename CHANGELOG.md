@@ -4,8 +4,15 @@
 
 ## [Unreleased]
 
+### Added 新增
+
+- **CI（GitHub Actions）**：push / PR 时在 Node 20 / 22 上执行 `npm ci → npm run build → npm test`；
+  离线用例已迁入仓库 `test/`（路径全部改为相对，`npm test` 一键跑 5 套，`npm run test:shots` 跑可选截图验收）
+
 ### Changed 变更
 
+- **README 重写**：按当前功能重新组织（特性 / 安装 / 指令列表 / 交互详解 / 配置 / 图片渲染 / 参与条件 /
+  权限 / 数据与事件 / 多语言 / 开发），并补充 CI 徽章与测试说明
 - **多语言收尾**：管理员诊断指令（`抽奖接口诊断` / `抽奖成员诊断`）的输出全部改为 i18n（三语），
   不再硬编码中文；创建流程的取消词扩展为 `q` / `quit` / `cancel` / `取消` / `abbrechen`
 - **新增功能总览文档** `docs/features-and-interactions.md`：全部指令、交互流程、配置面、数据模型、
