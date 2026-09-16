@@ -66,7 +66,8 @@ export function addRoll(ctx: Context, config: Config) {
         // 超时/没回 / 明确取消 / 回复别的内容 → 一律取消本次创建
         if (!answer) return session.text('.cancelled')
         const trimmed = answer.trim()
-        if (trimmed === 'q' || trimmed === '取消') return session.text('.quit')
+        // 取消词：中 / 英 / 德都能用（大小写不敏感）
+        if (['q', 'quit', 'cancel', '取消', 'abbrechen'].includes(trimmed.toLowerCase())) return session.text('.quit')
         const form = parseCreateForm(trimmed)
         if (!form.ok) {
           await session.send(session.text(form.error === 'time' ? '.timeError' : '.noPrize'))

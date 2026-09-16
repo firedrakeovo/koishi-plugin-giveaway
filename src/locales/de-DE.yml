@@ -322,21 +322,71 @@ commands:
         defaultUser: |-
           Deine Spracheinstellung wurde entfernt
   giveaway.debug.honor:
-    description: |-
-      Gruppen-Ehrungs-APIs diagnostizieren (nur Admins)
     messages:
       noAuth: |-
         Du darfst diesen Befehl nicht verwenden.
       groupOnly: |-
         Bitte verwende diesen Befehl in einer Gruppe.
+      notOneBot: |-
+        Diese Sitzung ist kein OneBot-Gruppenchat; Diagnose nicht möglich.
+      rawLogged: |-
+        (die vollständige Rohantwort wurde ins Plugin-Log geschrieben)
+      none: |-
+        (keine)
+      listSep: |-
+        , 
+      cookie: |-
+        (1) Cookie: {0}
+      cookieOk: |-
+        ✅ erhalten ({0} Zeichen)
+      cookieEmpty: |-
+        ❌ leer
+      failed: |-
+        ❌ {0}
+      napcat: |-
+        (2) NapCat-Gruppenehrungs-API: Drachenkönig {0} / Gruppenfeuer {1} / Gruppenflamme {2} / Emotion {3}
+      napcatFailed: |-
+        (2) NapCat-Gruppenehrungs-API: ❌ {0}
+      authVariant: |-
+           Auth-Methode: {0}
+      unknown: |-
+        unbestimmt
+      webApi: |-
+        (3) QQ-Web-API: {0} Drachenkönig {1} / Gruppenfeuer {2} / Gruppenflamme {3}
+      error: |-
+           Fehler: {0}
+      sample: |-
+           Beispiel: Drachenkönig {0}; Feuer / Flamme {1} / {2}
+      sampleItemMax: |-
+        {0} (max. {1} Tage)
+      sampleItemBoth: |-
+        {0} (max. {1} Tage / aktuell {2} Tage)
   giveaway.debug.member:
-    description: |-
-      Gruppenmitglieds-API diagnostizieren (nur Admins)
     messages:
       noAuth: |-
         Du darfst diesen Befehl nicht verwenden.
       groupOnly: |-
         Bitte verwende diesen Befehl in einer Gruppe.
+      notOneBot: |-
+        Diese Sitzung ist kein OneBot-Gruppenchat; Diagnose nicht möglich.
+      rawLogged: |-
+        (die vollständige Rohantwort wurde ins Plugin-Log geschrieben)
+      none: |-
+        (keine)
+      listSep: |-
+        , 
+      memberHeader: |-
+        Mitgliedsinfo von Nutzer {0} in Gruppe {1}:
+      memberLevel: |-
+        Gruppenlevel = {0}
+      memberLastSent: |-
+        zuletzt geschrieben = {0}
+      memberJoin: |-
+        beigetreten = {0}
+      memberRole: |-
+        Rolle = {0}
+      memberFailed: |-
+        ❌ Abruf fehlgeschlagen: {0}
 events:
   join.rejected: |-
     <quote id={messageId}/> Du erfüllst die Bedingungen dieser Verlosung nicht: {reason}

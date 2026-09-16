@@ -322,21 +322,71 @@ commands:
         defaultUser: |-
           已清除你的语言偏好设置
   giveaway.debug.honor:
-    description: |-
-      诊断当前群的荣誉接口（管理员）
     messages:
       noAuth: |-
         你没有权限使用该指令！
       groupOnly: |-
         请在群聊中使用该指令。
+      notOneBot: |-
+        当前会话不是 OneBot 群聊，无法诊断。
+      rawLogged: |-
+        （完整原始返回已写入插件日志）
+      none: |-
+        （无）
+      listSep: |-
+        、
+      cookie: |-
+        ① Cookie：{0}
+      cookieOk: |-
+        ✅ 已获取（{0} 字符）
+      cookieEmpty: |-
+        ❌ 为空
+      failed: |-
+        ❌ {0}
+      napcat: |-
+        ② NapCat 群荣誉接口：龙王 {0} / 群聊之火 {1} / 群聊炽焰 {2} / 快乐源泉 {3}
+      napcatFailed: |-
+        ② NapCat 群荣誉接口：❌ {0}
+      authVariant: |-
+           鉴权方式：{0}
+      unknown: |-
+        未确定
+      webApi: |-
+        ③ QQ 网页接口：{0} 龙王 {1} / 群聊之火 {2} / 群聊炽焰 {3}
+      error: |-
+           错误：{0}
+      sample: |-
+           样例：龙王 {0}；火 / 炽焰 {1} / {2}
+      sampleItemMax: |-
+        {0}（最长 {1} 天）
+      sampleItemBoth: |-
+        {0}（最长 {1} 天 / 当前 {2} 天）
   giveaway.debug.member:
-    description: |-
-      诊断群成员信息接口（管理员）
     messages:
       noAuth: |-
         你没有权限使用该指令！
       groupOnly: |-
         请在群聊中使用该指令。
+      notOneBot: |-
+        当前会话不是 OneBot 群聊，无法诊断。
+      rawLogged: |-
+        （完整原始返回已写入插件日志）
+      none: |-
+        （无）
+      listSep: |-
+        、
+      memberHeader: |-
+        用户 {0} 在群 {1} 的成员信息：
+      memberLevel: |-
+        群聊等级 level = {0}
+      memberLastSent: |-
+        最后发言 last_sent_time = {0}
+      memberJoin: |-
+        入群时间 join_time = {0}
+      memberRole: |-
+        角色 role = {0}
+      memberFailed: |-
+        ❌ 获取失败：{0}
 events:
   join.rejected: |-
     <quote id={messageId}/> 你不符合本次抽奖的参与条件：{reason}

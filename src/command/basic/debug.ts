@@ -10,6 +10,9 @@ import { logger } from '../../index';
  *
  *   giveaway.debug.honor          诊断当前群的荣誉接口
  *   giveaway.debug.member [用户]   诊断群成员信息（群聊等级 / 最后发言）
+ *
+ * 输出文案全部走 i18n（`commands.giveaway.debug.*.messages`），三语保持一致；
+ * 原始接口返回仍写进插件日志，避免在群里刷屏。
  */
 export function debugProbe(ctx: Context, config: Config) {
   ctx.command("giveaway.debug.honor")
@@ -19,45 +22,52 @@ export function debugProbe(ctx: Context, config: Config) {
       if (!session.guildId) return session.text('.groupOnly')
       const onebot = (session as any).onebot
       const groupId = Number(session.guildId)
-      const lines: string[] = []
 
-      if (!onebot) {
-        return '当前会话不是 OneBot 群聊，无法诊断。'
-      }
+      if (!onebot) return session.text('.notOneBot')
+
+      const lines: string[] = []
 
       // 1) Cookie
       try {
         const cookie = await onebot.getCookies('qun.qq.com')
-        lines.push(`① Cookie：${cookie ? `✅ 已获取（${String(cookie).length} 字符）` : '❌ 为空'}`)
+        const state = cookie ? session.text('.cookieOk', [String(cookie).length]) : session.text('.cookieEmpty')
+        lines.push(session.text('.cookie', [state]))
       } catch (error: any) {
-        lines.push(`① Cookie：❌ ${error?.message ?? error}`)
+        lines.push(session.text('.cookie', [session.text('.failed', [error?.message ?? error])]))
       }
 
       // 2) NapCat 的 get_group_honor_info
       try {
         const result = await onebot.getGroupHonorInfo(groupId, 'all')
         const count = (key: string) => Array.isArray(result?.[key]) ? result[key].length : 0
-        lines.push(`② NapCat get_group_honor_info：龙王 ${count('talkative_list')} / 群聊之火 ${count('performer_list')} / 群聊炽焰 ${count('legend_list')} / 快乐源泉 ${count('emotion_list')}`)
+        lines.push(session.text('.napcat', [count('talkative_list'), count('performer_list'), count('legend_list'), count('emotion_list')]))
         logger.info(`[debug.honor] NapCat 荣誉原始返回：${JSON.stringify(result)?.slice(0, 600)}`)
       } catch (error: any) {
-        lines.push(`② NapCat get_group_honor_info：❌ ${error?.message ?? error}`)
+        lines.push(session.text('.napcatFailed', [error?.message ?? error]))
       }
 
       // 3) QQ 网页接口（本插件的兜底实现）
       const probe = await fetchHonorViaWeb(ctx, session, groupId, ['talkative', 'performer', 'legend'])
-      lines.push(`   鉴权方式：${(probe.raw && Object.values(probe.raw)[0] as any)?.variant ?? '未确定'}`)
+      const variant = (probe.raw && Object.values(probe.raw)[0] as any)?.variant ?? session.text('.unknown')
+      lines.push(session.text('.authVariant', [variant]))
       const countOf = (key: string) => (probe.info as any)?.[key]?.length ?? 0
-      lines.push(`③ QQ 网页接口：${probe.ok ? '✅' : '❌'} 龙王 ${countOf('talkative_list')} / 群聊之火 ${countOf('performer_list')} / 群聊炽焰 ${countOf('legend_list')}`)
-      if (probe.error) lines.push(`   错误：${probe.error}`)
+      lines.push(session.text('.webApi', [
+        probe.ok ? '✅' : '❌',
+        countOf('talkative_list'), countOf('performer_list'), countOf('legend_list'),
+      ]))
+      if (probe.error) lines.push(session.text('.error', [probe.error]))
       if (probe.info) {
         const sample = (key: string) => ((probe.info as any)[key] ?? []).slice(0, 3)
-          .map((m: any) => `${m.user_id}${m.day_count_max !== undefined ? `(最长${m.day_count_max}天` : ''}`
-            + `${m.day_count_max !== undefined && m.day_count !== undefined ? `/当前${m.day_count}天)` : m.day_count_max !== undefined ? ')' : ''}`)
-          .join('、') || '—'
-        lines.push(`   样例：龙王 ${sample('talkative_list')}；火/炽焰 ${sample('performer_list')} / ${sample('legend_list')}`)
+          .map((m: any) => m.day_count_max === undefined
+            ? String(m.user_id)
+            : m.day_count === undefined
+              ? session.text('.sampleItemMax', [m.user_id, m.day_count_max])
+              : session.text('.sampleItemBoth', [m.user_id, m.day_count_max, m.day_count]))
+          .join(session.text('.listSep')) || '—'
+        lines.push(session.text('.sample', [sample('talkative_list'), sample('performer_list'), sample('legend_list')]))
       }
       logger.info(`[debug.honor] 网页接口原始返回：${JSON.stringify(probe.raw)?.slice(0, 4000)}`)
-      lines.push('（完整原始返回已写入插件日志）')
+      lines.push(session.text('.rawLogged'))
 
       return lines.join('\n')
     })
@@ -68,21 +78,22 @@ export function debugProbe(ctx: Context, config: Config) {
       if (!hasAuthority(session, config.permission.authorityManage)) return session.text('.noAuth')
       if (!session.guildId) return session.text('.groupOnly')
       const onebot = (session as any).onebot
-      if (!onebot) return '当前会话不是 OneBot 群聊，无法诊断。'
+      if (!onebot) return session.text('.notOneBot')
       const target = (user ?? session.userId).replace(/[^0-9]/g, '') || session.userId
       try {
         const member = await onebot.getGroupMemberInfo(Number(session.guildId), Number(target), true)
         logger.info(`[debug.member] 原始返回：${JSON.stringify(member)?.slice(0, 600)}`)
+        const none = session.text('.none')
         return [
-          `用户 ${target} 在群 ${session.guildId} 的成员信息：`,
-          `群聊等级 level = ${member?.level ?? '(无)'}`,
-          `最后发言 last_sent_time = ${member?.last_sent_time ?? '(无)'}`,
-          `入群时间 join_time = ${member?.join_time ?? '(无)'}`,
-          `角色 role = ${member?.role ?? '(无)'}`,
-          '（完整原始返回已写入插件日志）',
+          session.text('.memberHeader', [target, session.guildId]),
+          session.text('.memberLevel', [member?.level ?? none]),
+          session.text('.memberLastSent', [member?.last_sent_time ?? none]),
+          session.text('.memberJoin', [member?.join_time ?? none]),
+          session.text('.memberRole', [member?.role ?? none]),
+          session.text('.rawLogged'),
         ].join('\n')
       } catch (error: any) {
-        return `❌ 获取失败：${error?.message ?? error}`
+        return session.text('.memberFailed', [error?.message ?? error])
       }
     })
 }

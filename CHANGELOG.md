@@ -2,6 +2,15 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 的格式，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [Unreleased]
+
+### Changed 变更
+
+- **多语言收尾**：管理员诊断指令（`抽奖接口诊断` / `抽奖成员诊断`）的输出全部改为 i18n（三语），
+  不再硬编码中文；创建流程的取消词扩展为 `q` / `quit` / `cancel` / `取消` / `abbrechen`
+- **新增功能总览文档** `docs/features-and-interactions.md`：全部指令、交互流程、配置面、数据模型、
+  事件、多语言覆盖与 1.0 发布条件评估
+
 ## [0.1.3] - 2026-09-16
 
 ### Changed 变更

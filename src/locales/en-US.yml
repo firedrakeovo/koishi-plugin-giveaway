@@ -322,21 +322,71 @@ commands:
         defaultUser: |-
           Your language setting has been cleared
   giveaway.debug.honor:
-    description: |-
-      Diagnose the group honor APIs (admin only)
     messages:
       noAuth: |-
         You are not allowed to use this command.
       groupOnly: |-
-        Please use this command in a group.
+        Please use this command in a group chat.
+      notOneBot: |-
+        This session is not an OneBot group chat; diagnostics are unavailable.
+      rawLogged: |-
+        (the full raw response has been written to the plugin log)
+      none: |-
+        (none)
+      listSep: |-
+        , 
+      cookie: |-
+        (1) Cookie: {0}
+      cookieOk: |-
+        ✅ obtained ({0} chars)
+      cookieEmpty: |-
+        ❌ empty
+      failed: |-
+        ❌ {0}
+      napcat: |-
+        (2) NapCat group honors API: Dragon King {0} / group fire {1} / group blaze {2} / emotion {3}
+      napcatFailed: |-
+        (2) NapCat group honors API: ❌ {0}
+      authVariant: |-
+           auth method: {0}
+      unknown: |-
+        undetermined
+      webApi: |-
+        (3) QQ web API: {0} Dragon King {1} / group fire {2} / group blaze {3}
+      error: |-
+           error: {0}
+      sample: |-
+           sample: Dragon King {0}; fire / blaze {1} / {2}
+      sampleItemMax: |-
+        {0} (max {1} days)
+      sampleItemBoth: |-
+        {0} (max {1} days / current {2} days)
   giveaway.debug.member:
-    description: |-
-      Diagnose the group member API (admin only)
     messages:
       noAuth: |-
         You are not allowed to use this command.
       groupOnly: |-
-        Please use this command in a group.
+        Please use this command in a group chat.
+      notOneBot: |-
+        This session is not an OneBot group chat; diagnostics are unavailable.
+      rawLogged: |-
+        (the full raw response has been written to the plugin log)
+      none: |-
+        (none)
+      listSep: |-
+        , 
+      memberHeader: |-
+        Member info of user {0} in group {1}:
+      memberLevel: |-
+        group level = {0}
+      memberLastSent: |-
+        last spoke at = {0}
+      memberJoin: |-
+        joined at = {0}
+      memberRole: |-
+        role = {0}
+      memberFailed: |-
+        ❌ failed to fetch: {0}
 events:
   join.rejected: |-
     <quote id={messageId}/> You do not meet the requirements of this giveaway: {reason}
