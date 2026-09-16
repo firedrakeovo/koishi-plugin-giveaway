@@ -643,7 +643,10 @@ console.log('=== 19. 图片渲染（可选依赖 puppeteer） ===')
   // ⑧ 开奖时间解析：4 段（月-日-时-分）与 5 段（年-月-日-时-分）都要有效
   {
     const { dateInputToDateTime } = perm
-    const tz = '+08:00'   // luxon 需要 '+08:00' 这种固定偏移写法
+    // 插件把配置里的 +8 规范化成 UTC+8（FixedOffsetZone 能直接解析，不依赖 ICU 的 offset-zone 支持）
+    const { offsetToUTCOffset } = perm
+    const tz = offsetToUTCOffset('+8')
+    ok('时区规范化：+8 → UTC+8（luxon 固定偏移写法）', tz === 'UTC+8', tz)
     const four = dateInputToDateTime('09-30-20-00', tz)
     const five = dateInputToDateTime('2026-09-30-20-00', tz)
     ok('4 段写成月-日-时-分（当年），解析有效', four.isValid && four.year === 2026 && four.month === 9 && four.day === 30 && four.hour === 20, four.invalidReason || four.toISO())
@@ -979,11 +982,9 @@ console.log('=== 20. 提醒：按「剩余时长区间 + 百分比」配置（�
     }
     return { session: s }
   }
-  const atText = (ms) => {
-    const t = new Date(ms)
-    const pad = (n) => String(n).padStart(2, '0')
-    return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}-${pad(t.getHours())}-${pad(t.getMinutes())}`
-  }
+  // 用插件解析时使用的时区（配置默认 +8 → UTC+8）格式化，避免用例结果随宿主机时区变化
+  const { DateTime } = require('luxon')
+  const atText = (ms) => DateTime.fromMillis(ms, { zone: 'UTC+8' }).toFormat('yyyy-MM-dd-HH-mm')
   const create = async (a, endTime) => {
     const form = ['奖品：显卡*1', endTime ? `开奖时间：${endTime}` : '开奖时间：'].join('\n')
     const { session } = mkSession(a, [form])
