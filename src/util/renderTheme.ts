@@ -5,10 +5,15 @@
  * 只通过 `data-theme` 切换主题，因此新增风格只要再写一份主题 CSS 即可。
  */
 
-export type RenderStyle = 'default' | 'anime' | 'gothic' | 'avemujica'
+export type RenderStyle = 'default' | 'anime' | 'avemujica'
 
 /** 可选风格（供 Schema 与控制台展示） */
-export const RENDER_STYLES: RenderStyle[] = ['default', 'anime', 'gothic', 'avemujica']
+export const RENDER_STYLES: RenderStyle[] = ['default', 'anime', 'avemujica']
+
+/** 归一化风格名：未知值回落到 default（正常配置都来自 schema，这里只是兜底） */
+export function normalizeStyle(style?: string): RenderStyle {
+  return style === 'anime' || style === 'avemujica' ? style : 'default'
+}
 
 export interface ShellOptions {
   eyebrow: string
@@ -21,6 +26,8 @@ export interface ShellOptions {
   footRight?: string
   /** 头图（可选，http(s) / data: / file: URL）；不填则不渲染横幅 */
   banner?: string
+  /** 卡片宽度（px）。puppeteer 截的是 body 包围盒，卡片多宽图片就多宽 —— 越窄群里显示越大 */
+  cardWidth?: number
 }
 
 const ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
@@ -34,25 +41,26 @@ export function esc(input: unknown): string {
 const BASE_CSS = `
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-  body { margin: 0; padding: 22px; display: flex; justify-content: center; color: var(--ink);
+  /* display:inline-block 让 body 收缩到卡片大小：puppeteer 截 body 包围盒时不会带上视口宽度的背景 */
+  body { margin: 0; padding: 14px; display: inline-block; color: var(--ink);
     font-family: var(--sans); font-size: 15px; line-height: 1.5; background-color: var(--bg);
     background-image: var(--bg-image); }
-  .card { position: relative; width: 760px; overflow: hidden; background: var(--card);
+  .card { position: relative; width: var(--card-w, 420px); overflow: hidden; background: var(--card);
     border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); }
   .banner { position: relative; line-height: 0; }
-  .banner img { display: block; width: 100%; max-height: 240px; object-fit: cover; }
+  .banner img { display: block; width: 100%; max-height: 200px; object-fit: cover; }
   .banner::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 72px;
     background: linear-gradient(rgba(0, 0, 0, 0), var(--card)); pointer-events: none; }
-  .head { position: relative; padding: 24px 30px 20px; color: #fff; overflow: hidden; background: var(--head-bg); }
+  .head { position: relative; padding: 20px 22px 17px; color: #fff; overflow: hidden; background: var(--head-bg); }
   .head::after { content: ""; position: absolute; width: 220px; height: 220px; right: -70px; top: -110px; border-radius: 50%;
     background: radial-gradient(circle, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 70%); }
   .head > * { position: relative; }
   .head .eyebrow { font-size: 11px; letter-spacing: 2.6px; text-transform: uppercase; opacity: .85; }
-  .head .title { margin-top: 10px; font-size: 26px; font-weight: 700; letter-spacing: .3px; }
+  .head .title { margin-top: 8px; font-size: 23px; font-weight: 700; letter-spacing: .3px; }
   .head .meta { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
   .head .meta span { padding: 4px 11px; border-radius: 999px; font-size: 12.5px; background: var(--meta-bg); }
-  .body { padding: 6px 30px 4px; }
-  .row { display: flex; align-items: center; gap: 14px; padding: 15px 0; border-bottom: 1px solid var(--line); }
+  .body { padding: 4px 22px 2px; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 13px 0; border-bottom: 1px solid var(--line); }
   .row:last-child { border-bottom: 0; }
   .chip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px;
     font-size: 12px; font-weight: 600; }
@@ -60,10 +68,10 @@ const BASE_CSS = `
   .chip.open { color: var(--ok); background: var(--ok-bg); }
   .chip.ended { color: var(--muted-ink); background: var(--muted-bg); }
   .code { flex: none; font-family: var(--mono); font-size: 14px; color: var(--ink-2); letter-spacing: .5px; }
-  .name { flex: 1; font-size: 16.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .name { flex: 1; min-width: 0; font-size: 15.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .time { flex: none; font-size: 12.5px; color: var(--ink-3); }
   .kv { display: flex; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--line); }
-  .kv .k { flex: none; width: 92px; color: var(--ink-3); font-size: 13.5px; letter-spacing: .3px; }
+  .kv .k { flex: none; width: 74px; color: var(--ink-3); font-size: 13px; letter-spacing: .3px; }
   .kv .v { flex: 1; word-break: break-word; }
   .key { display: inline-block; padding: 3px 10px; border-radius: 8px; font-family: var(--mono); font-size: 15px;
     color: var(--key-ink); background: var(--key-bg); border: 1px dashed var(--key-border); }
@@ -74,20 +82,20 @@ const BASE_CSS = `
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .prize { padding: 6px 13px; border-radius: var(--chip-radius); font-size: 14px; color: var(--chip-ink); background: var(--chip-bg); }
   .cond { color: var(--chip-ink); }
-  .winner { display: flex; align-items: center; gap: 14px; padding: 15px 0; border-bottom: 1px solid var(--line); }
+  .winner { display: flex; align-items: center; gap: 10px; padding: 13px 0; border-bottom: 1px solid var(--line); }
   .winner:last-child { border-bottom: 0; }
-  .rank { flex: none; width: 30px; text-align: center; font-size: 19px; line-height: 1; font-weight: 600; color: var(--ink-3); }
-  .avatar { position: relative; flex: none; width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
-    display: flex; align-items: center; justify-content: center; color: var(--avatar-ink); font-size: 17px; font-weight: 700;
+  .rank { flex: none; width: 22px; text-align: center; font-size: 18px; line-height: 1; font-weight: 600; color: var(--ink-3); }
+  .avatar { position: relative; flex: none; width: 38px; height: 38px; border-radius: 50%; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; color: var(--avatar-ink); font-size: 15px; font-weight: 700;
     background: var(--avatar-bg); box-shadow: var(--avatar-ring); }
   .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .who { flex: 1; min-width: 0; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .who .nick { font-size: 16.5px; font-weight: 600; }
+  .who { flex: 1; min-width: 0; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .who .nick { font-size: 15.5px; font-weight: 600; }
   .who .qq { margin-left: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
-  .prizes { flex: none; max-width: 300px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  .prizes { flex: none; max-width: 150px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
   .empty { padding: 30px 0 34px; text-align: center; color: var(--ink-3); }
   .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px;
-    padding: 14px 30px 18px; font-size: 11.5px; color: var(--foot-ink); letter-spacing: .3px; }
+    padding: 12px 22px 14px; font-size: 11px; color: var(--foot-ink); letter-spacing: .3px; }
 `
 
 /** 默认风格：Koishi 品牌蓝紫渐变 + 简洁卡片 */
@@ -137,7 +145,7 @@ const ANIME_THEME_CSS = `
     --sans: "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
-  body { padding: 24px; }
+  body { padding: 14px; }
   /* 顶栏：斜纹波点 + 描边字，像贴纸标题 */
   .head { border-radius: 0 0 22px 22px; padding-bottom: 22px; }
   .head::before { content: ""; position: absolute; inset: 0; opacity: .35;
@@ -167,59 +175,6 @@ const ANIME_THEME_CSS = `
   .foot { color: #d7b9cd; }
 `
 
-/** 哥特风格：暗夜黑 + 血红 + 古金，衬线字体与四角装饰 */
-const GOTHIC_THEME_CSS = `
-  :root {
-    --brand: #b3122b; --brand-2: #4a0d1a;
-    --ink: #ece5d8; --ink-2: #c3b8a4; --ink-3: #8d8172;
-    --line: rgba(201, 162, 39, .20); --bg: #0c0a0f; --card: #17131c; --card-border: #3a2f22;
-    --ok: #e0b64a; --ok-bg: rgba(224, 182, 74, .14); --muted-ink: #9a9082; --muted-bg: rgba(255, 255, 255, .06);
-    --chip-bg: rgba(201, 162, 39, .10); --chip-ink: #e2cf9b; --chip-radius: 3px;
-    --key-bg: rgba(179, 18, 43, .20); --key-ink: #ffb3be; --key-border: rgba(255, 120, 140, .55);
-    --avatar-bg: linear-gradient(135deg, #2a2130, #3a2430); --avatar-ink: #e0b64a;
-    --avatar-ring: 0 0 0 2px #17131c, 0 0 0 3px rgba(201, 162, 39, .8);
-    --accent-bar: linear-gradient(#c9a227, #b3122b);
-    --head-bg: linear-gradient(135deg, #33000e 0%, #140d18 55%, #241430 100%);
-    --meta-bg: rgba(201, 162, 39, .16); --foot-ink: #6f6455;
-    --radius: 6px;
-    --card-shadow: 0 0 0 1px rgba(201, 162, 39, .16) inset, 0 3px 0 rgba(201, 162, 39, .10),
-                   0 26px 52px -28px #000;
-    --bg-image: radial-gradient(80% 60% at 50% -10%, rgba(179, 18, 43, .38) 0%, rgba(12, 10, 15, 0) 62%),
-                radial-gradient(60% 45% at 50% 108%, rgba(109, 16, 32, .40) 0%, rgba(12, 10, 15, 0) 60%);
-    --sans: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  }
-  body { padding: 24px; }
-  /* 顶栏：暗红渐隐 + 金色下边线 + 哥特窗格纹 */
-  .head { border-bottom: 1px solid rgba(201, 162, 39, .45); padding-bottom: 22px; }
-  .head::before { content: ""; position: absolute; inset: 0; opacity: .5;
-    background-image: radial-gradient(circle at 50% 140%, rgba(201, 162, 39, .30) 0 2px, rgba(0, 0, 0, 0) 3px),
-                      repeating-linear-gradient(90deg, rgba(201, 162, 39, .09) 0 1px, rgba(0, 0, 0, 0) 1px 26px); }
-  .head .eyebrow { color: #d9c07a; letter-spacing: 3.5px; }
-  .head .title { font-weight: 700; letter-spacing: 2px; text-shadow: 0 2px 14px rgba(179, 18, 43, .65); }
-  .head .meta span { background: var(--meta-bg); border: 1px solid rgba(201, 162, 39, .32); letter-spacing: .6px; }
-  /* 四角纹章 */
-  .card::before, .card::after { position: absolute; z-index: 3; color: rgba(214, 178, 70, .75);
-    line-height: 1; pointer-events: none; text-shadow: 0 0 6px rgba(201, 162, 39, .5); }
-  .card::before { content: "❖"; top: 14px; right: 20px; font-size: 16px; }
-  .card::after { content: "✦"; bottom: 14px; right: 20px; font-size: 14px; }
-  .row { padding: 16px 0; }
-  .chip { border: 1px solid rgba(201, 162, 39, .34); font-weight: 500; letter-spacing: .5px; }
-  .chip::before { content: "◆"; width: auto; height: auto; background: none; font-size: 8px; }
-  .chip.open { color: #e6c163; }
-  .chip.ended { color: #9a9082; border-color: rgba(255, 255, 255, .14); }
-  .code { color: #c9a227; }
-  .name { letter-spacing: .3px; }
-  .prize { border: 1px solid rgba(201, 162, 39, .30); letter-spacing: .3px; }
-  .key { border-style: solid; }
-  .section .sec-title { color: #c9a227; letter-spacing: 1.5px; }
-  .rank { color: #c9a227; font-size: 17px; letter-spacing: 1px; }
-  .who .nick { letter-spacing: .3px; }
-  .winner { border-radius: 2px; }
-  .winner:nth-child(odd) { background: linear-gradient(90deg, rgba(179, 18, 43, .12), rgba(0, 0, 0, 0)); }
-  .empty { color: #8d8172; letter-spacing: 1px; }
-`
-
 /** Ave Mujica 风格：暗紫黑 + 玫红 + 哥特金，假面舞会气质（配色取自 community 色板） */
 const AVEMUJICA_THEME_CSS = `
   :root {
@@ -242,7 +197,7 @@ const AVEMUJICA_THEME_CSS = `
     --sans: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
-  body { padding: 24px; }
+  body { padding: 14px; }
   /* 顶栏：幕布渐隐 + 金色细边 + 舞台追光 */
   .head { padding-bottom: 22px; border-bottom: 1px solid rgba(201, 169, 107, .42); }
   .head::before { content: ""; position: absolute; inset: 0; opacity: .55;
@@ -277,16 +232,18 @@ const AVEMUJICA_THEME_CSS = `
 const THEMES: Record<RenderStyle, string> = {
   default: DEFAULT_THEME_CSS,
   anime: ANIME_THEME_CSS,
-  gothic: GOTHIC_THEME_CSS,
   avemujica: AVEMUJICA_THEME_CSS,
 }
 
 /** 拼出完整 HTML：骨骼 + 主题 + 数据 */
 export function shellHtml(options: ShellOptions, style: RenderStyle = 'default'): string {
-  const theme = THEMES[style] ?? THEMES.default
+  const theme = THEMES[normalizeStyle(style)]
   const meta = (options.meta ?? []).filter(Boolean)
+  // 卡片宽度：越窄，群里显示的字体越大（图片会按聊天窗口宽度缩放）
+  const cardWidth = Math.min(900, Math.max(320, Math.round(Number(options.cardWidth) || 420)))
   return `<!DOCTYPE html>
-<html data-theme="${esc(style)}"><head><meta charset="utf-8"><style>
+<html data-theme="${esc(normalizeStyle(style))}"><head><meta charset="utf-8"><style>
+:root { --card-w: ${cardWidth}px; }
 ${BASE_CSS}${theme}</style></head>
 <body><div class="card">
   ${options.banner ? `<div class="banner"><img src="${esc(options.banner)}" onerror="this.remove()"/></div>` : ''}

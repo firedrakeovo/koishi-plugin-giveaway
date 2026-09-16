@@ -43,10 +43,18 @@ export type HonorRequirement = 'fire7' | 'fire30' | 'dragon'
  */
 namespace RenderConfig {
   export interface Config {
-    style: 'default' | 'anime' | 'gothic' | 'avemujica'
+    style: 'default' | 'anime' | 'avemujica'
     /** 可选头图（http(s) / data: / file: URL 或本机绝对路径），用于卡片顶部横幅 */
     banner: string
+    /** 卡片宽度（CSS px）：越窄，群里显示的字体越大（默认 420） */
+    width: number
     create: boolean
+    /** 抽奖详情（`抽奖详情 <编号>`）用图片重新调出创建时的卡片 */
+    detail: boolean
+    /** 参与名单（`抽奖成员 <编号>`）用图片渲染（头像 + 昵称 + QQ 号） */
+    member: boolean
+    /** 图片里参与名单最多显示多少人（超出只显示前 N 个并提示剩余人数） */
+    memberLimit: number
     list: boolean
     result: boolean
     avatar: boolean
@@ -155,11 +163,16 @@ const renderConfig: Schema<RenderConfig.Config> = Schema.object({
   style: Schema.union([
     Schema.const('default'),
     Schema.const('anime'),
-    Schema.const('gothic'),
     Schema.const('avemujica'),
   ]).default('default'),
   banner: Schema.string().default(''),
+  width: Schema.natural().min(320).max(900).default(420)
+    .description('卡片宽度（px）：图片会按聊天窗口缩放，越窄字体显示越大（默认 420）'),
   create: Schema.boolean().default(true),
+  detail: Schema.boolean().default(true),
+  member: Schema.boolean().default(true),
+  memberLimit: Schema.natural().min(1).max(100).default(12)
+    .description('图片里参与名单最多显示几个人（1~100，默认 12）：超出只显示前 N 个并提示「…等共 X 人」'),
   list: Schema.boolean().default(true),
   result: Schema.boolean().default(true),
   avatar: Schema.boolean().default(true),

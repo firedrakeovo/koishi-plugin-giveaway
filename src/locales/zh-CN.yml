@@ -83,23 +83,34 @@ _config:
     banner: |-
       <p>卡片顶部的<b>头图</b>（可选，留空则不显示）。</p>
       <p>支持 http(s) 地址、<code>data:</code> 内联图片、<code>file:</code> 地址，或本机绝对路径（会自动转成 file://）。</p>
+    width: |-
+      <p>卡片宽度（CSS px，320~900，默认 <code>420</code>）。</p>
+      <p>渲染服务截取的是 <code>body</code> 包围盒，<b>卡片多宽图片就多宽</b>；群聊里图片会按聊天窗口缩放，所以卡片越窄、字体显示越大。</p>
     style:
       $description: |-
         <p>图片卡片的界面风格。</p>
         <ul>
           <li><b>默认：</b>Koishi 品牌蓝紫渐变 + 简洁卡片</li>
           <li><b>二次元：</b>樱花粉 / 薰衣草紫渐变，圆润描边、状态表情与星光点缀</li>
-          <li><b>哥特：</b>暗夜黑 + 血红 + 古金配色，衬线字体、金色描边与纹章装饰</li>
           <li><b>Ave Mujica：</b>暗紫黑 + 玫红 + 哥特金，假面舞会气质（🎭🌹 点缀，罗马数字名次）</li>
         </ul>
+        <p><b>哥特</b>与 Ave Mujica 气质重复，已删除（衬线字体 / 古金描边 / 纹章装饰本来就是 Ave Mujica 的特征）。升级后如果这里显示为空，重新选一次风格即可。</p>
       $inner:
         - 默认
         - 二次元
-        - 哥特
         - Ave Mujica
     create: |-
       <p>创建抽奖成功后，把抽奖内容（编号 / 标题 / 描述 / 开奖时间 / 口令 / 奖品 / 参与条件）渲染成一张图片。</p>
       <p>需要安装并启用 <code>koishi-plugin-puppeteer</code>；未安装或渲染失败时只发原来的文字提示。</p>
+    detail: |-
+      <p><code>抽奖详情</code> 用图片重新调出创建时的卡片（额外显示状态与参与人数，已开奖时附中奖名单）。</p>
+      <p>需要安装并启用 <code>koishi-plugin-puppeteer</code>；未安装或渲染失败时回退为文字详情。</p>
+    member: |-
+      <p><code>抽奖成员</code> 用图片渲染参与名单（头像 + 昵称 + QQ 号）。</p>
+      <p>需要安装并启用 <code>koishi-plugin-puppeteer</code>；未安装或渲染失败时回退为文字名单。</p>
+    memberLimit: |-
+      <p>图片里参与名单最多显示几个人（1~100，默认 <code>12</code>）。</p>
+      <p>超出部分只显示前 N 个，并在末尾提示「…… 等共 X 人」；详情卡片里的参与名单也用这个上限。</p>
     avatar: |-
       <p>开奖结果的图片里显示中奖者的<b>头像与昵称</b>（头像用 QQ 号拼 qlogo 地址，昵称取自 OneBot 的用户资料）。</p>
       <p>取不到资料时退化为只显示 QQ 号；头像加载失败时显示昵称首字。</p>
@@ -358,7 +369,7 @@ events:
       <quote id={messageId}/> 成功加入编号为 {rollCode} 的抽奖。
     failed: |-
       <quote id={messageId}/> 您已加入编号为 {rollCode} 的抽奖，无需重复加入。
-  roll.end:
+  roll.quit:
     success: |-
       <quote id={messageId}/> 成功退出编号为 {rollCode} 的抽奖。
     failed: |-
@@ -408,6 +419,20 @@ messageBuilder:
         奖品
       conditions: |-
         参与条件
+    detail:
+      title: |-
+        抽奖详情
+      members: |-
+        参与人数 {0}
+      winners: |-
+        中奖名单
+      more: |-
+        …… 等共 {0} 人
+      participants: |-
+        参与名单
+    member:
+      title: |-
+        参与名单
     result:
       title: |-
         开奖结果

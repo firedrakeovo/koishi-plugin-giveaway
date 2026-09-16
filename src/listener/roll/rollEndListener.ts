@@ -39,7 +39,7 @@ export function rollEndListener(ctx: Context, config: Config) {
           if (config.render?.result && hasPuppeteer(ctx)) {
             const locales = await channelLocaleList(ctx, item.channel_id, item.channel_platform)
             // 传入当前 bot：用它取中奖者的昵称与头像
-            msg = await rollEndImage(ctx, roll, locales, bot as any, config.render?.avatar !== false, { style: config.render?.style, banner: config.render?.banner })
+            msg = await rollEndImage(ctx, roll, locales, bot as any, config.render?.avatar !== false, { style: config.render?.style, banner: config.render?.banner, width: config.render?.width })
           }
           if (!msg) msg = await rollEndMsgFromRollId(ctx, config, roll, item)
           bot.sendMessage(item.channel_id, msg)

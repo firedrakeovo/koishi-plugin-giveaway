@@ -5,6 +5,7 @@ import {bots, logger} from '../index'
 import {pickLang, policyFromConfig, policyHasConditions, renderPolicy, rowToPolicy} from "./rollPolicy";
 import {getCurrentUTCOffset, offsetToUTCOffset} from "./time";
 import {getCurrentLocales} from "./locale";
+import {collectWinners} from "./render";
 import {dateInputToDateTime} from "./general";
 
 export async function rollListMsgFromChannelId(session: Session, cid: string, platform: string) {
@@ -77,41 +78,22 @@ export async function rollDetailMsgFromRoll(session: Session, roll: any, current
       amount: prize[0].amount
     }))
   }
-  // if roll is end, show winner list
+  // if roll is end, show winner list（复用 collectWinners：资料取不到时退化为只显示 QQ 号）
   if (roll.isEnd) {
     msgList.push(session.text('messageBuilder.roll.detail.divider'))
     msgList.push(session.text('messageBuilder.roll.detail.body.winnerTitle'))
-    const res = await session.app.database.get('roll_member', {roll_id: roll.id}, ['user_id'])
-    const r = await session.app.database.join(['roll_prize', 'user_prize'], (roll_prize, user_prize) => $.eq(roll_prize.prize_id, user_prize.prize_id)).execute()
-    // for every member
-    let isWinner = false
-    for (let u of res) {
-      const userId = u.user_id
-      const userPlatformId = await session.app.database.get('binding', {aid: userId})
-      let user = null
-      for (const bot of bots) {
-        if (bot.platform === userPlatformId[0].platform) {
-          user = await bot.getUser(userPlatformId[0].pid)
-        }
-      }
+    const winners = await collectWinners(session.app, roll, session.bot as any)
+    for (const winner of winners) {
       msgList.push(session.text('messageBuilder.roll.detail.body.winner', {
-        userName: user.name,
-        userId: userPlatformId[0].pid
+        userName: winner.name || winner.pid,
+        userId: winner.pid,
       }))
-      for (const e of r) {
-        if (e.roll_prize.roll_id === roll.id && e.user_prize.user_id === userId) {
-          isWinner = true
-          const prizeDetail = await session.app.database.get('prize', {id: e.roll_prize.prize_id})
-          msgList.push(session.text('messageBuilder.roll.detail.body.winList', {
-            name: prizeDetail[0].name,
-            amount: e.user_prize.amount
-          }))
-        }
+      for (const prize of winner.prizes) {
+        msgList.push(session.text('messageBuilder.roll.detail.body.winList', {
+          name: prize.name,
+          amount: prize.amount,
+        }))
       }
-      if (!isWinner) {
-        msgList.pop()
-      }
-      isWinner = false
     }
   }
   msgList.forEach((str) => msg += str)
@@ -120,18 +102,25 @@ export async function rollDetailMsgFromRoll(session: Session, roll: any, current
 
 export async function rollMemberMsgFromRoll(session: Session, roll: any) {
 
-  let res = await session.app.database.get('roll_member', {roll_id: roll.id})
+  const res = await session.app.database.get('roll_member', {roll_id: roll.id})
   if (res.length === 0) return session.text('messageBuilder.roll.member.empty')
   let msg = session.text('messageBuilder.roll.member.header', [res.length, roll.roll_code])
   for (const member of res) {
-    const userId = await session.app.database.get('binding', {aid: member.user_id})
-    let user = null
-    for (const bot of bots) {
-      if (bot.platform === userId[0].platform) {
-        user = await bot.getUser(userId[0].pid)
+    const binding = (await session.app.database.get('binding', {aid: member.user_id}))[0]
+    const pid = binding?.pid ?? String(member.user_id)
+    // 取不到资料时退化为只显示 QQ 号，绝不因为某个用户资料缺失而让整条名单发不出去
+    let userName = ''
+    if (binding) {
+      const target = (bots ?? []).find((bot) => bot.platform === binding.platform)
+      if (target?.getUser) {
+        try {
+          userName = (await target.getUser(binding.pid))?.name ?? ''
+        } catch (error) {
+          logger.warn(`取参与用户资料失败（${binding.pid}）：${(error as Error)?.message ?? error}`)
+        }
       }
     }
-    msg += session.text('messageBuilder.roll.member.body.memberListItem', {userName: user.name, userId: userId[0].pid})
+    msg += session.text('messageBuilder.roll.member.body.memberListItem', {userName: userName || pid, userId: pid})
   }
 
   return msg

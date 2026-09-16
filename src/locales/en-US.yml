@@ -83,23 +83,34 @@ _config:
     banner: |-
       <p>Optional <b>banner image</b> shown above the card header (leave empty to hide).</p>
       <p>Accepts an http(s) URL, <code>data:</code> inline image, <code>file:</code> URL, or a local absolute path (converted to file://).</p>
+    width: |-
+      <p>Card width in CSS pixels (320-900, default <code>420</code>).</p>
+      <p>The renderer screenshots the <code>body</code> bounding box, so <b>the image is exactly as wide as the card</b>; chat clients scale images to the chat width, so a narrower card shows larger text.</p>
     style:
       $description: |-
         <p>Visual style of the rendered cards.</p>
         <ul>
-          <li><b>Default:</b> Koishi brand blue-violet gradient, clean card</li>
-          <li><b>Anime:</b> sakura pink / lavender gradient, rounder shapes, cute icons and sparkles</li>
-          <li><b>Gothic:</b> midnight black + blood red + antique gold, serif type, gold hairlines and heraldic ornaments</li>
+          <li><b>Default:</b> Koishi blue-violet gradient, clean card</li>
+          <li><b>Anime:</b> sakura pink / lavender gradient, rounded shapes, status emoji and sparkles</li>
           <li><b>Ave Mujica:</b> dark purple-black + rose pink + gothic gold, masquerade mood (🎭🌹 accents, roman numerals)</li>
         </ul>
+        <p><b>Gothic</b> duplicated Ave Mujica and has been removed (serif type, antique-gold outlines and heraldic ornaments live on in Ave Mujica). If this field looks empty after upgrading, just pick a style again.</p>
       $inner:
         - Default
         - Anime
-        - Gothic
         - Ave Mujica
     create: |-
       <p>After a giveaway is created, render its content (code / title / description / end time / join key / prizes / conditions) as an image.</p>
       <p>Requires <code>koishi-plugin-puppeteer</code> to be installed and enabled; without it (or when rendering fails) only the plain text message is sent.</p>
+    detail: |-
+      <p>Show <code>giveaway detail</code> as the same card as at creation time, plus status and member count (and the winner list once drawn).</p>
+      <p>Requires <code>koishi-plugin-puppeteer</code>; without it (or on render failure) the plain text details are sent.</p>
+    member: |-
+      <p>Render <code>giveaway member</code> as an image list of participants (avatar + nickname + QQ number).</p>
+      <p>Requires <code>koishi-plugin-puppeteer</code>; without it (or on render failure) the plain text list is sent.</p>
+    memberLimit: |-
+      <p>How many participants to show at most in the image (1-100, default <code>12</code>).</p>
+      <p>The rest is summarized as "... and X more"; the detail card uses the same limit.</p>
     avatar: |-
       <p>Show the winner's <b>avatar and nickname</b> in the result image (avatar from the QQ number via qlogo, nickname from the OneBot user profile).</p>
       <p>Falls back to the QQ number when the profile cannot be fetched, and to the initial letter when the avatar fails to load.</p>
@@ -358,7 +369,7 @@ events:
       <quote id={messageId}/> Successfully joined giveaway {rollCode}.
     failed: |-
       <quote id={messageId}/> You already joined giveaway {rollCode}, no need to join again.
-  roll.end:
+  roll.quit:
     success: |-
       <quote id={messageId}/> Successfully left giveaway {rollCode}.
     failed: |-
@@ -408,6 +419,20 @@ messageBuilder:
         Prizes
       conditions: |-
         Conditions
+    detail:
+      title: |-
+        Giveaway details
+      members: |-
+        {0} member(s) joined
+      winners: |-
+        Winners
+      more: |-
+        ... and {0} more
+      participants: |-
+        Participants
+    member:
+      title: |-
+        Participants
     result:
       title: |-
         Draw result

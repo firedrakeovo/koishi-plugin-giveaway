@@ -3,8 +3,11 @@ import {Config} from "../config";
 
 export function getCurrentLocales(ctx: Context, session: any, config: Config): string {
   const preferUser = ctx.root.options.i18n.output === 'prefer-user'
-  let currentChannelLocales = session.channel.locales.length === 0 ? '' : session.channel.locales
-  let currentUserLocales = session.user.locales.length === 0 ? '' : session.user.locales
+  // 平台 / 会话不一定带 locales（没装 locales 插件时 session.user.locales 是 undefined），兜一层避免报错
+  const channelLocales = session.channel?.locales ?? []
+  const userLocales = session.user?.locales ?? []
+  let currentChannelLocales = channelLocales.length === 0 ? '' : channelLocales
+  let currentUserLocales = userLocales.length === 0 ? '' : userLocales
   let currentDefaultLocales = ctx.root.options.i18n.locales
 
   if (preferUser) {
