@@ -1,3 +1,0 @@
-files:
-  - source: /src/locales/zh-CN.yml
-    translation: /src/locales/%locale%.yml
