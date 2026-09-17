@@ -204,6 +204,8 @@ commands:
         已取消本次创建；需要时重新发送「创建抽奖」即可。
       quit: |-
         已取消本次创建。
+      timePast: |-
+        开奖时间不能早于现在，请重新填写。
   giveaway.delete:
     description: |-
       手动删除一个抽奖
@@ -261,6 +263,10 @@ commands:
         找不到此抽奖！
       empty: |-
         请输入抽奖编号！
+      notFound: |-
+        没有找到该抽奖！
+      noBinding: |-
+        暂时无法获取你的账号信息，请稍后再试或联系管理员。
   giveaway.quit:
     description: |-
       退出指定的抽奖
@@ -269,6 +275,10 @@ commands:
         找不到此抽奖！
       empty: |-
         请输入抽奖编号！
+      notFound: |-
+        没有找到该抽奖！
+      noBinding: |-
+        暂时无法获取你的账号信息，请稍后再试或联系管理员。
   giveaway.time:
     description: |-
       修改时区
@@ -430,6 +440,14 @@ events:
     messageWithDiff: |-
       <p>编号为 {rollCode} 的抽奖还有 {diff} 就要结束啦~</p>
 
+  join.notFound: |-
+    找不到此抽奖！
+  join.ended: |-
+    编号为 {rollCode} 的抽奖已经开奖，无法再加入啦～
+  quit.notFound: |-
+    找不到此抽奖！
+  quit.ended: |-
+    编号为 {rollCode} 的抽奖已经开奖，名单已确定，无法再退出。
 messageBuilder:
   render:
     eyebrow: |-

@@ -204,6 +204,8 @@ commands:
         Erstellung abgebrochen; bei Bedarf einfach erneut „giveaway add“ senden.
       quit: |-
         Erstellung abgebrochen.
+      timePast: |-
+        Der Ziehungszeitpunkt darf nicht in der Vergangenheit liegen, bitte erneut eingeben.
   giveaway.delete:
     description: |-
       Eine Verlosung manuell löschen
@@ -261,6 +263,10 @@ commands:
         Verlosung nicht gefunden!
       empty: |-
         Bitte die Verlosungsnummer eingeben!
+      notFound: |-
+        Verlosung nicht gefunden!
+      noBinding: |-
+        Dein Konto kann gerade nicht ermittelt werden, bitte versuche es später erneut oder wende dich an einen Admin.
   giveaway.quit:
     description: |-
       Eine Verlosung verlassen
@@ -269,6 +275,10 @@ commands:
         Verlosung nicht gefunden!
       empty: |-
         Bitte die Verlosungsnummer eingeben!
+      notFound: |-
+        Verlosung nicht gefunden!
+      noBinding: |-
+        Dein Konto kann gerade nicht ermittelt werden, bitte versuche es später erneut oder wende dich an einen Admin.
   giveaway.time:
     description: |-
       Zeitzone ändern
@@ -430,6 +440,14 @@ events:
     messageWithDiff: |-
       <p>Die Verlosung {rollCode} endet in {diff}~</p>
 
+  join.notFound: |-
+    Verlosung nicht gefunden!
+  join.ended: |-
+    Die Verlosung {rollCode} wurde bereits gezogen, ein Beitritt ist nicht mehr möglich.
+  quit.notFound: |-
+    Verlosung nicht gefunden!
+  quit.ended: |-
+    Die Verlosung {rollCode} wurde bereits gezogen; die Liste ist endgültig, ein Austritt ist nicht mehr möglich.
 messageBuilder:
   render:
     eyebrow: |-

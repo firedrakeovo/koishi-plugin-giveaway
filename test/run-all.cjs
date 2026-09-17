@@ -8,7 +8,7 @@
 const { spawnSync } = require('child_process')
 const path = require('path')
 
-const SUITES = ['create-test.cjs', 'join-test.cjs', 'schema-test.cjs', 'perm-test.cjs', 'i18n-test.cjs']
+const SUITES = ['create-test.cjs', 'join-test.cjs', 'schema-test.cjs', 'perm-test.cjs', 'i18n-test.cjs', 'interaction-test.cjs']
 
 function run(file) {
   const started = Date.now()

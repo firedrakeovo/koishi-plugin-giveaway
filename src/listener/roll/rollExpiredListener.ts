@@ -29,6 +29,8 @@ export function rollExpiredListener(ctx: Context, config: Config) {
       ctx.database.remove('prize', {id: prize.prize_id})
     }
     ctx.database.remove('roll_prize', {roll_id: rollId})
+    // per-roll 参与条件也要一起清（否则会随抽奖记录一起永久残留）
+    ctx.database.remove('roll_policy', {roll_id: rollId})
     // Delete jobs
     autoEndManager.deleteJob(rollId)
     expireManager.deleteJob(rollId)

@@ -70,9 +70,10 @@ export function checkDateInput(input: string, length: number): boolean {
  */
 export function dateInputToDateTime(input: string, offset: string): DateTime {
   const parts = String(input ?? '').split('-').map((part) => parseInt(part, 10))
+  // 4 段式（月-日-时-分）取「目标时区」的当前年：用宿主机年份在跨年时区会差一年
   const [year, month, day, hour, minute] = parts.length >= 5
     ? parts
-    : [new Date().getFullYear(), parts[0], parts[1], parts[2], parts[3]]
+    : [DateTime.now().setZone(offset).year, parts[0], parts[1], parts[2], parts[3]]
   return DateTime.fromObject({ year, month, day, hour, minute: minute || undefined }, { zone: offset })
 }
 

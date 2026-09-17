@@ -24,7 +24,6 @@ export function endRoll(ctx: Context, config: Config) {
         }
 
         msg += session.text('.wait.footer')
-        console.log(msg)
         await session.send(msg)
         const input = await session.prompt()
         if (!input) return session.text('commands.timeout')

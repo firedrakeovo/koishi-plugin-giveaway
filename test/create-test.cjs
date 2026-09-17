@@ -6,6 +6,12 @@ const LOCALES_DIR = path.join(SRC_DIR, 'locales')
 
 // 真实驱动 giveaway.add：文字表格模板流程（模板 → 一条填写后的回复 → 成功或取消）
 const { Context, Service } = require('koishi')
+const { DateTime } = require('luxon')
+
+// 「开奖时间」不允许早于现在（插件会拒绝），所以统一用「此刻 + N 小时」动态生成，
+// 避免写死日期后随时间流逝而过期
+const future = (hours = 2) => DateTime.fromMillis(Date.now() + hours * 3600_000, { zone: 'UTC+8' })
+const futureInput = (hours = 2) => future(hours).toFormat('yyyy-MM-dd-HH-mm')
 const PLUGIN = ROOT
 
 class DbStub extends Service {
@@ -64,7 +70,7 @@ const ok = (n, c, extra) => { c ? pass++ : fail++; console.log(`${c ? '  ✓' : 
 
   console.log('=== 1. 模板流程：完整填写 ===')
   {
-    const form = ['奖品：显卡*1，鼠标*2', '开奖时间：09-15-20-00', '加入口令：参加', '标题：双十一抽奖', '描述：满 40 级可参加'].join('\n')
+    const form = ['奖品：显卡*1，鼠标*2', `开奖时间：${futureInput()}`, '加入口令：参加', '标题：双十一抽奖', '描述：满 40 级可参加'].join('\n')
     const { sent, result, captured: c } = await run({ answers: [form] })
     ok('先发出了模板', sent[0] === '.createForm', sent)
     ok('一次往返即完成', sent.length === 1, sent)
@@ -97,7 +103,7 @@ const ok = (n, c, extra) => { c ? pass++ : fail++; console.log(`${c ? '  ✓' : 
     ok('没有创建任何抽奖', c === null)
   }
   {
-    const { sent, result, captured: c } = await run({ answers: ['开奖时间：09-15-20-00'] })
+    const { sent, result, captured: c } = await run({ answers: [`开奖时间：${futureInput()}`] })
     ok('只有时间没有奖品 → 取消', sent.includes('.noPrize') && result === '.cancelled' && c === null, sent)
   }
   {
@@ -112,11 +118,11 @@ const ok = (n, c, extra) => { c ? pass++ : fail++; console.log(`${c ? '  ✓' : 
     ok('全角冒号 + 说明行都被正确处理', !!c && c.prizes.length === 1 && c.roll.joinKey === '参加' && c.roll.endTime === '', c && [c.roll.joinKey, c.roll.endTime])
   }
   {
-    const { captured: c } = await run({ answers: ['Prizes: keyboard*1\nEnd time: 09-15-20-00\nJoin key: join'] })
+    const { captured: c } = await run({ answers: [`Prizes: keyboard*1\nEnd time: ${futureInput()}\nJoin key: join`] })
     ok('英文标签同样识别', !!c && c.roll.joinKey === 'join' && c.roll.isAutoEnd === true, c && c.roll.joinKey)
   }
   {
-    const { captured: c } = await run({ answers: ['奖品：显卡*1\n开奖时间：09-15-20-00', ''] })
+    const { captured: c } = await run({ answers: [`奖品：显卡*1\n开奖时间：${futureInput()}`, ''] })
     ok('多余的一行不影响', !!c)
   }
 
@@ -140,7 +146,7 @@ const ok = (n, c, extra) => { c ? pass++ : fail++; console.log(`${c ? '  ✓' : 
 
   console.log('=== 6. 带参数：跳过模板（零往返）===')
   {
-    const { sent, captured: c } = await run({ positional: ['显卡*1', '09-15-20-00', '参加'] })
+    const { sent, captured: c } = await run({ positional: ['显卡*1', futureInput(), '参加'] })
     ok('没有输出模板', sent.length === 0, sent)
     ok('参数生效', c.roll.joinKey === '参加' && c.roll.isAutoEnd === true)
   }
@@ -616,7 +622,7 @@ console.log('=== 19. 图片渲染（可选依赖 puppeteer） ===')
   // ⑥ 创建成功后输出「抽奖内容」卡片（文字提示 + 图片）
   {
     const a = await mkApp({ create: true, list: true, result: true })
-    const form = ['奖品：显卡*1，鼠标*2', '开奖时间：09-30-20-00', '加入口令：参加', '标题：双十一抽奖', '描述：满 40 级可参加', '参与条件：等级≥60'].join('\n')
+    const form = ['奖品：显卡*1，鼠标*2', `开奖时间：${futureInput(3)}`, '加入口令：参加', '标题：双十一抽奖', '描述：满 40 级可参加', '参与条件：等级≥60'].join('\n')
     const { session } = mkSession(a, [form])
     const out = String(await a.$commander.resolve('创建抽奖')._actions[0]({ session, options: {} }))
     await new Promise((r) => setTimeout(r, 400))
@@ -626,7 +632,7 @@ console.log('=== 19. 图片渲染（可选依赖 puppeteer） ===')
     ok('卡片含标题 / 口令 / 奖品 / 参与条件',
       html.includes('双十一抽奖') && html.includes('加入口令') && html.includes('参加')
       && html.includes('显卡 × 1') && html.includes('鼠标 × 2') && html.includes('等级≥60'), html.length)
-    ok('卡片含编号与开奖时间（4 段写法解析为当年）', html.includes('编号 ') && html.includes('2026-09-30 20:00'), html.match(/\d{4}-\d\d-\d\d \d\d:\d\d/))
+    ok('卡片含编号与开奖时间（按用户时区渲染）', html.includes('编号 ') && html.includes(future(3).toFormat('yyyy-MM-dd HH:mm')), html.match(/\d{4}-\d\d-\d\d \d\d:\d\d/))
     await a.stop()
   }
   // ⑦ 关掉 render.create → 只发文字

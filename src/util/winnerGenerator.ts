@@ -5,8 +5,9 @@ export async function getWinnerList(ctx: Context, rollId: number) {
   const prizeList = []
 
   const resMember = await ctx.database.get('roll_member', {roll_id: rollId})
+  // 历史数据里可能有重复的参与记录（并发重复写入）：按 user_id 去重，避免同一个人被抽中两次
   resMember.forEach(m => {
-    memberList.push(m.user_id)
+    if (!memberList.includes(m.user_id)) memberList.push(m.user_id)
   })
   if (memberList.length === 0) return []
 
@@ -31,20 +32,12 @@ export async function getWinnerList(ctx: Context, rollId: number) {
 
 export function uniqueWinners(memberList: string[], prizeList: string[]) {
   if (memberList.length === 0 || prizeList.length === 0) return []
-  const length = prizeList.length
+  // 「不允许重复中奖」：一个中奖人只能拿一个名额，因此最多抽出 min(参与者, 奖品数) 个名额。
+  // 人不够时宁可不抽满（剩余奖品不发放），也不能循环复用同一个人。
+  const length = Math.min(memberList.length, prizeList.length)
   const shuffledMembers = Random.shuffle(memberList)
   const shuffledPrizes = Random.shuffle(prizeList)
-  const winners = [];
-
-  let i = 0
-  while (i < length) {
-    for (const member of shuffledMembers) {
-      if (i === length) break
-      winners.push({userId: member, prizeId: shuffledPrizes[i]});
-      i++
-    }
-  }
-  return winners;
+  return shuffledMembers.slice(0, length).map((member, i) => ({ userId: member, prizeId: shuffledPrizes[i] }))
 }
 
 export function repeatableWinners(memberList: string[], prizeList: string[]) {

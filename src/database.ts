@@ -139,6 +139,8 @@ export function apply(ctx: Context) {
     user_id: 'unsigned'
   }, {
     autoInc: true,
+    // 同一个抽奖里同一用户只能有一条参与记录（并发重复写入由数据库兜底）
+    unique: [['roll_id', 'user_id']],
   })
 
   ctx.model.extend('roll_channel', {

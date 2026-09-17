@@ -99,6 +99,12 @@ export function addRoll(ctx: Context, config: Config) {
           // luxon 对非法日期不抛错，只返回 isValid=false —— 必须显式拦掉，
           // 否则会带着 Invalid Date 创建抽奖（自动开奖直接失效）
           if (!dt.isValid) throw new Error('invalid date')
+          // 过去的开奖时间会导致「永远不会自动开奖」，而且排期管理器拿到 null 任务后
+          // 删除/过期时还会抛异常，所以在这里直接拦掉
+          if (dt.toMillis() <= Date.now()) {
+            await session.send(session.text('.timePast'))
+            return session.text('.cancelled')
+          }
           endTime = dt.toUTC().toJSDate()
         } catch (e) {
           await session.send(session.text('.timeError'))

@@ -204,6 +204,8 @@ commands:
         Creation cancelled; just send "giveaway add" again when needed.
       quit: |-
         Creation cancelled.
+      timePast: |-
+        The end time cannot be earlier than now, please fill it in again.
   giveaway.delete:
     description: |-
       Delete a giveaway manually
@@ -261,6 +263,10 @@ commands:
         Giveaway not found!
       empty: |-
         Please enter the giveaway code!
+      notFound: |-
+        Giveaway not found!
+      noBinding: |-
+        Cannot resolve your account right now, please try again later or contact an admin.
   giveaway.quit:
     description: |-
       Leave a giveaway
@@ -269,6 +275,10 @@ commands:
         Giveaway not found!
       empty: |-
         Please enter the giveaway code!
+      notFound: |-
+        Giveaway not found!
+      noBinding: |-
+        Cannot resolve your account right now, please try again later or contact an admin.
   giveaway.time:
     description: |-
       Change the timezone
@@ -430,6 +440,14 @@ events:
     messageWithDiff: |-
       <p>Giveaway {rollCode} ends in {diff}~</p>
 
+  join.notFound: |-
+    Giveaway not found!
+  join.ended: |-
+    Giveaway {rollCode} has already been drawn, you can no longer join.
+  quit.notFound: |-
+    Giveaway not found!
+  quit.ended: |-
+    Giveaway {rollCode} has already been drawn; the list is final, you can no longer leave.
 messageBuilder:
   render:
     eyebrow: |-
