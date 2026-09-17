@@ -23,9 +23,18 @@
 - [数据与事件](#数据与事件)
 - [多语言](#多语言)
 - [开发](#开发)
+- [维护状态](#维护状态)
 - [许可证](#许可证)
 
-完整的功能清单与交互矩阵见 [`docs/features-and-interactions.md`](docs/features-and-interactions.md)。
+完整的功能清单与交互矩阵见 [`docs/features-and-interactions.md`](docs/features-and-interactions.md)；发版步骤与冒烟清单见 [`docs/release-checklist.md`](docs/release-checklist.md)。
+
+## 维护状态
+
+- **1.0.0 是首个正式版本**，功能面已稳定：**1.0 起配置项与数据结构只增不删**，小版本只修缺陷
+- 预期使用规模不大，因此 **1.0 之后不做常规迭代**：只有在社区反馈缺陷或有明确需求时才更新
+- **不承诺与 0.x 的兼容**：从 0.x 升级请按本 README 重新配置（配置项含义与数据模型都按当前版本为准）；
+  0.x 的变更历史见 [`CHANGELOG-0.x.md`](CHANGELOG-0.x.md)
+- 遇到问题请提 [Issue](https://github.com/firedrakeovo/koishi-plugin-giveaway/issues)，附上 `抽奖接口诊断` 的输出与插件日志
 
 ## 特性
 
