@@ -3,6 +3,20 @@
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 的格式，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 0.x 开发版的变更历史见 [`CHANGELOG-0.x.md`](./CHANGELOG-0.x.md)。
 
+## [1.0.1] - 2026-09-17
+
+> 1.0.0 只发布到 GitHub（未发 npm），1.0.1 是第一个发布到 npm 的版本。
+
+### Fixed 修复
+
+- **`roll_member` 的唯一索引在已有数据库上没有真正建出来**：1.0.0 用 `unique: [['roll_id','user_id']]` 声明，
+  而该写法**只在新建表时**写入表级约束，已经存在的表不会被补（实测线上库 `roll_member` 上没有任何索引）。
+  改为用 `indexes: [{ keys: {...}, unique: true }]` 声明 —— 驱动会在**表首次被访问时补建唯一索引**，
+  老库同样生效。已用线上库副本验证：14 行数据保留、索引建出、重复插入被数据库拦下
+  （minato 的 `IndexDef` 类型漏了 `unique` 字段，代码里按运行时能力做了类型规避并注释说明）
+  > 若历史数据里已存在 `(roll_id, user_id)` 重复行，建索引会失败（插件仍可运行，只是少了这层保护）。
+  > 清理：`DELETE FROM roll_member WHERE id NOT IN (SELECT MIN(id) FROM roll_member GROUP BY roll_id, user_id);`
+
 ## [1.0.0] - 2026-09-17
 
 首个正式版本。1.0 起按「全新开始」对待：**不承诺与 0.x 的配置 / 数据结构兼容**，请按 README 重新配置；

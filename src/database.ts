@@ -139,8 +139,11 @@ export function apply(ctx: Context) {
     user_id: 'unsigned'
   }, {
     autoInc: true,
-    // 同一个抽奖里同一用户只能有一条参与记录（并发重复写入由数据库兜底）
-    unique: [['roll_id', 'user_id']],
+    // 同一个抽奖里同一用户只能有一条参与记录（并发重复写入由数据库兜底）。
+    // 注意：`unique: [[...]]` 只在**新建表**时写入表级约束，已存在的表不会被补；
+    // 用 `indexes` 声明唯一索引则会在表首次被访问时创建，老库同样生效。
+    // minato 的 IndexDef 类型漏了 `unique` 字段（运行时 parseIndex 支持），这里按运行时能力声明
+    indexes: [{ keys: { roll_id: 'asc', user_id: 'asc' }, unique: true } as any],
   })
 
   ctx.model.extend('roll_channel', {

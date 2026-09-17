@@ -162,7 +162,7 @@ async function mkApp(config = {}) {
     const dbSrc = require('fs').readFileSync(path.join(ROOT, 'src/database.ts'), 'utf8')
     const block = dbSrc.slice(dbSrc.indexOf("ctx.model.extend('roll_member'"), dbSrc.indexOf("ctx.model.extend('roll_channel'"))
     ok('database.ts 给 roll_member 声明了 (roll_id, user_id) 唯一索引',
-      /unique:\s*\[\s*\[\s*'roll_id'\s*,\s*'user_id'\s*\]\s*\]/.test(block), block.slice(0, 160))
+      /keys:\s*\{[^}]*roll_id[^}]*user_id[^}]*\}[^}]*unique:\s*true/.test(block), block.slice(0, 220))
 
     // 行为层面：即使并发下真的撞上唯一约束，也要按「已参与」回应而不是抛异常
     const app = await mkApp()

@@ -267,7 +267,7 @@ npm i koishi-plugin-giveaway
 | `roll` | 抽奖主体（编号 / 标题 / 描述 / 口令 / 开奖时间 / 是否自动开奖 / 是否已开奖 / 中奖人可否重复） |
 | `prize`、`roll_prize` | 奖品与「抽奖 × 奖品」关联 |
 | `roll_creator` | 抽奖创建者 |
-| `roll_member` | 参与名单（按加入顺序）；对 `(roll_id, user_id)` 建**唯一索引**，同一抽奖里同一用户只会有一条记录 |
+| `roll_member` | 参与名单（按加入顺序）；对 `(roll_id, user_id)` 建**唯一索引**（老库在表首次被访问时自动补建），同一抽奖里同一用户只会有一条记录 |
 | `roll_channel` | 抽奖与频道的关联（决定广播范围） |
 | `user_prize` | 中奖记录（用户 × 奖品 × 数量） |
 | `roll_policy` | per-roll 参与条件覆盖 |
